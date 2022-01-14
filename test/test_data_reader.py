@@ -1,17 +1,14 @@
-import datetime
 import unittest
-
+from mock import patch
 import pandas as pd
 
-from data_reader.bank_file_reader import BankTSVReader
+
+from data_reader.bank_file_reader import *
 
 
 class TestBankCSVReader(unittest.TestCase):
     def setUp(self):
         self.reader = BankTSVReader('test/fake_data.tsv')
-
-    def test_real_data(self):
-        reader = BankTSVReader('data/1592297Z0371641662082660.tsv')
 
     def test_clean_description(self):
         self.reader.data = pd.DataFrame({'description': ['     spaces     2    ',
@@ -115,6 +112,34 @@ class TestBankCSVReader(unittest.TestCase):
         self.assertEqual(self.reader.date.month, 1)
         self.assertEqual(self.reader.date.year, 2022)
         self.assertEqual(self.reader.balance, 300.48)
+
+
+class TestFunctions(unittest.TestCase):
+    def test_create_list_transactions_from_file(self):
+
+        class FakeFileReader:
+            def __init__(self):
+                self.account_id = 10
+                self.data = pd.DataFrame({'date_bank': [1, 2],
+                                          'date_transaction': [3, 4],
+                                          'description': ['des1', 'des2'],
+                                          'amount_e': [98.1, -0.2],
+                                          'type_transaction': ['1', '2']})
+        fake_file_reader = FakeFileReader()
+
+        with patch('data_reader.bank_file_reader.BankTSVReader') as service_mock:
+            service_mock.return_value = fake_file_reader
+            list_trans = create_list_transactions_from_file('')
+
+        self.assertEqual(len(list_trans), 2)
+        for i in range(len(list_trans)):
+            self.assertEqual(list_trans[i].account_id, fake_file_reader.account_id)
+            self.assertEqual(list_trans[i].date_bank, fake_file_reader.data.loc[i, 'date_bank'])
+            self.assertEqual(list_trans[i].date, fake_file_reader.data.loc[i, 'date_transaction'])
+            self.assertEqual(list_trans[i].description, fake_file_reader.data.loc[i, 'description'])
+            self.assertEqual(list_trans[i].amount, fake_file_reader.data.loc[i, 'amount_e'])
+            self.assertEqual(list_trans[i].type, fake_file_reader.data.loc[i, 'type_transaction'])
+            self.assertEqual(list_trans[i].category, None)
 
 
 if __name__ == '__main__':
