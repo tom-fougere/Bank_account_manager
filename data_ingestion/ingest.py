@@ -8,7 +8,7 @@ class TransactionIngest:
 
     def ingest(self):
         for trans in self.transactions_list:
-            print('ok')
+            self.ingest_one_transaction(trans)
 
     def ingest_one_transaction(self, transaction):
         db_trans = self.connection.collection.find({'account_id': transaction.account_id,
@@ -16,10 +16,14 @@ class TransactionIngest:
                                                     'date_bank': transaction.date_bank,
                                                     'amount': transaction.amount})
 
-        if len(list(db_trans)) > 1:
-            print('error')
-        elif len(list(db_trans)) == 1:
-            print('merge')
+        if len(list(db_trans)) >= 1:
+            raise ValueError('There is 1 or more documents in the DB with the same attributes: '
+                             ' - account_id: {},'
+                             ' - date: {},'
+                             ' - date_bank: {},'
+                             ' - amount: {}'.format(transaction.account_id,
+                                                    transaction.date,
+                                                    transaction.date_bank,
+                                                    transaction.amount))
         else:
-            print('insert')
             self.connection.collection.insert(transaction.get_dict())
