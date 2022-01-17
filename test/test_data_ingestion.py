@@ -1,9 +1,9 @@
 import unittest
 
-from db_connection.db_access import MongoDBConnection
-from data_reader.bank_file_reader import create_list_transactions_from_file
-from transactions import dict_to_transaction
-from data_ingestion.ingest import *
+from source.db_connection.db_access import MongoDBConnection
+from source.data_ingestion.ingest import TransactionIngest
+from source.data_reader.bank_file_reader import create_list_transactions_from_file
+from source.transactions import dict_to_transaction
 
 
 class TestTransactionIngest(unittest.TestCase):

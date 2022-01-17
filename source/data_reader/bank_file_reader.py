@@ -1,9 +1,9 @@
 import datetime
 
 import pandas as pd
-from utils.time_operations import detect_date_in_string, str_to_datetime
+from utils.time_operations import detect_date_in_string
 from utils.text_operations import find_substring_with_dict, remove_substring_with_list
-from transactions import Transaction
+from source.transactions import Transaction
 
 names_account_id = ['numero compte', 'numéro compte']
 names_balance = ['solde (euros)']

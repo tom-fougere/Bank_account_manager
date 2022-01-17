@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 import configparser
 
-DB_CONNECTION_FILE = "db_connection/connection_params.ini"
+DB_CONNECTION_FILE = "source/db_connection/connection_params.ini"
 
 
 class MongoDBConnection:

@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from transactions import *
+from source.transactions import *
 
 
 class TestTransactions(unittest.TestCase):

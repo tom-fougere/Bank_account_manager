@@ -2,8 +2,7 @@ import unittest
 from mock import patch
 import pandas as pd
 
-
-from data_reader.bank_file_reader import *
+from source.data_reader.bank_file_reader import BankTSVReader, create_list_transactions_from_file
 
 
 class TestBankCSVReader(unittest.TestCase):
@@ -127,7 +126,7 @@ class TestFunctions(unittest.TestCase):
                                           'type_transaction': ['1', '2']})
         fake_file_reader = FakeFileReader()
 
-        with patch('data_reader.bank_file_reader.BankTSVReader') as service_mock:
+        with patch('source.data_reader.bank_file_reader.BankTSVReader') as service_mock:
             service_mock.return_value = fake_file_reader
             list_trans = create_list_transactions_from_file('')
 
