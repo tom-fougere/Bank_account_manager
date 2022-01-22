@@ -48,21 +48,22 @@ class TestBankCSVReader(unittest.TestCase):
         self.assertEqual(self.reader.data.shape[1], 1)
         self.reader.manage_transaction_type()
 
-        self.assertEqual(self.reader.data.shape[1], 2)
-        self.assertEqual('type_transaction' in self.reader.data.keys(), True)
-        self.assertEqual(self.reader.data['type_transaction'][0], 'VIREMENT')
-        self.assertEqual(self.reader.data['type_transaction'][1], 'VIREMENT')
-        self.assertEqual(self.reader.data['type_transaction'][2], 'ACHAT')
-        self.assertEqual(self.reader.data['type_transaction'][3], 'CREDIT')
-        self.assertEqual(self.reader.data['type_transaction'][4], 'PRELEVEMENT')
-        self.assertEqual(self.reader.data['type_transaction'][5], None)
+        df = self.reader.get_dataframe()
+        self.assertEqual(df.shape[1], 2)
+        self.assertEqual('type_transaction' in df.keys(), True)
+        self.assertEqual(df['type_transaction'][0], 'VIREMENT')
+        self.assertEqual(df['type_transaction'][1], 'VIREMENT')
+        self.assertEqual(df['type_transaction'][2], 'ACHAT')
+        self.assertEqual(df['type_transaction'][3], 'CREDIT')
+        self.assertEqual(df['type_transaction'][4], 'PRELEVEMENT')
+        self.assertEqual(df['type_transaction'][5], None)
 
-        self.assertEqual(self.reader.data['description'][0], '')
-        self.assertEqual(self.reader.data['description'][1], '')
-        self.assertEqual(self.reader.data['description'][2], '')
-        self.assertEqual(self.reader.data['description'][3], '')
-        self.assertEqual(self.reader.data['description'][4], '')
-        self.assertEqual(self.reader.data['description'][5], 'NO KEY')
+        self.assertEqual(df['description'][0], '')
+        self.assertEqual(df['description'][1], '')
+        self.assertEqual(df['description'][2], '')
+        self.assertEqual(df['description'][3], '')
+        self.assertEqual(df['description'][4], '')
+        self.assertEqual(df['description'][5], 'NO KEY')
 
     def test_format_date(self):
         self.reader.data = pd.DataFrame({'date': ['\n12/02/2005',
@@ -70,30 +71,53 @@ class TestBankCSVReader(unittest.TestCase):
 
         self.reader.format_date()
 
-        self.assertEqual(self.reader.data['date'][0], '12/02/2005')
-        self.assertEqual(self.reader.data['date'][1], '13/03/2006')
+        df = self.reader.get_dataframe()
+        self.assertEqual(df['date'][0], '12/02/2005')
+        self.assertEqual(df['date'][1], '13/03/2006')
 
     def test_convert_amount_in_float(self):
 
-        self.reader.data = pd.DataFrame({'amount_e': ['15,5', '-5,8'],
-                                         'amount_f': ['-89,37', '60,1']})
+        self.reader.data = pd.DataFrame({'amount': ['15,5', '-5,8']})
 
         self.reader.convert_amount_in_float()
 
-        self.assertEqual(self.reader.data['amount_e'][0], 15.5)
-        self.assertEqual(self.reader.data['amount_e'][1], -5.8)
-        self.assertEqual(self.reader.data['amount_f'][0], -89.37)
-        self.assertEqual(self.reader.data['amount_f'][1], 60.1)
+        df = self.reader.get_dataframe()
+        self.assertEqual(df['amount'][0], 15.5)
+        self.assertEqual(df['amount'][1], -5.8)
+
+    def test_format_dataframe(self):
+
+        self.reader.data = pd.DataFrame({'amount': [1, 2],
+                                        'amount_f': [3, 4]})
+
+        self.reader.format_dataframe()
+
+        df = self.reader.get_dataframe()
+        self.assertEqual(df.shape, (2, 7))
+
+        self.assertEqual('amount_f' in df.keys(), False)
+        np.testing.assert_array_equal(df['account_id'].values, [self.reader.account_id]*2)
+        np.testing.assert_array_equal(df['check'].values, [False, False])
+        for att in ['category', 'sub_category', 'occasion', 'note']:
+            np.testing.assert_array_equal(df[att].values, [None]*2)
 
     def test_read_raw_data(self):
 
-        self.assertEqual(self.reader.data.shape, (3, 6))
-        self.assertEqual(self.reader.data['date'][0], '07/01/2022')
-        self.assertEqual(self.reader.data['description'][1], 'FOOD')
-        self.assertEqual(self.reader.data['amount_e'][1], -5.)
-        self.assertEqual(self.reader.data['amount_f'][1], -32.8)
-        self.assertEqual(self.reader.data['type_transaction'][2], 'PRELEVEMENT')
-        self.assertEqual(self.reader.data['date_transaction'][2], self.reader.data['date'][2])
+        df = self.reader.get_dataframe()
+
+        self.assertEqual(df.shape, (3, 11))
+        self.assertEqual(df['date'][0], '07/01/2022')
+        self.assertEqual(df['account_id'][0], '007')
+        self.assertEqual(df['description'][1], 'FOOD')
+        self.assertEqual(df['amount'][1], -5.)
+        self.assertEqual(df['type_transaction'][2], 'PRELEVEMENT')
+        self.assertEqual(df['date_transaction'][2], self.reader.data['date'][2])
+        self.assertEqual(df['check'][2], False)
+
+        for att in ['category', 'sub_category', 'occasion', 'note']:
+            self.assertEqual(df[att][0], None)
+            self.assertEqual(df[att][1], None)
+            self.assertEqual(df[att][2], None)
 
     def test_read_header(self):
 

@@ -67,7 +67,7 @@ class BankTSVReader:
 
     def read_raw_data(self):
 
-        col_names = ['date', 'description', 'amount_e', 'amount_f']
+        col_names = ['date', 'description', 'amount', 'amount_f']
         self.data = pd.read_csv(self.file_path,
                                 delimiter='\t', lineterminator='\r',
                                 skiprows=self.header_lines + 1,
@@ -76,10 +76,8 @@ class BankTSVReader:
                                 header=None)
         self.data = self.data[:-1]
 
+        # Format the date
         self.format_date()
-
-        # Remove amount in francs
-        self.data.drop(['amount_f'], axis=1)
 
         # Manage type of transaction
         self.manage_transaction_type()
@@ -92,6 +90,9 @@ class BankTSVReader:
 
         # Clean transaction
         self.clean_description()
+
+        # Format data
+        self.format_dataframe()
 
     def format_date(self):
 
@@ -134,8 +135,7 @@ class BankTSVReader:
             self.data.loc[self.data['date_transaction'].isna(), 'date']
 
     def convert_amount_in_float(self):
-        self.data['amount_f'] = self.data['amount_f'].str.replace(',', '.').astype(float)
-        self.data['amount_e'] = self.data['amount_e'].str.replace(',', '.').astype(float)
+        self.data['amount'] = self.data['amount'].str.replace(',', '.').astype(float)
 
     def clean_description(self):
 
@@ -147,6 +147,22 @@ class BankTSVReader:
 
         # Remove continuous spaces
         self.data['description'] = self.data['description'].apply(lambda x: " ".join(x.split()))
+
+    def format_dataframe(self):
+
+        # Drop useless columns
+        self.data.drop(['amount_f'], axis=1, inplace=True)
+
+        # Add empty columns for other attributes
+        self.data['account_id'] = self.account_id
+        self.data['category'] = None
+        self.data['sub_category'] = None
+        self.data['occasion'] = None
+        self.data['note'] = None
+        self.data['check'] = False
+
+    def get_dataframe(self):
+        return self.data
 
 
 def create_list_transactions_from_file(file):
