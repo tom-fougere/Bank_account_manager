@@ -1,29 +1,30 @@
 
 
 class TransactionIngest:
-    def __init__(self, mongodb_connection, transactions_list):
+    def __init__(self, mongodb_connection, transactions_df):
         self.connection = mongodb_connection
-        self.transactions_list = transactions_list
-        print('ok')
+        self.transactions_df = transactions_df
 
     def ingest(self):
-        for trans in self.transactions_list:
+        for _, trans in self.transactions_df.iterrows():
             self.ingest_one_transaction(trans)
 
-    def ingest_one_transaction(self, transaction):
-        db_trans = self.connection.collection.find({'account_id': transaction.account_id,
-                                                    'date': transaction.date,
-                                                    'date_bank': transaction.date_bank,
-                                                    'amount': transaction.amount})
+    def ingest_one_transaction(self, transaction_series):
+
+        transaction_dict = transaction_series.to_dict()
+        db_trans = self.connection.collection.find({'account_id': transaction_dict['account_id'],
+                                                    'date': transaction_dict['date'],
+                                                    'date_transaction': transaction_dict['date_transaction'],
+                                                    'amount': transaction_dict['amount']})
 
         if len(list(db_trans)) >= 1:
             raise ValueError('There is 1 or more documents in the DB with the same attributes: '
                              ' - account_id: {},'
                              ' - date: {},'
-                             ' - date_bank: {},'
-                             ' - amount: {}'.format(transaction.account_id,
-                                                    transaction.date,
-                                                    transaction.date_bank,
-                                                    transaction.amount))
+                             ' - date_transaction: {},'
+                             ' - amount: {}'.format(transaction_dict['account_id'],
+                                                    transaction_dict['date'],
+                                                    transaction_dict['date_transaction'],
+                                                    transaction_dict['amount']))
         else:
-            self.connection.collection.insert(transaction.get_dict())
+            self.connection.collection.insert(transaction_dict)
