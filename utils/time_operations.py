@@ -13,7 +13,7 @@ def get_date_in_string(text, regex_date=r'\d{2}\.\d{2}\.\d{2}'):
     return date_str
 
 
-def remove_date_in_string(text,  regex_date=r'\d{2}\.\d{2}\.\d{2}'):
+def remove_date_in_string(text, regex_date=r'\d{2}\.\d{2}\.\d{2}'):
 
     new_text = text
     date_str = re.search(regex_date, text)
