@@ -6,7 +6,7 @@ from app import app
 from apps import home
 from apps.sidebar import sidebar
 from apps.content import content
-from apps import new_data_page
+from apps import new_data_page, all_data_page
 from apps import canvas_transaction_details
 
 
@@ -24,6 +24,8 @@ def display_page(pathname):
         return home.layout
     if pathname == '/new_data_page':
         return new_data_page.layout
+    if pathname == '/all_data_page':
+        return all_data_page.layout
     else:
         return '404'
 
