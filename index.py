@@ -7,6 +7,7 @@ from apps import home
 from apps.sidebar import sidebar
 from apps.content import content
 from apps import new_data_page
+from apps import canvas_transaction_details
 
 
 app.layout = html.Div([

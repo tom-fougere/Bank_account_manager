@@ -3,16 +3,16 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State
 import dash_table as dt
-import dash_daq as daq
 from dash_table.Format import Format, Symbol, Scheme
 from app import app
-from datetime import date
 
 from source.data_reader.bank_file_reader import BankTSVReader
 from utils.text_operations import get_project_root
-from utils.time_operations import str_to_datetime
+from source.db_connection.db_access import MongoDBConnection
+from source.data_ingestion.ingest import TransactionIngest
 
 DATA_FOLDER = 'raw_data'
+DB_CONNECTION = 'db_bank_connection'
 
 
 layout = html.Div([
@@ -102,72 +102,6 @@ def create_datatable(df):
     return dt_transactions
 
 
-def create_sidebar_transaction_details(df):
-
-    date_transaction = str_to_datetime(df.date_transaction, date_format='%d/%m/%Y')
-    date_bank = str_to_datetime(df.date, date_format='%d/%m/%Y')
-
-    component = html.Div([
-        html.Div('Compte bancaire:'),
-        dcc.Input(
-            value=df.account_id,
-            style={'width': '100%'},
-            type='number',
-            disabled=True),
-        html.Div('Date Transaction'),
-        dcc.DatePickerSingle(
-            id='date-picker',
-            date=date(date_transaction.year, date_transaction.month, date_transaction.day),
-            disabled=True),
-        html.Div('Libelé'),
-        dcc.Textarea(
-            value=df.description,
-            style={'width': '100%'},
-            disabled=True),
-        html.Div('Montant (€)'),
-        dcc.Input(
-            value=df.amount,
-            style={'width': '100%'},
-            type='number',
-            disabled=True),
-        html.Div('Type:'),
-        dcc.Input(
-            value=df.type_transaction,
-            style={'width': '100%'},
-            disabled=True),
-        html.Div('Catégorie:'),
-        dcc.Input(
-            value=df.category,
-            style={'width': '100%'},
-            disabled=True),
-        dcc.Input(
-            value=df.sub_category,
-            style={'width': '100%'},
-            disabled=True),
-        html.Div('Occasion:'),
-        dcc.Input(
-            value=df.occasion,
-            style={'width': '100%'},
-            disabled=True),
-        html.Div('Date à la banque:'),
-        dcc.DatePickerSingle(
-            id='date-picker',
-            date=date(date_bank.year, date_bank.month, date_bank.day),
-            disabled=True),
-        html.Div('Note:'),
-        dcc.Textarea(
-            value=df.note,
-            style={'width': '100%'},
-            disabled=True),
-        html.Div('Pointage:'),
-        daq.BooleanSwitch(
-            on=df.check,
-            disabled=True),
-    ])
-
-    return component
-
-
 @app.callback(
     Output("new_transaction_msg", 'children'),
     Output("table", 'children'),
@@ -185,7 +119,7 @@ def upload_file(list_of_contents, filename, btn_disabled):
     if list_of_contents is not None:
         # Read data
         data_reader = BankTSVReader('/'.join([get_project_root(), DATA_FOLDER, filename]))
-        df = data_reader.data
+        df = data_reader.get_dataframe()
 
         # Create message
         msg = 'New transactions = {}'.format(len(df))
@@ -200,29 +134,23 @@ def upload_file(list_of_contents, filename, btn_disabled):
 
 
 @app.callback(
-    [Output("off_canvas", "is_open"),
-     Output('canvas_trans_details', 'children')],
-    Input('table_content', 'active_cell'),
-    [State("off_canvas", "is_open"),
-     State('drag_upload_file', 'filename')])
-def display_one_transaction(active_cell, canvas_is_open, filename):
-
-    # Read data
-    data_reader = BankTSVReader('/'.join([get_project_root(), DATA_FOLDER, filename]))
-    df = data_reader.data
-
-    if active_cell is None:
-        return canvas_is_open, html.Div()
-    else:
-        component = create_sidebar_transaction_details(df.iloc[active_cell['row']])
-        return (not canvas_is_open), component
-
-
-@app.callback(
     Output('btn_click', 'children'),
-    Input('btn_import_database', 'n_clicks'))
-def import_transactions_in_database(n_clicks):
+    Input('btn_import_database', 'n_clicks'),
+    State('drag_upload_file', 'filename'))
+def import_transactions_in_database(n_clicks, filename):
     if n_clicks > 0:
+
+        # Read data
+        data_reader = BankTSVReader('/'.join([get_project_root(), DATA_FOLDER, filename]))
+        df = data_reader.get_dataframe()
+
+        # Create connection
+        my_connection = MongoDBConnection(DB_CONNECTION)
+
+        # Database ingestion
+        ingestion = TransactionIngest(my_connection, transactions_df=df)
+        ingestion.ingest()
+
         return 'The input value was and the button has been clicked {} times'.format(
             n_clicks
         )
