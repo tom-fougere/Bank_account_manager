@@ -10,3 +10,5 @@ CATEGORIES = {'Travail': ['Salaire', 'Prime', 'Autre'],
               'Perso': ['Tom', 'Elise'],
               'Epargne': [],
               'Fêtes': ['Anniversaire', 'Fêtes', 'Autre']}
+
+OCCASIONS = ['regulier', 'ponctuel', 'loisir']
