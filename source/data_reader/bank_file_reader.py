@@ -67,7 +67,7 @@ class BankTSVReader:
 
     def read_raw_data(self):
 
-        col_names = ['date', 'description', 'amount', 'amount_f']
+        col_names = ['date_str', 'description', 'amount', 'amount_f']
         self.data = pd.read_csv(self.file_path,
                                 delimiter='\t', lineterminator='\r',
                                 skiprows=self.header_lines + 1,
@@ -97,10 +97,10 @@ class BankTSVReader:
     def format_date(self):
 
         # Remove '\n' character at the beginning of the string
-        self.data['date'] = self.data['date'].apply(lambda x: x.replace('\n', ''))
+        self.data['date_str'] = self.data['date_str'].apply(lambda x: x.replace('\n', ''))
 
         # Convert string to datetime
-        # self.data['date'] = pd.to_datetime(self.data['date'], format='%d/%m/%Y')
+        self.data['date_dt'] = pd.to_datetime(self.data['date_str'], format='%d/%m/%Y')
 
     def manage_transaction_type(self):
 
@@ -115,24 +115,27 @@ class BankTSVReader:
     def manage_transaction_date(self):
 
         # Search date of transaction in description and store it in a new column
-        self.data['date_transaction'] = self.data['description'].apply(lambda x: get_date_in_string(x))
+        self.data['date_transaction_str'] = self.data['description'].apply(lambda x: get_date_in_string(x))
 
         # Remove date from the description
         self.data['description'] = self.data['description'].apply(lambda x: remove_date_in_string(x))
 
         # Get when the date is available
-        df = self.data.loc[self.data['date_transaction'].notna(), 'date_transaction']
+        df = self.data.loc[self.data['date_transaction_str'].notna(), 'date_transaction_str']
 
         # Change the format of the date
         df = pd.to_datetime(df, format='%d.%m.%y')
         df = df.dt.strftime('%d/%m/%Y')
 
         # Insert new format to the original dataframe
-        self.data.loc[self.data['date_transaction'].notna(), 'date_transaction'] = df
+        self.data.loc[self.data['date_transaction_str'].notna(), 'date_transaction_str'] = df
 
         # Replace unavailable transaction date by the bank date
-        self.data.loc[self.data['date_transaction'].isna(), 'date_transaction'] =\
-            self.data.loc[self.data['date_transaction'].isna(), 'date']
+        self.data.loc[self.data['date_transaction_str'].isna(), 'date_transaction_str'] =\
+            self.data.loc[self.data['date_transaction_str'].isna(), 'date_str']
+
+        # Convert string to datetime
+        self.data['date_transaction_dt'] = pd.to_datetime(self.data['date_transaction_str'], format='%d/%m/%Y')
 
     def convert_amount_in_float(self):
         self.data['amount'] = self.data['amount'].str.replace(',', '.').astype(float)
@@ -173,8 +176,8 @@ def create_list_transactions_from_file(file):
     list_transactions = []
     for idx, row in pd.DataFrame.iterrows(file_reader.data):
         trans = Transaction(account_id=file_reader.account_id,
-                            date_bank=row['date'],
-                            date=row['date_transaction'],
+                            date_bank=row['date_str'],
+                            date=row['date_transaction_str'],
                             description=row['description'],
                             amount=row['amount_e'],
                             type=row['type_transaction'])

@@ -3,6 +3,7 @@ from mock import patch
 import pandas as pd
 import numpy as np
 
+from utils.time_operations import str_to_datetime
 from source.data_reader.bank_file_reader import BankTSVReader, create_list_transactions_from_file
 
 
@@ -23,17 +24,22 @@ class TestBankCSVReader(unittest.TestCase):
 
         self.reader.data = pd.DataFrame({'description': ['python 12.02.05 ruby',
                                                          'FORTRAN'],
-                                         'date': ['13/03/2006',
-                                                  '24/11/2022']})
+                                         'date_str': ['13/03/2006',
+                                                      '24/11/2022']})
 
         self.assertEqual(self.reader.data.shape[1], 2)
         self.reader.manage_transaction_date()
 
-        self.assertEqual(self.reader.data.shape[1], 3)
-        self.assertEqual('date_transaction' in self.reader.data.keys(), True)
+        self.assertEqual(self.reader.data.shape[1], 4)
+        self.assertEqual('date_transaction_str' in self.reader.data.keys(), True)
+        self.assertEqual('date_transaction_dt' in self.reader.data.keys(), True)
         self.assertEqual(self.reader.data['description'][0], 'python  ruby')
-        self.assertEqual(self.reader.data['date_transaction'][0], '12/02/2005')
-        self.assertEqual(self.reader.data['date_transaction'][1], '24/11/2022')
+        self.assertEqual(self.reader.data['date_transaction_str'][0], '12/02/2005')
+        self.assertEqual(self.reader.data['date_transaction_str'][1], '24/11/2022')
+        self.assertEqual(self.reader.data['date_transaction_dt'][0], str_to_datetime('12/02/2005',
+                                                                                     date_format='%d/%m/%Y'))
+        self.assertEqual(self.reader.data['date_transaction_dt'][1], str_to_datetime('24/11/2022',
+                                                                                     date_format='%d/%m/%Y'))
 
     def test_manage_transaction_type(self):
 
@@ -66,14 +72,16 @@ class TestBankCSVReader(unittest.TestCase):
         self.assertEqual(df['description'][5], 'NO KEY')
 
     def test_format_date(self):
-        self.reader.data = pd.DataFrame({'date': ['\n12/02/2005',
-                                                  '13/03/2006']})
+        self.reader.data = pd.DataFrame({'date_str': ['\n12/02/2005',
+                                                      '13/03/2006']})
 
         self.reader.format_date()
 
         df = self.reader.get_dataframe()
-        self.assertEqual(df['date'][0], '12/02/2005')
-        self.assertEqual(df['date'][1], '13/03/2006')
+        self.assertEqual(df['date_str'][0], '12/02/2005')
+        self.assertEqual(df['date_str'][1], '13/03/2006')
+        self.assertEqual(df['date_dt'][0], str_to_datetime('12/02/2005', date_format='%d/%m/%Y'))
+        self.assertEqual(df['date_dt'][1], str_to_datetime('13/03/2006', date_format='%d/%m/%Y'))
 
     def test_convert_amount_in_float(self):
 
@@ -88,7 +96,7 @@ class TestBankCSVReader(unittest.TestCase):
     def test_format_dataframe(self):
 
         self.reader.data = pd.DataFrame({'amount': [1, 2],
-                                        'amount_f': [3, 4]})
+                                         'amount_f': [3, 4]})
 
         self.reader.format_dataframe()
 
@@ -105,13 +113,14 @@ class TestBankCSVReader(unittest.TestCase):
 
         df = self.reader.get_dataframe()
 
-        self.assertEqual(df.shape, (3, 11))
-        self.assertEqual(df['date'][0], '07/01/2022')
+        self.assertEqual(df.shape, (3, 13))
+        self.assertEqual(df['date_str'][0], '07/01/2022')
+        self.assertEqual(df['date_dt'][0], str_to_datetime('07/01/2022', date_format='%d/%m/%Y'))
         self.assertEqual(df['account_id'][0], '007')
         self.assertEqual(df['description'][1], 'FOOD')
         self.assertEqual(df['amount'][1], -5.)
         self.assertEqual(df['type_transaction'][2], 'PRELEVEMENT')
-        self.assertEqual(df['date_transaction'][2], self.reader.data['date'][2])
+        self.assertEqual(df['date_transaction_str'][2], self.reader.data['date_str'][2])
         self.assertEqual(df['check'][2], False)
 
         for att in ['category', 'sub_category', 'occasion', 'note']:
@@ -134,8 +143,8 @@ class TestFunctions(unittest.TestCase):
         class FakeFileReader:
             def __init__(self):
                 self.account_id = 10
-                self.data = pd.DataFrame({'date': [1, 2],
-                                          'date_transaction': [3, 4],
+                self.data = pd.DataFrame({'date_str': [1, 2],
+                                          'date_transaction_str': [3, 4],
                                           'description': ['des1', 'des2'],
                                           'amount_e': [98.1, -0.2],
                                           'type_transaction': ['1', '2']})
@@ -148,8 +157,8 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(len(list_trans), 2)
         for i in range(len(list_trans)):
             self.assertEqual(list_trans[i].account_id, fake_file_reader.account_id)
-            self.assertEqual(list_trans[i].date_bank, fake_file_reader.data.loc[i, 'date'])
-            self.assertEqual(list_trans[i].date, fake_file_reader.data.loc[i, 'date_transaction'])
+            self.assertEqual(list_trans[i].date_bank, fake_file_reader.data.loc[i, 'date_str'])
+            self.assertEqual(list_trans[i].date, fake_file_reader.data.loc[i, 'date_transaction_str'])
             self.assertEqual(list_trans[i].description, fake_file_reader.data.loc[i, 'description'])
             self.assertEqual(list_trans[i].amount, fake_file_reader.data.loc[i, 'amount_e'])
             self.assertEqual(list_trans[i].type, fake_file_reader.data.loc[i, 'type_transaction'])
