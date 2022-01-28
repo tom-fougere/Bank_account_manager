@@ -1,3 +1,4 @@
+from utils.time_operations import str_to_datetime
 
 
 class TransactionIngest:
@@ -6,15 +7,30 @@ class TransactionIngest:
         self.transactions_df = transactions_df
 
     def ingest(self):
-        for _, trans in self.transactions_df.iterrows():
+
+        df_transaction = self.transactions_df.copy()
+
+        # Convert 2 fields of date as one with a dict
+        df_transaction['date'] = \
+            df_transaction.apply(lambda x: {'str': x.date_str,
+                                            'dt': x.date_dt}, axis=1)
+        df_transaction['date_transaction'] = \
+            df_transaction.apply(lambda x: {'str': x.date_transaction_str,
+                                            'dt': x.date_transaction_dt}, axis=1)
+
+        df_transaction.drop(columns=['date_str', 'date_dt', 'date_transaction_str', 'date_transaction_dt'],
+                            axis=1,
+                            inplace=True)
+
+        for _, trans in df_transaction.iterrows():
             self.ingest_one_transaction(trans)
 
     def ingest_one_transaction(self, transaction_series):
 
         transaction_dict = transaction_series.to_dict()
         db_trans = self.connection.collection.find({'account_id': transaction_dict['account_id'],
-                                                    'date': transaction_dict['date'],
-                                                    'date_transaction': transaction_dict['date_transaction'],
+                                                    'date.str': transaction_dict['date']['str'],
+                                                    'date_transaction.str': transaction_dict['date_transaction']['str'],
                                                     'amount': transaction_dict['amount']})
 
         if len(list(db_trans)) >= 1:
@@ -23,8 +39,8 @@ class TransactionIngest:
                              ' - date: {},'
                              ' - date_transaction: {},'
                              ' - amount: {}'.format(transaction_dict['account_id'],
-                                                    transaction_dict['date'],
-                                                    transaction_dict['date_transaction'],
+                                                    transaction_dict['date']['str'],
+                                                    transaction_dict['date_transaction']['str'],
                                                     transaction_dict['amount']))
         else:
             self.connection.collection.insert(transaction_dict)
