@@ -85,9 +85,9 @@ class TestTransactionIngest(unittest.TestCase):
         for db_trans in db_all_trans:
 
             # Compare dates
-            self.assertEqual(str_to_datetime(db_trans['date']['str'], date_format="%d/%m/%Y"),
+            self.assertEqual(str_to_datetime(db_trans['date']['str'], date_format="%d/%m/%Y").isoformat(),
                              db_trans['date']['dt'])
-            self.assertEqual(str_to_datetime(db_trans['date_transaction']['str'], date_format="%d/%m/%Y"),
+            self.assertEqual(str_to_datetime(db_trans['date_transaction']['str'], date_format="%d/%m/%Y").isoformat(),
                              db_trans['date_transaction']['dt'])
             self.assertEqual(db_trans['date']['str'], self.df_transactions.loc[idx, 'date_str'])
             self.assertEqual(db_trans['date_transaction']['str'], self.df_transactions.loc[idx, 'date_transaction_str'])

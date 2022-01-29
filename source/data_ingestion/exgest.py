@@ -36,22 +36,36 @@ class TransactionExgest:
         for att in self.attributes:
             att_value = getattr(self, att)
 
-            # if att == ''
-            if (type(att_value) is list) and (len(att_value) >= 2):
-                # if isinstance(att_value[0], datetime.datetime):
-                pipeline.append({
-                    "$match": {
-                        "$gte": att_value[0],
-                        "$lt": att_value[0]
-                    }
-                })
-            elif type(att_value) is list:
-                pass
-            elif att_value is not None:
-                pipeline.append({
-                    "$match": {
-                        att: att_value
-                    }})
+            if is_var_empty(att_value) is False:
+
+                # Manage dates
+                if 'date' in att:
+                    pipeline.append({
+                        "$match": {
+                            '.'.join([att, 'dt']): {"$gte": att_value[0].isoformat(),
+                                                    "$lte": att_value[1].isoformat()}
+                        }
+                    })
+                # Manage numeric value
+                elif 'amount' in att:
+                    pipeline.append({
+                        "$match": {
+                            att: {"$gte": min(att_value[0], att_value[1]),
+                                  "$lte": max(att_value[0], att_value[1])}
+                        }
+                    })
+                # Manage description
+                elif 'description' in att:
+                    pipeline.append({
+                        "$match": {
+                            att: {"$regex": ''.join(['/*', att_value, '/*']), "$options": 'i'}
+                        }
+                    })
+                else:
+                    pipeline.append({
+                        "$match": {
+                            att: att_value
+                        }})
 
         pipeline.append({
             "$addFields": {
@@ -62,32 +76,27 @@ class TransactionExgest:
             }
         })
 
-        pipeline.append({
-            "$project": {"_id": 0}
-        })
+        # if len(pipeline) > 1:
+        #     pipeline.append({
+        #         "$project": {"_id": 0}
+        #     })
 
         return pipeline
 
     def exgest(self):
         pipeline = self.create_pipeline()
-        self.aggregate(pipeline=pipeline)
+        result = self.aggregate(pipeline=pipeline)
 
-    def ingest_one_transaction(self, transaction_series):
+        return result
 
-        transaction_dict = transaction_series.to_dict()
-        db_trans = self.connection.collection.find({'account_id': transaction_dict['account_id'],
-                                                    'date': transaction_dict['date'],
-                                                    'date_transaction': transaction_dict['date_transaction'],
-                                                    'amount': transaction_dict['amount']})
 
-        if len(list(db_trans)) >= 1:
-            raise ValueError('There is 1 or more documents in the DB with the same attributes: '
-                             ' - account_id: {},'
-                             ' - date: {},'
-                             ' - date_transaction: {},'
-                             ' - amount: {}'.format(transaction_dict['account_id'],
-                                                    transaction_dict['date'],
-                                                    transaction_dict['date_transaction'],
-                                                    transaction_dict['amount']))
-        else:
-            self.connection.collection.insert(transaction_dict)
+def is_var_empty(var):
+
+    empty_var = False
+    if ((type(var) is list) and (len(var) == 0)) or\
+            (var is None):
+        empty_var = True
+
+    return empty_var
+
+

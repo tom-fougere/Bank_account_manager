@@ -1,34 +1,76 @@
+import datetime
 import unittest
 from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.ingest import TransactionIngest
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.data_ingestion.exgest import TransactionExgest
 
+data_reader = BankTSVReader('test/fake_data.tsv')
+df_transactions = data_reader.get_dataframe()
+db_connection = MongoDBConnection('db_ut')
+
 
 class TestTransactionExgest(unittest.TestCase):
-    def setUp(self) -> None:
-
+    @classmethod
+    def setUpClass(cls) -> None:
         # Ingest
-        data_reader = BankTSVReader('test/fake_data.tsv')
-        self.df_transactions = data_reader.get_dataframe()
-        my_connection = MongoDBConnection('db_ut')
-        self.transInges = TransactionIngest(my_connection, self.df_transactions)
-        self.transInges.ingest()
+        cls.transInges = TransactionIngest(db_connection, df_transactions)
+        cls.transInges.ingest()
 
-        # Instantiate the ingestion class
-        self.transExges = TransactionExgest(my_connection, {})
-
-    def tearDown(self) -> None:
+    @classmethod
+    def tearDownClass(cls) -> None:
         # Remove all transactions in the collection
-        result = self.transInges.connection.collection.remove()
+        result = cls.transInges.connection.collection.remove()
 
     def test_exgest_all(self):
-        results = self.transExges.exgest_all()
+        data_extractor = TransactionExgest(db_connection, {"account_id": "007"})
+        results = data_extractor.exgest_all()
+
         self.assertEqual(len(results), 3)
 
     def test_exgest_empty_pipeline(self):
-        results = self.transExges.exgest()
-        self.assertEqual(results, None)
+        data_extractor = TransactionExgest(db_connection, {"account_id": "007"})
+        results = data_extractor.exgest()
+
+        self.assertEqual(len(results), 3)
+
+    def test_exgest_account_id(self):
+        data_extractor = TransactionExgest(db_connection, {"account_id": "007"})
+        results = data_extractor.exgest()
+
+        self.assertEqual(len(results), 3)
+
+    def test_exgest_type_transaction(self):
+        data_extractor = TransactionExgest(db_connection, {"type_transaction": "VIREMENT"})
+        results = data_extractor.exgest()
+
+        self.assertEqual(len(results), 1)
+
+    def test_exgest_date(self):
+        data_extractor = TransactionExgest(db_connection, {"date": [datetime.datetime(2022, 1, 7),
+                                                                    datetime.datetime(2022, 1, 7)]})
+        results = data_extractor.exgest()
+
+        self.assertEqual(len(results), 2)
+
+    def test_exgest_amount(self):
+        data_extractor = TransactionExgest(db_connection, {"amount": [-10, 10]})
+        results = data_extractor.exgest()
+
+        self.assertEqual(len(results), 2)
+
+    def test_exgest_description(self):
+        data_extractor = TransactionExgest(db_connection, {"description": "co"})
+        results = data_extractor.exgest()
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results['description'].values, 'TELECOM')
+
+    def test_exgest_empty_description(self):
+        data_extractor = TransactionExgest(db_connection, {"description": "tom"})
+        results = data_extractor.exgest()
+
+        self.assertEqual(len(results), 0)
 
 
 if __name__ == '__main__':
