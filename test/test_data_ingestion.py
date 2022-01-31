@@ -21,7 +21,7 @@ class TestTransactionIngest(unittest.TestCase):
 
     def tearDown(self) -> None:
         # Remove all transactions in the collection
-        result = self.transInges.connection.collection.remove()
+        result = self.transInges.connection.collection.remove({"account_id": "007"})
 
     def test_ingest_one_new_transaction(self):
 
@@ -42,7 +42,7 @@ class TestTransactionIngest(unittest.TestCase):
         self.transInges.ingest_one_transaction(df.iloc[0])
 
         # get the transaction in the mongodb
-        db_trans = self.transInges.connection.collection.find_one()
+        db_trans = self.transInges.connection.collection.find_one({"account_id": "007"})
         # Remove id field for the comparison
         db_trans.pop('_id', None)
 
@@ -76,7 +76,7 @@ class TestTransactionIngest(unittest.TestCase):
         self.transInges.ingest()
 
         # get the transaction in the mongodb
-        db_all_trans = self.transInges.connection.collection.find()
+        db_all_trans = self.transInges.connection.collection.find({"account_id": "007"})
 
         self.assertEqual(len(list(db_all_trans)), len(self.df_transactions))
 

@@ -20,13 +20,13 @@ class TestTransactionExgest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         # Remove all transactions in the collection
-        result = cls.transInges.connection.collection.remove()
+        result = cls.transInges.connection.collection.remove({"account_id": "007"})
 
     def test_exgest_all(self):
         data_extractor = TransactionExgest(db_connection, {"account_id": "007"})
         results = data_extractor.exgest_all()
 
-        self.assertEqual(len(results), 3)
+        self.assertEqual(len(results), 6)
 
     def test_exgest_empty_pipeline(self):
         data_extractor = TransactionExgest(db_connection, {"account_id": "007"})
@@ -41,33 +41,38 @@ class TestTransactionExgest(unittest.TestCase):
         self.assertEqual(len(results), 3)
 
     def test_exgest_type_transaction(self):
-        data_extractor = TransactionExgest(db_connection, {"type_transaction": "VIREMENT"})
+        data_extractor = TransactionExgest(db_connection, {"account_id": "007",
+                                                           "type_transaction": "VIREMENT"})
         results = data_extractor.exgest()
 
         self.assertEqual(len(results), 1)
 
     def test_exgest_date(self):
-        data_extractor = TransactionExgest(db_connection, {"date": [datetime.datetime(2022, 1, 7),
+        data_extractor = TransactionExgest(db_connection, {"account_id": "007",
+                                                           "date": [datetime.datetime(2022, 1, 7),
                                                                     datetime.datetime(2022, 1, 7)]})
         results = data_extractor.exgest()
 
         self.assertEqual(len(results), 2)
 
     def test_exgest_amount(self):
-        data_extractor = TransactionExgest(db_connection, {"amount": [-10, 10]})
+        data_extractor = TransactionExgest(db_connection, {"account_id": "007",
+                                                           "amount": [-10, 10]})
         results = data_extractor.exgest()
 
         self.assertEqual(len(results), 2)
 
     def test_exgest_description(self):
-        data_extractor = TransactionExgest(db_connection, {"description": "co"})
+        data_extractor = TransactionExgest(db_connection, {"account_id": "007",
+                                                           "description": "co"})
         results = data_extractor.exgest()
 
         self.assertEqual(len(results), 1)
         self.assertEqual(results['description'].values, 'TELECOM')
 
     def test_exgest_empty_description(self):
-        data_extractor = TransactionExgest(db_connection, {"description": "tom"})
+        data_extractor = TransactionExgest(db_connection, {"account_id": "007",
+                                                           "description": "tom"})
         results = data_extractor.exgest()
 
         self.assertEqual(len(results), 0)

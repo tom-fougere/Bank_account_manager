@@ -8,28 +8,28 @@ class MetadataDB:
         self.balance = None
         self.categories = None
         self.occasions = None
-        self.date_last_update = {'dt': None,
+        self.date_last_transaction = {'dt': None,
                                  'str': None}
-        self.last_date = {'dt': None,
-                          'str': None}
+        self.date_last_import = {'dt': None,
+                                 'str': None}
 
-    def init_db(self, account_id, balance, date_late_update, last_date,
+    def init_db(self, account_id, balance, date_last_transaction, date_last_import,
                 categories=CATEGORIES, occasions=OCCASIONS):
         self.account_id = account_id
         self.balance = balance
         self.categories = categories
         self.occasions = occasions
-        self.date_last_update['dt'] = date_late_update
-        self.date_last_update['str'] = date_late_update.strftime("%d/%m/%Y")
-        self.last_date['dt'] = last_date
-        self.last_date['str'] = last_date.strftime("%d/%m/%Y")
+        self.date_last_transaction['dt'] = date_last_transaction
+        self.date_last_transaction['str'] = date_last_transaction.strftime("%d/%m/%Y")
+        self.date_last_import['dt'] = date_last_import
+        self.date_last_import['str'] = date_last_import.strftime("%d/%m/%Y")
 
         data_to_ingest = {'account_id': self.account_id,
                           'balance': self.balance,
                           'categories': self.categories,
                           'occasions': self.occasions,
-                          'date_last_update': self.date_last_update,
-                          'last_date': self.last_date}
+                          'date_last_transaction': self.date_last_transaction,
+                          'date_last_import': self.date_last_import}
 
         self.connection.collection.insert_one(data_to_ingest)
 
@@ -49,10 +49,13 @@ class MetadataDB:
         result = self.connection.collection.find_one({'account_id': account_id}, ['occasions'])
         return result['occasions']
 
-    def get_last_date(self, account_id):
-        result = self.connection.collection.find_one({'account_id': account_id}, ['last_date.str'])
-        return result['last_date']['str']
+    def get_date_last_import(self, account_id):
+        result = self.connection.collection.find_one({'account_id': account_id}, ['date_last_import.str'])
+        return result['date_last_import']['str']
 
-    def get_date_last_update(self, account_id):
-        result = self.connection.collection.find_one({'account_id': account_id}, ['date_last_update.str'])
-        return result['date_last_update']['str']
+    def get_date_last_transaction(self, account_id):
+        result = self.connection.collection.find_one({'account_id': account_id}, ['date_last_transaction.str'])
+        return result['date_last_transaction']['str']
+
+    def update_balance(self, account_id, balance):
+        self.connection.collection.update({'account_id': account_id}, {"$set": {'balance': balance}}, upsert=False)

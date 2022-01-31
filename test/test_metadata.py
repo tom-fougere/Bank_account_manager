@@ -7,8 +7,8 @@ from source.definitions import CATEGORIES, OCCASIONS
 
 BALANCE = -101.98
 ACCOUNT_ID = '007'
-DATE_LAST_UPDATE = datetime.datetime(2022, 4, 13)
-LAST_DATE = datetime.datetime(2019, 12, 25)
+DATE_LAST_IMPORT = datetime.datetime(2022, 4, 13)
+DATE_LAST_TRANSACTION = datetime.datetime(2019, 12, 25)
 
 
 class TestMetadataDB(unittest.TestCase):
@@ -19,12 +19,12 @@ class TestMetadataDB(unittest.TestCase):
 
         self.metadata_db.init_db(account_id=ACCOUNT_ID,
                                  balance=BALANCE,
-                                 date_late_update=DATE_LAST_UPDATE,
-                                 last_date=LAST_DATE)
+                                 date_last_import=DATE_LAST_IMPORT,
+                                 date_last_transaction=DATE_LAST_TRANSACTION)
 
     def tearDown(self) -> None:
         # Remove all in the collection
-        self.metadata_db.connection.collection.remove()
+        self.metadata_db.connection.collection.remove({"account_id": ACCOUNT_ID})
 
     def test_init(self):
 
@@ -37,12 +37,12 @@ class TestMetadataDB(unittest.TestCase):
         self.assertEqual(result['balance'], BALANCE)
         self.assertEqual(result['categories'], CATEGORIES)
         self.assertEqual(result['occasions'], OCCASIONS)
-        self.assertEqual(result['date_last_update']['dt'], DATE_LAST_UPDATE)
-        self.assertEqual(result['date_last_update']['str'], '13/04/2022')
-        self.assertEqual(result['last_date']['dt'], LAST_DATE)
-        self.assertEqual(result['last_date']['str'], '25/12/2019')
+        self.assertEqual(result['date_last_import']['dt'], DATE_LAST_IMPORT)
+        self.assertEqual(result['date_last_import']['str'], '13/04/2022')
+        self.assertEqual(result['date_last_transaction']['dt'], DATE_LAST_TRANSACTION)
+        self.assertEqual(result['date_last_transaction']['str'], '25/12/2019')
 
-        self.metadata_db.connection.collection.remove()
+        self.metadata_db.connection.collection.remove({"account_id": ACCOUNT_ID})
 
     def test_get_balance(self):
         balance = self.metadata_db.get_balance(account_id=ACCOUNT_ID)
@@ -66,12 +66,20 @@ class TestMetadataDB(unittest.TestCase):
 
         self.assertEqual(occasions, OCCASIONS)
 
-    def test_get_last_date(self):
-        last_date = self.metadata_db.get_last_date(account_id=ACCOUNT_ID)
+    def test_get_date_last_transaction(self):
+        date_last_transaction = self.metadata_db.get_date_last_transaction(account_id=ACCOUNT_ID)
 
-        self.assertEqual(last_date, "25/12/2019")
+        self.assertEqual(date_last_transaction, "25/12/2019")
 
-    def test_get_date_last_update(self):
-        date_last_update = self.metadata_db.get_date_last_update(account_id=ACCOUNT_ID)
+    def test_get_date_last_import(self):
+        date_last_import = self.metadata_db.get_date_last_import(account_id=ACCOUNT_ID)
 
-        self.assertEqual(date_last_update, "13/04/2022")
+        self.assertEqual(date_last_import, "13/04/2022")
+
+    def test_update_balance(self):
+        new_balance = 10.1
+        self.metadata_db.update_balance(account_id=ACCOUNT_ID, balance=new_balance)
+
+        doc = self.metadata_db.connection.collection.find_one({'account_id': ACCOUNT_ID}, ['balance'])
+        self.assertEqual(doc['balance'], new_balance)
+

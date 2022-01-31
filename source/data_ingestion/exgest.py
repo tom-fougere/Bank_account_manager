@@ -72,20 +72,21 @@ class TransactionExgest:
                 "date_str": "$date.str",
                 "date_dt": "$date.dt",
                 "date_transaction_str": "$date_transaction.str",
-                "date_transaction_dt": "$date_transaction.st",
+                "date_transaction_dt": "$date_transaction.dt",
             }
         })
-
-        # if len(pipeline) > 1:
-        #     pipeline.append({
-        #         "$project": {"_id": 0}
-        #     })
 
         return pipeline
 
     def exgest(self):
         pipeline = self.create_pipeline()
         result = self.aggregate(pipeline=pipeline)
+
+        if len(result) > 0:
+            result.drop(columns=['date_transaction', 'date'], inplace=True)
+            result['date_transaction_dt'] = result['date_transaction_dt'].apply(lambda x:
+                                                                                datetime.datetime.fromisoformat(x))
+            result['date_dt'] = result['date_dt'].apply(lambda x: datetime.datetime.fromisoformat(x))
 
         return result
 

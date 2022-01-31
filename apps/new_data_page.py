@@ -156,6 +156,3 @@ def import_transactions_in_database(n_clicks, filename):
         )
     else:
         return None
-
-
-
