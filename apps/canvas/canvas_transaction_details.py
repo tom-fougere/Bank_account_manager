@@ -6,73 +6,82 @@ from datetime import date
 
 from app import app
 from utils.time_operations import str_to_datetime
-from source.data_reader.bank_file_reader import BankTSVReader
+from apps.import_new_data.operations import read_and_format_data
 from utils.text_operations import get_project_root
 
 DATA_FOLDER = 'raw_data'
 
 
-def create_sidebar_transaction_details(df):
+def create_sidebar_transaction_details(df, disabled=True):
 
-    date_transaction = str_to_datetime(df.date_transaction, date_format='%d/%m/%Y')
-    date_bank = str_to_datetime(df.date, date_format='%d/%m/%Y')
+    date_transaction = str_to_datetime(df.date_transaction_str, date_format='%d/%m/%Y')
+    date_bank = str_to_datetime(df.date_str, date_format='%d/%m/%Y')
 
     component = html.Div([
         html.Div('Compte bancaire:'),
         dcc.Input(
+            id='sidebar_account_id',
             value=df.account_id,
             style={'width': '100%'},
             type='number',
-            disabled=True),
+            disabled=disabled),
         html.Div('Date Transaction'),
         dcc.DatePickerSingle(
-            id='date-picker',
+            id='sidebar_date_transaction',
             date=date(date_transaction.year, date_transaction.month, date_transaction.day),
-            disabled=True),
+            disabled=disabled),
         html.Div('Libelé'),
         dcc.Textarea(
+            id='sidebar_description',
             value=df.description,
             style={'width': '100%'},
-            disabled=True),
+            disabled=disabled),
         html.Div('Montant (€)'),
         dcc.Input(
+            id='sidebar_amount',
             value=df.amount,
             style={'width': '100%'},
             type='number',
-            disabled=True),
+            disabled=disabled),
         html.Div('Type:'),
         dcc.Input(
+            id='sidebar_type',
             value=df.type_transaction,
             style={'width': '100%'},
-            disabled=True),
+            disabled=disabled),
         html.Div('Catégorie:'),
         dcc.Input(
+            id='sidebar_category',
             value=df.category,
             style={'width': '100%'},
-            disabled=True),
+            disabled=disabled),
         dcc.Input(
+            id='sidebar_sub_category',
             value=df.sub_category,
             style={'width': '100%'},
-            disabled=True),
+            disabled=disabled),
         html.Div('Occasion:'),
         dcc.Input(
+            id='sidebar_occasion',
             value=df.occasion,
             style={'width': '100%'},
-            disabled=True),
+            disabled=disabled),
         html.Div('Date à la banque:'),
         dcc.DatePickerSingle(
-            id='date-picker',
+            id='sidebar_date',
             date=date(date_bank.year, date_bank.month, date_bank.day),
-            disabled=True),
+            disabled=disabled),
         html.Div('Note:'),
         dcc.Textarea(
+            id='sidebar_note',
             value=df.note,
             style={'width': '100%'},
-            disabled=True),
+            disabled=disabled),
         html.Div('Pointage:'),
         daq.BooleanSwitch(
+            id='sidebar_check',
             on=df.check,
-            disabled=True),
+            disabled=disabled),
     ])
 
     return component
@@ -87,8 +96,8 @@ def create_sidebar_transaction_details(df):
 def display_one_transaction(active_cell, canvas_is_open, filename):
 
     # Read data
-    data_reader = BankTSVReader('/'.join([get_project_root(), DATA_FOLDER, filename]))
-    df = data_reader.data
+    df = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
+                              db_connection='db_bank_connection')
 
     if active_cell is None:
         return canvas_is_open, html.Div()

@@ -6,9 +6,8 @@ from app import app
 from apps import home
 from apps.sidebar import sidebar
 from apps.content import content
-from apps import new_data_page, all_data_page
-from apps import canvas_transaction_details
-
+from apps import all_data_page
+from apps.import_new_data import import_new_data
 
 app.layout = html.Div([
     dcc.Location(id='url'),
@@ -23,7 +22,7 @@ def display_page(pathname):
     if pathname == '/':
         return home.layout
     if pathname == '/new_data_page':
-        return new_data_page.layout
+        return import_new_data.layout
     if pathname == '/all_data_page':
         return all_data_page.layout
     else:
