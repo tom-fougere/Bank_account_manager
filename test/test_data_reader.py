@@ -136,6 +136,13 @@ class TestBankCSVReader(unittest.TestCase):
         self.assertEqual(self.reader.date.year, 2022)
         self.assertEqual(self.reader.balance, 300.48)
 
+    def test_get_account_info(self):
+        info = self.reader.get_account_info()
+
+        self.assertEqual(info, {'account_id': '007',
+                                'balance': 300.48,
+                                'date': str_to_datetime('08/01/2022', date_format='%d/%m/%Y')})
+
 
 class TestFunctions(unittest.TestCase):
     def test_create_list_transactions_from_file(self):

@@ -62,7 +62,8 @@ def upload_file(list_of_contents, filename, btn_disabled):
 
     if list_of_contents is not None:
         # Read data
-        df = read_and_format_data('/'.join([get_project_root(), DATA_FOLDER, filename]), db_connection=DB_CONNECTION)
+        df, account_info = read_and_format_data('/'.join([get_project_root(), DATA_FOLDER, filename]),
+                                                db_connection=DB_CONNECTION)
 
         # Create message
         msg = 'New transactions = {}'.format(len(df))
@@ -84,13 +85,16 @@ def import_transactions_in_database(n_clicks, filename):
     if n_clicks > 0:
 
         # Read data
-        df = read_and_format_data('/'.join([get_project_root(), DATA_FOLDER, filename]), db_connection=DB_CONNECTION)
+        df, account_info = read_and_format_data('/'.join([get_project_root(), DATA_FOLDER, filename]),
+                                                db_connection=DB_CONNECTION)
+        df_new = df[df['duplicate'] == 'False']
+        df_new.drop(columns=['duplicate'])
 
         # Create connection
         my_connection = MongoDBConnection(DB_CONNECTION)
 
         # Database ingestion
-        ingestion = TransactionIngest(my_connection, transactions_df=df[df['duplicate'] is True])
+        ingestion = TransactionIngest(my_connection, transactions_df=df_new)
         ingestion.ingest()
 
         return 'The input value was and the button has been clicked {} times'.format(

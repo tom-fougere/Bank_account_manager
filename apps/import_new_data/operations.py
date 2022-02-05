@@ -1,7 +1,7 @@
 import dash_table as dt
 from dash_table.Format import Format, Symbol, Scheme
 
-from utils.mixed_operations import check_duplicates_in_df
+from source.transactions.transaction_operations import check_duplicates_in_df
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.data_ingestion.exgest import TransactionExgest
 from source.db_connection.db_access import MongoDBConnection
@@ -97,5 +97,5 @@ def read_and_format_data(full_filename, db_connection):
     # Convert boolean to string (for dash datatable)
     df['duplicate'] = df['duplicate'].astype('str')
 
-    return df
+    return df, data_reader.get_account_info()
 

@@ -167,6 +167,14 @@ class BankTSVReader:
     def get_dataframe(self):
         return self.data
 
+    def get_account_info(self):
+
+        info = {'account_id': self.account_id,
+                'date': self.date,
+                'balance': self.balance}
+
+        return info
+
 
 def create_list_transactions_from_file(file):
     # Read file
