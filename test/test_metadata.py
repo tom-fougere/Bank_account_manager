@@ -7,6 +7,7 @@ from source.definitions import CATEGORIES, OCCASIONS
 
 BALANCE_IN_DB = -101.98
 BALANCE_IN_BANK = -223.67
+BALANCE_BIAS = 54.3
 ACCOUNT_ID = '007'
 DATE_LAST_IMPORT = datetime.datetime(2022, 4, 13)
 DATE_BALANCE_IN_BANK = datetime.datetime(2019, 12, 25)
@@ -21,6 +22,7 @@ class TestMetadataDB(unittest.TestCase):
         self.metadata_db.init_db(account_id=ACCOUNT_ID,
                                  balance_in_db=BALANCE_IN_DB,
                                  balance_in_bank=BALANCE_IN_BANK,
+                                 balance_bias=BALANCE_BIAS,
                                  date_last_import=DATE_LAST_IMPORT,
                                  date_balance_in_bank=DATE_BALANCE_IN_BANK)
 
@@ -32,12 +34,11 @@ class TestMetadataDB(unittest.TestCase):
 
         result = self.metadata_db.connection.collection.find_one()
 
-        self.assertEqual(len(result), 8)
-        for key in ['_id', 'account_id', 'balance_in_db', 'balance_in_bank', 'categories']:
-            self.assertEqual(key in result.keys(), True)
+        self.assertEqual(len(result), 9)
         self.assertEqual(result['account_id'], ACCOUNT_ID)
         self.assertEqual(result['balance_in_bank'], BALANCE_IN_BANK)
         self.assertEqual(result['balance_in_db'], BALANCE_IN_DB)
+        self.assertEqual(result['balance_bias'], BALANCE_BIAS)
         self.assertEqual(result['categories'], CATEGORIES)
         self.assertEqual(result['occasions'], OCCASIONS)
         self.assertEqual(result['date_last_import']['dt'], DATE_LAST_IMPORT)
@@ -56,6 +57,11 @@ class TestMetadataDB(unittest.TestCase):
         balance = self.metadata_db.get_balance_in_bank(account_id=ACCOUNT_ID)
 
         self.assertEqual(balance, BALANCE_IN_BANK)
+
+    def test_get_balance_bias(self):
+        balance_bias = self.metadata_db.get_balance_bias(account_id=ACCOUNT_ID)
+
+        self.assertEqual(balance_bias, BALANCE_BIAS)
 
     def test_get_categories(self):
         categories = self.metadata_db.get_categories(account_id=ACCOUNT_ID)

@@ -7,6 +7,7 @@ class MetadataDB:
         self.account_id = None
         self.balance_in_bank = None
         self.balance_in_db = None
+        self.balance_bias = None
         self.categories = None
         self.occasions = None
         self.date_balance_in_bank = {'dt': None,
@@ -14,12 +15,13 @@ class MetadataDB:
         self.date_last_import = {'dt': None,
                                  'str': None}
 
-    def init_db(self, account_id, balance_in_bank, balance_in_db,
+    def init_db(self, account_id, balance_in_bank, balance_in_db, balance_bias,
                 date_balance_in_bank, date_last_import,
                 categories=CATEGORIES, occasions=OCCASIONS):
         self.account_id = account_id
         self.balance_in_bank = balance_in_bank
         self.balance_in_db = balance_in_db
+        self.balance_bias = balance_bias
         self.categories = categories
         self.occasions = occasions
         self.date_balance_in_bank['dt'] = date_balance_in_bank
@@ -30,6 +32,7 @@ class MetadataDB:
         data_to_ingest = {'account_id': self.account_id,
                           'balance_in_bank': self.balance_in_bank,
                           'balance_in_db': self.balance_in_db,
+                          'balance_bias': self.balance_bias,
                           'categories': self.categories,
                           'occasions': self.occasions,
                           'date_balance_in_bank': self.date_balance_in_bank,
@@ -44,6 +47,10 @@ class MetadataDB:
     def get_balance_in_db(self, account_id):
         result = self.connection.collection.find_one({'account_id': account_id}, ['balance_in_db'])
         return result['balance_in_db']
+
+    def get_balance_bias(self, account_id):
+        result = self.connection.collection.find_one({'account_id': account_id}, ['balance_bias'])
+        return result['balance_bias']
 
     def get_categories(self, account_id):
         result = self.connection.collection.find_one({'account_id': account_id}, ['categories'])
