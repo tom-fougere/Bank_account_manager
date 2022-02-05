@@ -108,3 +108,19 @@ class TestMetadataDB(unittest.TestCase):
         self.assertEqual(doc['balance_in_bank'], BALANCE_IN_BANK)
         self.assertEqual(doc['balance_in_db'], new_balance)
 
+    def test_update_date_balance_in_bank(self):
+        new_date = datetime.datetime(2023, 11, 1)
+        self.metadata_db.update_date_balance_in_bank(account_id=ACCOUNT_ID, date=new_date)
+
+        doc = self.metadata_db.connection.collection.find_one({'account_id': ACCOUNT_ID}, ['date_balance_in_bank'])
+        self.assertEqual(doc['date_balance_in_bank']['dt'], new_date.isoformat())
+        self.assertEqual(doc['date_balance_in_bank']['str'], new_date.strftime("%d/%m/%Y"))
+
+    def test_update_date_last_import(self):
+        new_date = datetime.datetime(2023, 11, 1)
+        self.metadata_db.update_date_last_import(account_id=ACCOUNT_ID, date=new_date)
+
+        doc = self.metadata_db.connection.collection.find_one({'account_id': ACCOUNT_ID}, ['date_last_import'])
+        self.assertEqual(doc['date_last_import']['dt'], new_date.isoformat())
+        self.assertEqual(doc['date_last_import']['str'], new_date.strftime("%d/%m/%Y"))
+

@@ -79,3 +79,21 @@ class MetadataDB:
     def update_balance_in_db(self, account_id, balance):
         self.connection.collection.update({'account_id': account_id},
                                           {"$set": {'balance_in_db': balance}}, upsert=False)
+
+    def update_date_balance_in_bank(self, account_id, date):
+
+        date_dt = date.isoformat()
+        date_str = date.strftime("%d/%m/%Y")
+
+        self.connection.collection.update({'account_id': account_id},
+                                          {"$set": {'date_balance_in_bank.str': date_str,
+                                                    'date_balance_in_bank.dt': date_dt}}, upsert=False)
+
+    def update_date_last_import(self, account_id, date):
+
+        date_dt = date.isoformat()
+        date_str = date.strftime("%d/%m/%Y")
+
+        self.connection.collection.update({'account_id': account_id},
+                                          {"$set": {'date_last_import.str': date_str,
+                                                    'date_last_import.dt': date_dt}}, upsert=False)
