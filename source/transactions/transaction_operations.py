@@ -23,4 +23,3 @@ def check_duplicates_in_df(df1, df2):
             elif len(df2_same) > 1:
                 raise ValueError('WARNING')
 
-

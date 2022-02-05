@@ -12,3 +12,7 @@ CATEGORIES = {'Travail': ['Salaire', 'Prime', 'Autre'],
               'Fêtes': ['Anniversaire', 'Fêtes', 'Autre']}
 
 OCCASIONS = ['regulier', 'ponctuel', 'loisir']
+
+DATA_FOLDER = 'raw_data'
+DB_CONNECTION = 'db_bank_connection'
+ACCOUNT_ID = ''

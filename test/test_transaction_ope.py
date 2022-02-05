@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from source.data_reader.bank_file_reader import BankTSVReader
 
-from utils.mixed_operations import check_duplicates_in_df
+from source.transactions.transaction_operations import check_duplicates_in_df
 
 
 class TestMixedUtils(unittest.TestCase):

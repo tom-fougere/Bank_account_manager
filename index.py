@@ -21,7 +21,7 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/':
         return home.layout
-    if pathname == '/new_data_page':
+    if pathname == '/import_data':
         return import_new_data.layout
     if pathname == '/all_data_page':
         return all_data_page.layout

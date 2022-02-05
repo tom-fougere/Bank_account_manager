@@ -8,8 +8,7 @@ from app import app
 from utils.time_operations import str_to_datetime
 from apps.import_new_data.operations import read_and_format_data
 from utils.text_operations import get_project_root
-
-DATA_FOLDER = 'raw_data'
+from source.definitions import DATA_FOLDER, DB_CONNECTION
 
 
 def create_sidebar_transaction_details(df, disabled=True):
@@ -97,7 +96,7 @@ def display_one_transaction(active_cell, canvas_is_open, filename):
 
     # Read data
     df = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
-                              db_connection='db_bank_connection')
+                              db_connection=DB_CONNECTION)
 
     if active_cell is None:
         return canvas_is_open, html.Div()

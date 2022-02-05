@@ -18,15 +18,15 @@ SIDEBAR_STYLE = {
 
 sidebar = html.Div(
     [
-        html.H2("Sidebar", className="display-4"),
+        html.H2("Gestion des dépenses", className="display-4"),
         html.Hr(),
         html.P(
-            "Number of students per education level", className="lead"
+            "Selectionner une option", className="lead"
         ),
         dbc.Nav(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
-                dbc.NavLink("New data", href="/new_data_page", active="exact"),
+                dbc.NavLink("Importer données", href="/import_data", active="exact"),
                 dbc.NavLink("All data", href="/all_data_page", active="exact"),
             ],
             vertical=True,

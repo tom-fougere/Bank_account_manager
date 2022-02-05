@@ -9,7 +9,7 @@ class MetadataDB:
         self.categories = None
         self.occasions = None
         self.date_last_transaction = {'dt': None,
-                                 'str': None}
+                                      'str': None}
         self.date_last_import = {'dt': None,
                                  'str': None}
 

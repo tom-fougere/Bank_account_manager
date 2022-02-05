@@ -10,9 +10,7 @@ from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.ingest import TransactionIngest
 from apps.import_new_data.operations import create_datatable, read_and_format_data
 from apps.canvas.canvas_transaction_details import display_one_transaction
-
-DATA_FOLDER = 'raw_data'
-DB_CONNECTION = 'db_bank_connection'
+from source.definitions import DB_CONNECTION, DATA_FOLDER
 
 
 layout = html.Div([

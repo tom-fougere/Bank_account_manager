@@ -83,4 +83,3 @@ def list_transactions_to_dataframe(list_transactions):
     df_transactions = pd.DataFrame(dict_trans, columns=column_names)
 
     return df_transactions
-
