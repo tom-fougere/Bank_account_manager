@@ -22,4 +22,3 @@ def check_duplicates_in_df(df1, df2):
                 df1.loc[index, 'duplicate'] = True
             elif len(df2_same) > 1:
                 raise ValueError('WARNING')
-
