@@ -8,7 +8,7 @@ from app import app
 from utils.time_operations import str_to_datetime
 from apps.import_new_data.operations import read_and_format_data
 from utils.text_operations import get_project_root
-from source.definitions import DATA_FOLDER, DB_CONNECTION
+from source.definitions import DATA_FOLDER, DB_CONN_TRANSACTION
 
 
 def create_sidebar_transaction_details(df, disabled=True):
@@ -81,6 +81,11 @@ def create_sidebar_transaction_details(df, disabled=True):
             id='sidebar_check',
             on=df.check,
             disabled=disabled),
+        html.Button(
+            'Enregistrer',
+            id='save_trans_details',
+            n_clicks=0,
+            disabled=disabled),
     ])
 
     return component
@@ -96,7 +101,7 @@ def display_one_transaction(active_cell, canvas_is_open, filename):
 
     # Read data
     df, _ = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
-                                 db_connection=DB_CONNECTION)
+                                 db_connection=DB_CONN_TRANSACTION)
 
     if active_cell is None:
         return canvas_is_open, html.Div()

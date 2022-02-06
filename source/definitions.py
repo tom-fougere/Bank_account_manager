@@ -14,5 +14,6 @@ CATEGORIES = {'Travail': ['Salaire', 'Prime', 'Autre'],
 OCCASIONS = ['regulier', 'ponctuel', 'loisir']
 
 DATA_FOLDER = 'raw_data'
-DB_CONNECTION = 'db_bank_connection'
+DB_CONN_TRANSACTION = 'db_transaction_connection'
+DB_CONN_ACCOUNT = 'db_account_connection'
 ACCOUNT_ID = ''

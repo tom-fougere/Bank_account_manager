@@ -8,9 +8,10 @@ from app import app
 from utils.text_operations import get_project_root
 from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.ingest import TransactionIngest
-from apps.import_new_data.operations import create_datatable, read_and_format_data
+from apps.import_new_data.operations import create_datatable, read_and_format_data, update_db_account
+from source.data_ingestion.metadata import MetadataDB
 from apps.canvas.canvas_transaction_details import display_one_transaction
-from source.definitions import DB_CONNECTION, DATA_FOLDER
+from source.definitions import DB_CONN_TRANSACTION, DB_CONN_ACCOUNT, DATA_FOLDER
 
 
 layout = html.Div([
@@ -63,7 +64,7 @@ def upload_file(list_of_contents, filename, btn_disabled):
     if list_of_contents is not None:
         # Read data
         df, account_info = read_and_format_data('/'.join([get_project_root(), DATA_FOLDER, filename]),
-                                                db_connection=DB_CONNECTION)
+                                                db_connection=DB_CONN_TRANSACTION)
 
         # Create message
         msg = 'New transactions = {}'.format(len(df))
@@ -86,15 +87,19 @@ def import_transactions_in_database(n_clicks, filename):
 
         # Read data
         df, account_info = read_and_format_data('/'.join([get_project_root(), DATA_FOLDER, filename]),
-                                                db_connection=DB_CONNECTION)
+                                                db_connection=DB_CONN_TRANSACTION)
         df_new = df[df['duplicate'] == 'False']
         df_new.drop(columns=['duplicate'])
 
+        update_db_account(account_info=account_info,
+                          df=df_new,
+                          db_connection=DB_CONN_ACCOUNT)
+
         # Create connection
-        my_connection = MongoDBConnection(DB_CONNECTION)
+        con_transaction = MongoDBConnection(DB_CONN_TRANSACTION)
 
         # Database ingestion
-        ingestion = TransactionIngest(my_connection, transactions_df=df_new)
+        ingestion = TransactionIngest(con_transaction, transactions_df=df_new)
         ingestion.ingest()
 
         return 'The input value was and the button has been clicked {} times'.format(
@@ -102,3 +107,4 @@ def import_transactions_in_database(n_clicks, filename):
         )
     else:
         return None
+

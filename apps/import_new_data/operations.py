@@ -5,6 +5,7 @@ from source.transactions.transaction_operations import check_duplicates_in_df
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.data_ingestion.exgest import TransactionExgest
 from source.db_connection.db_access import MongoDBConnection
+from source.data_ingestion.metadata import MetadataDB
 
 
 style_cell_conditional = (
@@ -98,4 +99,28 @@ def read_and_format_data(full_filename, db_connection):
     df['duplicate'] = df['duplicate'].astype('str')
 
     return df, data_reader.get_account_info()
+
+
+def update_db_account(account_info, df, db_connection):
+    account_id = df['account_id'].unique()
+    if len(account_id) > 1:
+        ValueError('here')
+    else:
+        account_id = account_id[0]
+
+    my_connection = MongoDBConnection(db_connection)
+    metadata_db = MetadataDB(my_connection)
+
+    metadata_db.update_date_balance_in_bank(account_id=account_id, date=account_info['date'])
+    metadata_db.update_balance_in_bank(account_id=account_id, balance=account_info['balance'])
+
+    # Update balance add the sum to the previous balance
+    previous_balance = metadata_db.get_balance_in_db(account_id=account_id)
+    new_balance = previous_balance + round(df['amount'].sum(), 2)
+    metadata_db.update_balance_in_db(account_id=account_id, balance=new_balance)
+
+    # Update date of import using the newest date
+    newest_date = max(df['date_bank_dt'])
+    metadata_db.update_date_last_import(account_id=account_id, date=max(df['']))
+
 
