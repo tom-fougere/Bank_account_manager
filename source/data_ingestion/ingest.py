@@ -12,10 +12,10 @@ class TransactionIngest:
         # Convert 2 fields of date as one with a dict
         df_transaction['date'] = \
             df_transaction.apply(lambda x: {'str': x.date_str,
-                                            'dt': x.date_dt.isoformat()}, axis=1)
+                                            'dt': x.date_dt}, axis=1)
         df_transaction['date_transaction'] = \
             df_transaction.apply(lambda x: {'str': x.date_transaction_str,
-                                            'dt': x.date_transaction_dt.isoformat()}, axis=1)
+                                            'dt': x.date_transaction_dt}, axis=1)
 
         df_transaction.drop(columns=['date_str', 'date_dt', 'date_transaction_str', 'date_transaction_dt'],
                             axis=1,

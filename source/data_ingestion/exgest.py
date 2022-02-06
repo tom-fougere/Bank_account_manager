@@ -42,8 +42,8 @@ class TransactionExgest:
                 if 'date' in att:
                     pipeline.append({
                         "$match": {
-                            '.'.join([att, 'dt']): {"$gte": att_value[0].isoformat(),
-                                                    "$lte": att_value[1].isoformat()}
+                            '.'.join([att, 'dt']): {"$gte": att_value[0],
+                                                    "$lte": att_value[1]}
                         }
                     })
                 # Manage numeric value
@@ -84,9 +84,6 @@ class TransactionExgest:
 
         if len(result) > 0:
             result.drop(columns=['date_transaction', 'date'], inplace=True)
-            result['date_transaction_dt'] = result['date_transaction_dt'].apply(lambda x:
-                                                                                datetime.datetime.fromisoformat(x))
-            result['date_dt'] = result['date_dt'].apply(lambda x: datetime.datetime.fromisoformat(x))
 
         return result
 

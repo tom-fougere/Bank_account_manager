@@ -5,6 +5,8 @@ from source.data_ingestion.ingest import TransactionIngest
 from source.data_reader.bank_file_reader import BankTSVReader
 from utils.time_operations import str_to_datetime
 
+ACCOUNT_ID = '007'
+
 
 class TestTransactionIngest(unittest.TestCase):
     def setUp(self) -> None:
@@ -21,7 +23,7 @@ class TestTransactionIngest(unittest.TestCase):
 
     def tearDown(self) -> None:
         # Remove all transactions in the collection
-        result = self.transInges.connection.collection.remove({"account_id": "007"})
+        result = self.transInges.connection.collection.remove({"account_id": ACCOUNT_ID})
 
     def test_ingest_one_new_transaction(self):
 
@@ -42,7 +44,7 @@ class TestTransactionIngest(unittest.TestCase):
         self.transInges.ingest_one_transaction(df.iloc[0])
 
         # get the transaction in the mongodb
-        db_trans = self.transInges.connection.collection.find_one({"account_id": "007"})
+        db_trans = self.transInges.connection.collection.find_one({"account_id": ACCOUNT_ID})
         # Remove id field for the comparison
         db_trans.pop('_id', None)
 
@@ -76,7 +78,7 @@ class TestTransactionIngest(unittest.TestCase):
         self.transInges.ingest()
 
         # get the transaction in the mongodb
-        db_all_trans = self.transInges.connection.collection.find({"account_id": "007"})
+        db_all_trans = self.transInges.connection.collection.find({"account_id": ACCOUNT_ID})
 
         self.assertEqual(len(list(db_all_trans)), len(self.df_transactions))
 
@@ -85,9 +87,9 @@ class TestTransactionIngest(unittest.TestCase):
         for db_trans in db_all_trans:
 
             # Compare dates
-            self.assertEqual(str_to_datetime(db_trans['date']['str'], date_format="%d/%m/%Y").isoformat(),
+            self.assertEqual(str_to_datetime(db_trans['date']['str'], date_format="%d/%m/%Y"),
                              db_trans['date']['dt'])
-            self.assertEqual(str_to_datetime(db_trans['date_transaction']['str'], date_format="%d/%m/%Y").isoformat(),
+            self.assertEqual(str_to_datetime(db_trans['date_transaction']['str'], date_format="%d/%m/%Y"),
                              db_trans['date_transaction']['dt'])
             self.assertEqual(db_trans['date']['str'], self.df_transactions.loc[idx, 'date_str'])
             self.assertEqual(db_trans['date_transaction']['str'], self.df_transactions.loc[idx, 'date_transaction_str'])
