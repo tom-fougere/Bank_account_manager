@@ -1,7 +1,7 @@
 import dash_table as dt
 from dash_table.Format import Format, Symbol, Scheme
 
-from source.transactions.transaction_operations import check_duplicates_in_df
+from source.transactions.transaction_operations import check_duplicates_in_df, format_dataframe_to_datatable
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.data_ingestion.exgest import TransactionExgest
 from source.db_connection.db_access import MongoDBConnection
@@ -44,18 +44,7 @@ style_data_conditional = (
 
 def create_datatable(df):
 
-    df_display = df.copy()
-    df_display = df_display[['date_transaction_str', 'amount', 'description', 'type_transaction', 'date_str', 'duplicate']]
-    df_display.rename(columns={'date_str': 'Date (banque)',
-                               'amount': 'Montant (€)',
-                               'description': 'Libelé',
-                               'type_transaction': 'Type',
-                               'date_transaction_str': 'Date',
-                               'duplicate': 'Duplicata'}, inplace=True)
-
-    columns = [{"name": i, "id": i, } for i in df_display.columns]
-    columns[1]['type'] = 'numeric'
-    columns[1]['format'] = Format(precision=2, scheme=Scheme.fixed).symbol(Symbol.yes).symbol_suffix('€')
+    df_display, columns = format_dataframe_to_datatable(df, show_new_data=True, show_category=False)
 
     dt_transactions = dt.DataTable(id='table_content',
                                    data=df_display.to_dict('records'),
@@ -80,7 +69,8 @@ def read_and_format_data(full_filename, db_connection):
 
     # Check account ID is unique
     current_account_id = df['account_id'].unique()
-    assert (len(current_account_id), 1)
+    assert len(current_account_id) == 1
+    account_id = current_account_id[0]
 
     # Get the min/max date from the new df
     min_date = min(df['date_transaction_dt'])
@@ -88,7 +78,7 @@ def read_and_format_data(full_filename, db_connection):
 
     # Extract from the database the same dates
     my_connection = MongoDBConnection(db_connection)
-    data_extractor = TransactionExgest(my_connection, {"account_id": current_account_id[0],
+    data_extractor = TransactionExgest(my_connection, {"account_id": account_id,
                                                        "date": [min_date, max_date]})
     db = data_extractor.exgest()
 
@@ -103,10 +93,8 @@ def read_and_format_data(full_filename, db_connection):
 
 def update_db_account(account_info, df, db_connection):
     account_id = df['account_id'].unique()
-    if len(account_id) > 1:
-        ValueError('here')
-    else:
-        account_id = account_id[0]
+    assert len(account_id) == 1
+    account_id = account_id[0]
 
     my_connection = MongoDBConnection(db_connection)
     metadata_db = MetadataDB(my_connection)
@@ -120,7 +108,7 @@ def update_db_account(account_info, df, db_connection):
     metadata_db.update_balance_in_db(account_id=account_id, balance=new_balance)
 
     # Update date of import using the newest date
-    newest_date = max(df['date_bank_dt'])
-    metadata_db.update_date_last_import(account_id=account_id, date=max(df['']))
+    newest_date = max(df['date_dt'])
+    metadata_db.update_date_last_import(account_id=account_id, date=newest_date)
 
 

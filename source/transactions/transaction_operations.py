@@ -1,3 +1,17 @@
+import pandas as pd
+from dash_table.Format import Format, Symbol, Scheme
+
+MANDATORY_COLUMNS = ['date_str', 'amount', 'description', 'type_transaction', 'date_transaction_str']
+OPTIONAL_COLUMNS = {'new_data': ['duplicate'],
+                    'category': ['category', 'sub_category']}
+COLUMNS_RENAMING = {'date_str': 'Date (banque)',
+                    'amount': 'Montant (€)',
+                    'description': 'Libelé',
+                    'type_transaction': 'Type',
+                    'date_transaction_str': 'Date',
+                    'duplicate': 'Duplicata',
+                    'category': 'Catégorie',
+                    'sub_category': 'Sous-catégorie'}
 
 
 def check_duplicates_in_df(df1, df2):
@@ -22,3 +36,46 @@ def check_duplicates_in_df(df1, df2):
                 df1.loc[index, 'duplicate'] = True
             elif len(df2_same) > 1:
                 raise ValueError('WARNING')
+
+
+def format_dataframe_to_datatable(df, show_new_data=False, show_category=False):
+    # keep selected columns
+    df_display = keep_selected_columns(df, show_new_data, show_category)
+
+    # rename columns
+    rename_columns(df_display)
+
+    # Format to numeric the amount
+    columns = [{"name": i, "id": i, } for i in df_display.columns]
+    for idx, column in enumerate(columns):
+        if column['name'] == 'Montant (€)':
+            columns[idx]['type'] = 'numeric'
+            columns[idx]['format'] = Format(precision=2, scheme=Scheme.fixed).symbol(Symbol.yes).symbol_suffix('€')
+
+    return df_display, columns
+
+
+def keep_selected_columns(df, show_new_data=False, show_category=False):
+
+    new_df = pd.DataFrame()
+
+    columns_to_keep = MANDATORY_COLUMNS
+    if show_new_data:
+        columns_to_keep += OPTIONAL_COLUMNS['new_data']
+    if show_category:
+        columns_to_keep += OPTIONAL_COLUMNS['category']
+
+    keys = df.keys()
+    for column in columns_to_keep:
+        if column in keys:
+            new_df[column] = df[column].copy()
+
+    return new_df
+
+
+def rename_columns(df):
+
+    df_keys = df.keys()
+    for key in COLUMNS_RENAMING:
+        if key in df_keys:
+            df.rename(columns={key: COLUMNS_RENAMING[key]}, inplace=True)
