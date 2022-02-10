@@ -49,7 +49,7 @@ def search_transactions(connection_name, filter):
     # Keep only when it's not None and the list isn"t empty
     for key in filter:
         if isinstance(filter[key], list):
-            if len(filter[key]) > 0 and all(filter[key]):
+            if len(filter[key]) > 0 and all(x is not None for x in filter[key]):
                 searches[key] = filter[key]
         elif filter[key] is not None:
             searches[key] = filter[key]
