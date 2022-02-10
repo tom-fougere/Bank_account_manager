@@ -6,7 +6,7 @@ from app import app
 from apps import home
 from apps.sidebar import sidebar
 from apps.content import content
-from apps import all_data_page
+from apps.search_data import search_data
 from apps.import_new_data import import_new_data
 
 app.layout = html.Div([
@@ -24,7 +24,7 @@ def display_page(pathname):
     if pathname == '/import_data':
         return import_new_data.layout
     if pathname == '/all_data_page':
-        return all_data_page.layout
+        return search_data.layout
     else:
         return '404'
 
