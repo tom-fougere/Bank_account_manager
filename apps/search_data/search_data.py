@@ -7,7 +7,6 @@ from app import app
 from apps.search_data.operations import get_categories, get_sub_categories, search_transactions, create_datatable
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
 
-
 layout = html.Div([
     html.Div('Compte bancaire:'),
     dcc.Input(
@@ -36,27 +35,30 @@ layout = html.Div([
         debounce=True,
         placeholder="Maximum",
         style={'width': '50%'}),
-    html.Div('Type:'),
-    dcc.Input(
-        id='search_type',
-        value=None,
-        style={'width': '100%'}),
-    html.Div('Catégorie:'),
-    dcc.Dropdown(
-        id='search_category',
-        options=get_categories(db_connection=DB_CONN_ACCOUNT,
-                               account_id=ACCOUNT_ID),
-        value=[],
-        multi=True,
-        style={'width': '100%'}),
-    dcc.Dropdown(
-        id='search_sub_category',
-        options=get_sub_categories(db_connection=DB_CONN_ACCOUNT,
-                                   account_id=ACCOUNT_ID,
-                                   categories=[]),
-        value=[],
-        multi=True,
-        style={'width': '100%'}),
+    html.Div([
+        html.Div([
+            "Type transaction:",
+            dcc.Input(
+                id='search_type',
+                value=None,
+                style={'width': '100%'}),
+        ])
+    ]),
+    html.Div([
+        "Catégorie:",
+        html.Div([
+            dcc.Dropdown(
+                id='search_category',
+                options=get_categories(db_connection=DB_CONN_ACCOUNT,
+                                       account_id=ACCOUNT_ID),
+                value=[],
+                multi=True,
+                style={'width': '100%'}
+            ),
+            html.Div(id='search_sub_category',
+                     style={'width': '100%'})],  # Dropdown for sub-categories
+            style={"display": 'flex'})
+    ]),
     html.Div('Occasion:'),
     dcc.Input(
         id='search_occasion',
@@ -87,16 +89,14 @@ layout = html.Div([
      State('search_sub_category', 'value'),
      State('search_occasion', 'value'),
      State('search_note', 'value')]
-    )
+)
 def upload_file(n_clicks, date, description, amount_min, amount_max,
                 type, category, sub_category, occasion, note):
-
     dt_transactions = dt.DataTable()
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
     if 'btn_search' in changed_id:
-
         filter = {
             'account_id': ACCOUNT_ID,
             'date': date,
@@ -115,6 +115,27 @@ def upload_file(n_clicks, date, description, amount_min, amount_max,
     return dt_transactions
 
 
+@app.callback(
+    Output('search_sub_category', 'children'),
+    Input('search_category', 'value')
+)
+def update_sub_category(value):
+    print(f'You have selected {value}')
 
+    # Default value
+    dropdown_sub_category = dcc.Dropdown(
+                value=[],
+                multi=True,
+                style={'width': '100%'}
+            )
 
+    if len(value) > 0:
+        dropdown_sub_category = dcc.Dropdown(
+            options=get_sub_categories(db_connection=DB_CONN_ACCOUNT,
+                                       account_id=ACCOUNT_ID,
+                                       categories=value),
+            value=[],
+            multi=True,
+            style={'width': '100%'})
 
+    return dropdown_sub_category
