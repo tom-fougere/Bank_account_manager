@@ -97,7 +97,7 @@ def get_categories(db_connection, account_id):
     return list_categories
 
 
-def get_sub_categories(db_connection, account_id, categories, show_category=True):
+def get_sub_categories(db_connection, account_id, categories, add_suffix_cat=True):
 
     my_connection = MongoDBConnection(db_connection)
     metadata_db = MetadataDB(my_connection)
@@ -106,7 +106,7 @@ def get_sub_categories(db_connection, account_id, categories, show_category=True
     for category in categories:
         sub_categories = metadata_db.get_sub_categories(account_id=account_id, category=category)
         for sub_category in sub_categories:
-            if show_category:
+            if add_suffix_cat:
                 list_sub_categories.append({'label': f'{category}/{sub_category}',
                                             'value': f'{category}/{sub_category}'})
             else:

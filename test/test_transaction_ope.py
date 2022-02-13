@@ -3,6 +3,10 @@ import numpy as np
 from source.data_reader.bank_file_reader import BankTSVReader
 
 from source.transactions.transaction_operations import *
+from source.definitions import CATEGORIES, OCCASIONS
+
+ACCOUNT_ID = '008'
+DB_TITLE_CONNECTION = 'db_metadata_ut'
 
 
 class TestDuplicate(unittest.TestCase):
@@ -34,7 +38,7 @@ class TestDuplicate(unittest.TestCase):
         np.testing.assert_array_equal(df_transactions['type_transaction'].values, ['type1', 'ACHAT', 'type2'])
 
 
-class TestMixedUtils(unittest.TestCase):
+class TestSelectedColumns(unittest.TestCase):
     def test_keep_selected_columns_no_option(self):
         df = pd.DataFrame({'test1': [1],
                            'test2': [1],
@@ -72,3 +76,46 @@ class TestMixedUtils(unittest.TestCase):
         self.assertEqual(len(new_df.keys()), 2)
         self.assertEqual('amount' in new_df.keys(), True)
         self.assertEqual('sub_category' in new_df.keys(), True)
+
+
+class TestGetLists(unittest.TestCase):
+    def test_get_categories(self):
+        categories = get_categories(DB_TITLE_CONNECTION, ACCOUNT_ID)
+
+        expected_categories = []
+        for cat in CATEGORIES:
+            expected_categories.append({'label': cat, 'value': cat})
+
+        self.assertEqual(categories, expected_categories)
+
+    def test_get_sub_categories_without_suffix(self):
+        selected_category = 'Travail'
+        sub_categories = get_sub_categories(DB_TITLE_CONNECTION, ACCOUNT_ID, categories=[selected_category],
+                                            add_suffix_cat=False)
+
+        expected_categories = []
+        for cat in CATEGORIES[selected_category]:
+            expected_categories.append({'label': cat, 'value': cat})
+
+        self.assertEqual(sub_categories, expected_categories)
+
+    def test_get_sub_categories_with_suffix(self):
+        selected_category = 'Travail'
+        sub_categories = get_sub_categories(DB_TITLE_CONNECTION, ACCOUNT_ID, categories=[selected_category],
+                                            add_suffix_cat=True)
+
+        expected_categories = []
+        for cat in CATEGORIES[selected_category]:
+            expected_categories.append({'label': selected_category + '/' + cat,
+                                        'value': selected_category + '/' + cat})
+
+        self.assertEqual(sub_categories, expected_categories)
+
+    def test_get_occasions(self):
+        occasions = get_occasion(DB_TITLE_CONNECTION, ACCOUNT_ID)
+
+        expected_occasions = []
+        for occ in OCCASIONS:
+            expected_occasions.append({'label': occ, 'value': occ})
+
+        self.assertEqual(occasions, expected_occasions)
