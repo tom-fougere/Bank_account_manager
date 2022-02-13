@@ -35,11 +35,9 @@ layout = html.Div([
     html.Div(id="new_transaction_msg"),
     html.Div(id="table"),
     dbc.Offcanvas(
-            [html.P("Transaction"
-                    "Details"),
-             html.Div(id='canvas_trans_details')],
+            [html.Div(id='canvas_trans_details')],
             id="off_canvas",
-            title="Title",
+            title="Transaction",
             is_open=False,
         ),
 
