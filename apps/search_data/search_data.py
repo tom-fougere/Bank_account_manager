@@ -104,12 +104,6 @@ layout = html.Div([
     html.Div(id="table_content",
              style={'margin-top': 10}),
     html.Div(id='msg'),
-    dbc.Offcanvas(
-            [html.Div(id='canvas_trans_details')],
-            id="off_canvas",
-            title="Transaction",
-            is_open=False,
-        ),
 ])
 
 
@@ -126,8 +120,8 @@ layout = html.Div([
      State('search_occasion', 'value'),
      State('search_note', 'value')]
 )
-def upload_file(n_clicks, date, description, amount_min, amount_max,
-                type, category, sub_category, occasion, note):
+def search_transactions(n_clicks, date, description, amount_min, amount_max,
+                        type, category, sub_category, occasion, note):
     dt_transactions = dt.DataTable()
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]

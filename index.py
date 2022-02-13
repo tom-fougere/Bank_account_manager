@@ -6,13 +6,15 @@ from app import app
 from apps import home
 from apps.sidebar import sidebar
 from apps.content import content
+from apps.canvas.canvas import canvas
 from apps.search_data import search_data
 from apps.import_new_data import import_new_data
 
 app.layout = html.Div([
     dcc.Location(id='url'),
     sidebar,
-    content
+    content,
+    canvas,
 ])
 
 

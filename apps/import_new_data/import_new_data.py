@@ -9,7 +9,6 @@ from utils.text_operations import get_project_root
 from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.ingest import TransactionIngest
 from apps.import_new_data.operations import create_datatable, read_and_format_data, update_db_account
-from apps.canvas.canvas_transaction_details import display_one_transaction
 from source.definitions import DB_CONN_TRANSACTION, DB_CONN_ACCOUNT, DATA_FOLDER
 
 
@@ -34,13 +33,6 @@ layout = html.Div([
     html.Div(id="btn_click"),
     html.Div(id="new_transaction_msg"),
     html.Div(id="table"),
-    dbc.Offcanvas(
-            [html.Div(id='canvas_trans_details')],
-            id="off_canvas",
-            title="Transaction",
-            is_open=False,
-        ),
-
 ])
 
 
