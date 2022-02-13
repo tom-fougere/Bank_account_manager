@@ -61,11 +61,11 @@ def keep_selected_columns(df, show_new_data=False, show_category=False):
 
     new_df = pd.DataFrame()
 
-    columns_to_keep = MANDATORY_COLUMNS
+    columns_to_keep = MANDATORY_COLUMNS.copy()
     if show_new_data:
-        columns_to_keep += OPTIONAL_COLUMNS['new_data']
+        columns_to_keep += OPTIONAL_COLUMNS['new_data'].copy()
     if show_category:
-        columns_to_keep += OPTIONAL_COLUMNS['category']
+        columns_to_keep += OPTIONAL_COLUMNS['category'].copy()
 
     keys = df.keys()
     for column in columns_to_keep:
