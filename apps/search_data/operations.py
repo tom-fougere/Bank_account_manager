@@ -3,7 +3,6 @@ import dash_table as dt
 from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.metadata import MetadataDB
 from source.data_ingestion.exgest import TransactionExgest
-from source.definitions import ACCOUNT_ID
 from source.transactions.transaction_operations import format_dataframe_to_datatable
 
 style_cell_conditional = (
@@ -85,6 +84,20 @@ def get_sub_categories(db_connection, account_id, categories):
                                         'value': f'{category}/{sub_category}'})
 
     return list_sub_categories
+
+
+def get_occasion(db_connection, account_id):
+
+    my_connection = MongoDBConnection(db_connection)
+    metadata_db = MetadataDB(my_connection)
+
+    occasions = metadata_db.get_occasions(account_id=account_id)
+
+    list_occasions = []
+    for occas in occasions:
+        list_occasions.append({'label': occas, 'value': occas})
+
+    return list_occasions
 
 
 def create_datatable(df):

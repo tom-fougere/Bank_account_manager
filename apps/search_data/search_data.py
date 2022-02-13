@@ -4,46 +4,35 @@ import dash_table as dt
 from dash import Input, Output, State, callback_context
 from app import app
 
-from apps.search_data.operations import get_categories, get_sub_categories, search_transactions, create_datatable
+from apps.search_data.operations import get_categories, get_sub_categories, get_occasion, \
+    search_transactions, create_datatable
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
 
 layout = html.Div([
-    html.Div('Compte bancaire:'),
-    dcc.Input(
-        id='search_account_id',
-        value=None,
-        style={'width': '100%'},
-        type='number'),
-    html.Div('Date Transaction'),
-    dcc.DatePickerRange(
-        id='search_date'
-    ),
-    html.Div('Libelé'),
-    dcc.Textarea(
-        id='search_description',
-        value=None,
-        style={'width': '100%'}),
-    html.Div('Montant (€)'),
-    dcc.Input(
-        id='search_amount_min',
-        type="number",
-        placeholder="Minimum",
-        style={'width': '50%'}),
-    dcc.Input(
-        id='search_amount_max',
-        type="number",
-        debounce=True,
-        placeholder="Maximum",
-        style={'width': '50%'}),
     html.Div([
+        html.Div("Date de transaction:"),
+        dcc.DatePickerRange(
+            id='search_date'),
+        ]),
+    html.Div([
+        'Montant (€):',
         html.Div([
-            "Type transaction:",
             dcc.Input(
-                id='search_type',
-                value=None,
-                style={'width': '100%'}),
-        ])
-    ]),
+                id='search_amount_min',
+                type="number",
+                step=10,
+                placeholder="Minimum",
+                style={'width': '50%'}),
+            dcc.Input(
+                id='search_amount_max',
+                type="number",
+                debounce=True,
+                step=10,
+                placeholder="Maximum",
+                style={'width': '50%'}),
+            ])
+        ],
+        style={'margin-top': 10}),
     html.Div([
         "Catégorie:",
         html.Div([
@@ -58,21 +47,60 @@ layout = html.Div([
             html.Div(id='search_sub_category',
                      style={'width': '100%'})],  # Dropdown for sub-categories
             style={"display": 'flex'})
-    ]),
-    html.Div('Occasion:'),
-    dcc.Input(
-        id='search_occasion',
-        value=None,
-        style={'width': '100%'}),
-    html.Div('Note:'),
-    dcc.Textarea(
-        id='search_note',
-        value=None,
-        style={'width': '100%'}),
+        ],
+        style={'margin-top': 10}),
+    html.Div([
+        html.Div([
+            'Occasion:',
+            dcc.Dropdown(
+                id='search_occasion',
+                options=get_occasion(db_connection=DB_CONN_ACCOUNT,
+                                     account_id=ACCOUNT_ID),
+                value=[],
+                multi=True,
+            )],
+            style={'width': '50%'}),
+        html.Div([
+            "Type transaction:",
+            dcc.Dropdown(
+                id='search_type',
+                options=[],
+                value=[],
+                multi=True,
+            )],
+            style={'width': '50%'})
+        ],
+        style={"display": 'flex',
+               'margin-top': 10}),
+    html.Div([
+        html.Div([
+            html.Div("Libelé:"),
+            dcc.Textarea(
+                id='search_description',
+                value=None,
+                style={'width': '100%',
+                       'height': 40}),
+            ],
+            style={'width': '50%'}),
+        html.Div([
+            html.Div("Note:"),
+            dcc.Textarea(
+                id='search_note',
+                value=None,
+                style={'width': '100%',
+                       'height': 40}),
+            ],
+            style={'width': '50%'})
+        ],
+        style={"display": 'flex',
+               'margin-top': 10}),
     html.Button('Affiche',
                 id='btn_search',
-                n_clicks=0),
-    html.Div(id="table_searched"),
+                n_clicks=0,
+                style={'width': '100%',
+                       'margin-top': 10}),
+    html.Div(id="table_searched",
+             style={'margin-top': 10}),
     html.Div(id='msg')
 ])
 
@@ -120,14 +148,12 @@ def upload_file(n_clicks, date, description, amount_min, amount_max,
     Input('search_category', 'value')
 )
 def update_sub_category(value):
-    print(f'You have selected {value}')
-
     # Default value
     dropdown_sub_category = dcc.Dropdown(
-                value=[],
-                multi=True,
-                style={'width': '100%'}
-            )
+        value=[],
+        multi=True,
+        style={'width': '100%'}
+    )
 
     if len(value) > 0:
         dropdown_sub_category = dcc.Dropdown(
