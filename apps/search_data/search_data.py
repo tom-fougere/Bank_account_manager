@@ -1,11 +1,13 @@
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table as dt
+import dash_bootstrap_components as dbc
 from dash import Input, Output, State, callback_context
 from app import app
 
-from apps.search_data.operations import get_categories, get_sub_categories, get_occasion, \
-    search_transactions, create_datatable
+from apps.search_data.operations import search_transactions, create_datatable
+from source.transactions.transaction_operations import get_categories, get_sub_categories, get_occasion
+from apps.canvas.canvas_transaction_details import display_one_transaction
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
 
 layout = html.Div([
@@ -99,14 +101,20 @@ layout = html.Div([
                 n_clicks=0,
                 style={'width': '100%',
                        'margin-top': 10}),
-    html.Div(id="table_searched",
+    html.Div(id="table_content",
              style={'margin-top': 10}),
-    html.Div(id='msg')
+    html.Div(id='msg'),
+    dbc.Offcanvas(
+            [html.Div(id='canvas_trans_details')],
+            id="off_canvas",
+            title="Transaction",
+            is_open=False,
+        ),
 ])
 
 
 @app.callback(
-    Output('table_searched', 'children'),
+    Output('table_content', 'children'),
     Input('btn_search', 'n_clicks'),
     [State('search_date', 'value'),
      State('search_description', 'value'),

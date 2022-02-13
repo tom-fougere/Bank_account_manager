@@ -1,5 +1,7 @@
 import pandas as pd
 from dash_table.Format import Format, Symbol, Scheme
+from source.db_connection.db_access import MongoDBConnection
+from source.data_ingestion.metadata import MetadataDB
 
 MANDATORY_COLUMNS = ['date_str', 'amount', 'description', 'type_transaction', 'date_transaction_str']
 OPTIONAL_COLUMNS = {'new_data': ['duplicate'],
@@ -79,3 +81,50 @@ def rename_columns(df):
     for key in COLUMNS_RENAMING:
         if key in df_keys:
             df.rename(columns={key: COLUMNS_RENAMING[key]}, inplace=True)
+
+
+def get_categories(db_connection, account_id):
+
+    my_connection = MongoDBConnection(db_connection)
+    metadata_db = MetadataDB(my_connection)
+
+    categories = metadata_db.get_categories(account_id=account_id)
+
+    list_categories = []
+    for category in categories:
+        list_categories.append({'label': category, 'value': category})
+
+    return list_categories
+
+
+def get_sub_categories(db_connection, account_id, categories, show_category=True):
+
+    my_connection = MongoDBConnection(db_connection)
+    metadata_db = MetadataDB(my_connection)
+
+    list_sub_categories = []
+    for category in categories:
+        sub_categories = metadata_db.get_sub_categories(account_id=account_id, category=category)
+        for sub_category in sub_categories:
+            if show_category:
+                list_sub_categories.append({'label': f'{category}/{sub_category}',
+                                            'value': f'{category}/{sub_category}'})
+            else:
+                list_sub_categories.append({'label': f'{sub_category}',
+                                            'value': f'{sub_category}'})
+
+    return list_sub_categories
+
+
+def get_occasion(db_connection, account_id):
+
+    my_connection = MongoDBConnection(db_connection)
+    metadata_db = MetadataDB(my_connection)
+
+    occasions = metadata_db.get_occasions(account_id=account_id)
+
+    list_occasions = []
+    for occas in occasions:
+        list_occasions.append({'label': occas, 'value': occas})
+
+    return list_occasions
