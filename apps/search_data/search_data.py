@@ -7,7 +7,7 @@ from app import app
 
 from apps.search_data.operations import search_transactions, create_datatable
 from source.transactions.transaction_operations import get_categories, get_sub_categories, get_occasion
-from apps.canvas.canvas_transaction_details import display_one_transaction
+from apps.canvas.canvas_transaction_details import display_enabled_transaction
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
 
 layout = html.Div([
@@ -101,14 +101,14 @@ layout = html.Div([
                 n_clicks=0,
                 style={'width': '100%',
                        'margin-top': 10}),
-    html.Div(id="table_content",
+    html.Div(id="table_search",
              style={'margin-top': 10}),
     html.Div(id='msg'),
 ])
 
 
 @app.callback(
-    Output('table_content', 'children'),
+    Output('table_search', 'children'),
     Input('btn_search', 'n_clicks'),
     [State('search_date', 'value'),
      State('search_description', 'value'),

@@ -32,13 +32,13 @@ layout = html.Div([
     html.Button('Import', id='btn_import_database', n_clicks=0, disabled=True),
     html.Div(id="btn_click"),
     html.Div(id="new_transaction_msg"),
-    html.Div(id="table"),
+    html.Div(id="table_new_import"),
 ])
 
 
 @app.callback(
     Output("new_transaction_msg", 'children'),
-    Output("table", 'children'),
+    Output("table_new_import", 'children'),
     Output('btn_import_database', 'disabled'),
     Input('drag_upload_file', 'contents'),
     State('drag_upload_file', 'filename'),

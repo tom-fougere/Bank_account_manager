@@ -12,7 +12,7 @@ from source.definitions import DATA_FOLDER, DB_CONN_TRANSACTION, DB_CONN_ACCOUNT
 from source.transactions.transaction_operations import get_categories, get_sub_categories, get_occasion
 
 
-def create_sidebar_transaction_details(df, disabled=True):
+def create_canvas_content_with_transaction_details(df, disabled=True):
 
     date_transaction = str_to_datetime(df.date_transaction_str, date_format='%d/%m/%Y')
     date_bank = str_to_datetime(df.date_str, date_format='%d/%m/%Y')
@@ -145,19 +145,51 @@ def create_sidebar_transaction_details(df, disabled=True):
 
 
 @app.callback(
-    [Output("off_canvas", "is_open"),
-     Output('canvas_trans_details', 'children')],
-    Input('table_content', 'active_cell'),
-    [State("off_canvas", "is_open"),
-     State('drag_upload_file', 'filename')])
-def display_one_transaction(active_cell, canvas_is_open, filename):
+    Output("off_canvas", "is_open"),
+    Input('cell_new_import', 'active_cell'),
+    State("off_canvas", "is_open"))
+def open_canvas(cell_new_import, canvas_is_open):
+    if cell_new_import is None:
+        return canvas_is_open
+    else:
+        return not canvas_is_open
+
+
+@app.callback(
+    Output('canvas_disable_trans', 'children'),
+    [Input('cell_new_import', 'active_cell')],
+    [State('drag_upload_file', 'filename')])
+def display_disabled_transaction(cell_new_import, filename):
 
     # Read data
     df, _ = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
                                  db_connection=DB_CONN_TRANSACTION)
 
-    if active_cell is None:
+    component = html.Div()
+
+    if cell_new_import is not None:
+        component = create_canvas_content_with_transaction_details(df.iloc[cell_new_import['row']], disabled=True)
+    # elif cell_search is not None:
+    #     print('ok')
+
+    return component
+
+
+@app.callback(
+    Output('canvas_enabled_trans', 'children'),
+    Input('cell_search', 'active_cell'))
+def display_enabled_transaction(cell_search, canvas_is_open, filename):
+
+    if cell_search is None:
         return canvas_is_open, html.Div()
     else:
-        component = create_sidebar_transaction_details(df.iloc[active_cell['row']])
-        return (not canvas_is_open), component
+        print('ok')
+    # Read data
+    # df, _ = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
+    #                              db_connection=DB_CONN_TRANSACTION)
+    #
+    # if cell_search is None:
+    #     return canvas_is_open, html.Div()
+    # else:
+    #     component = create_canvas_content_with_transaction_details(df.iloc[cell_search['row']], disabled=False)
+    #     return (not canvas_is_open), component
