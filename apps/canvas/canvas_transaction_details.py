@@ -1,15 +1,11 @@
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_daq as daq
-from dash import Input, Output, State
 from datetime import date
 
-from app import app
 from utils.time_operations import str_to_datetime
-from apps.import_new_data.operations import read_and_format_data
-from utils.text_operations import get_project_root
-from source.definitions import DATA_FOLDER, DB_CONN_TRANSACTION, DB_CONN_ACCOUNT
-from source.transactions.transaction_operations import get_categories, get_sub_categories, get_occasion
+from source.definitions import DB_CONN_ACCOUNT
+from source.transactions.transaction_operations import get_categories, get_occasion
 
 
 def create_canvas_content_with_transaction_details(df, disabled=True):
@@ -143,53 +139,3 @@ def create_canvas_content_with_transaction_details(df, disabled=True):
 
     return layout
 
-
-@app.callback(
-    Output("off_canvas", "is_open"),
-    Input('cell_new_import', 'active_cell'),
-    State("off_canvas", "is_open"))
-def open_canvas(cell_new_import, canvas_is_open):
-    if cell_new_import is None:
-        return canvas_is_open
-    else:
-        return not canvas_is_open
-
-
-@app.callback(
-    Output('canvas_disable_trans', 'children'),
-    [Input('cell_new_import', 'active_cell')],
-    [State('drag_upload_file', 'filename')])
-def display_disabled_transaction(cell_new_import, filename):
-
-    # Read data
-    df, _ = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
-                                 db_connection=DB_CONN_TRANSACTION)
-
-    component = html.Div()
-
-    if cell_new_import is not None:
-        component = create_canvas_content_with_transaction_details(df.iloc[cell_new_import['row']], disabled=True)
-    # elif cell_search is not None:
-    #     print('ok')
-
-    return component
-
-
-@app.callback(
-    Output('canvas_enabled_trans', 'children'),
-    Input('cell_search', 'active_cell'))
-def display_enabled_transaction(cell_search, canvas_is_open, filename):
-
-    if cell_search is None:
-        return canvas_is_open, html.Div()
-    else:
-        print('ok')
-    # Read data
-    # df, _ = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
-    #                              db_connection=DB_CONN_TRANSACTION)
-    #
-    # if cell_search is None:
-    #     return canvas_is_open, html.Div()
-    # else:
-    #     component = create_canvas_content_with_transaction_details(df.iloc[cell_search['row']], disabled=False)
-    #     return (not canvas_is_open), component

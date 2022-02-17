@@ -1,6 +1,5 @@
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_bootstrap_components as dbc
 from dash import Input, Output, State
 import dash_table as dt
 from app import app
@@ -97,3 +96,21 @@ def import_transactions_in_database(n_clicks, filename):
     else:
         return None
 
+
+@app.callback(
+    Output('store_transaction_disabled', 'data'),
+    [Input('cell_new_import', 'active_cell')],
+    [State('drag_upload_file', 'filename')])
+def store_disabled_transaction(cell_new_import, filename):
+
+    # Read data
+    df, _ = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
+                                 db_connection=DB_CONN_TRANSACTION)
+
+    data = None
+
+    if cell_new_import is not None:
+        selected_df = df.iloc[cell_new_import['row']]
+        data = selected_df.to_json(date_format='iso')
+
+    return data
