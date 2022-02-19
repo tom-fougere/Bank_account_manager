@@ -59,7 +59,7 @@ def search_transactions(connection_name, filter):
 def create_datatable(df):
     df_display, columns = format_dataframe_to_datatable(df, show_new_data=True, show_category=False)
 
-    dt_transactions = dt.DataTable(id='table_content',
+    dt_transactions = dt.DataTable(id='cell_search',
                                    data=df_display.to_dict('records'),
                                    columns=columns,
                                    column_selectable="single",

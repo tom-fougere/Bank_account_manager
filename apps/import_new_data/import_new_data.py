@@ -1,6 +1,5 @@
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_bootstrap_components as dbc
 from dash import Input, Output, State
 import dash_table as dt
 from app import app
@@ -32,13 +31,13 @@ layout = html.Div([
     html.Button('Import', id='btn_import_database', n_clicks=0, disabled=True),
     html.Div(id="btn_click"),
     html.Div(id="new_transaction_msg"),
-    html.Div(id="table"),
+    html.Div(id="table_new_import"),
 ])
 
 
 @app.callback(
     Output("new_transaction_msg", 'children'),
-    Output("table", 'children'),
+    Output("table_new_import", 'children'),
     Output('btn_import_database', 'disabled'),
     Input('drag_upload_file', 'contents'),
     State('drag_upload_file', 'filename'),
@@ -97,3 +96,21 @@ def import_transactions_in_database(n_clicks, filename):
     else:
         return None
 
+
+@app.callback(
+    Output('store_transaction_disabled', 'data'),
+    [Input('cell_new_import', 'active_cell')],
+    [State('drag_upload_file', 'filename')])
+def store_disabled_transaction(cell_new_import, filename):
+
+    # Read data
+    df, _ = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
+                                 db_connection=DB_CONN_TRANSACTION)
+
+    data = None
+
+    if cell_new_import is not None:
+        selected_df = df.iloc[cell_new_import['row']]
+        data = selected_df.to_json(date_format='iso')
+
+    return data

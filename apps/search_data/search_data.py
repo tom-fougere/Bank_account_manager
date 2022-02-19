@@ -1,13 +1,11 @@
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table as dt
-import dash_bootstrap_components as dbc
 from dash import Input, Output, State, callback_context
 from app import app
 
 from apps.search_data.operations import search_transactions, create_datatable
 from source.transactions.transaction_operations import get_categories, get_sub_categories, get_occasion
-from apps.canvas.canvas_transaction_details import display_one_transaction
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
 
 layout = html.Div([
@@ -101,14 +99,14 @@ layout = html.Div([
                 n_clicks=0,
                 style={'width': '100%',
                        'margin-top': 10}),
-    html.Div(id="table_content",
+    html.Div(id="table_search",
              style={'margin-top': 10}),
     html.Div(id='msg'),
 ])
 
 
 @app.callback(
-    Output('table_content', 'children'),
+    Output('table_search', 'children'),
     Input('btn_search', 'n_clicks'),
     [State('search_date', 'value'),
      State('search_description', 'value'),
@@ -120,7 +118,7 @@ layout = html.Div([
      State('search_occasion', 'value'),
      State('search_note', 'value')]
 )
-def search_transactions(n_clicks, date, description, amount_min, amount_max,
+def display_searched_transactions(n_clicks, date, description, amount_min, amount_max,
                         type, category, sub_category, occasion, note):
     dt_transactions = dt.DataTable()
 
@@ -167,3 +165,42 @@ def update_sub_category(value):
             style={'width': '100%'})
 
     return dropdown_sub_category
+
+
+@app.callback(
+    Output('store_transaction_enabled', 'data'),
+    [Input('cell_search', 'active_cell')],
+    [State('search_date', 'value'),
+     State('search_description', 'value'),
+     State('search_amount_min', 'value'),
+     State('search_amount_max', 'value'),
+     State('search_type', 'value'),
+     State('search_category', 'value'),
+     State('search_sub_category', 'value'),
+     State('search_occasion', 'value'),
+     State('search_note', 'value')])
+def store_enabled_transaction(cell_search,
+                              date, description, amount_min, amount_max,
+                              type, category, sub_category, occasion, note):
+
+    if cell_search is not None:
+
+        filter = {
+            'account_id': ACCOUNT_ID,
+            'date': date,
+            'description': description,
+            'amount': [amount_min, amount_max],
+            'type': type,
+            'category': category,
+            'sub_category': sub_category,
+            'occasion': occasion,
+            'note': note
+        }
+        df = search_transactions(connection_name=DB_CONN_TRANSACTION, filter=filter)
+
+        selected_df = df.iloc[cell_search['row']]
+        data = selected_df.to_json(date_format='iso')
+    else:
+        data = None
+
+    return data
