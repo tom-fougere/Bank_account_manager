@@ -42,7 +42,7 @@ def create_canvas_content_with_transaction_details(df, disabled=True):
                     date=date(date_bank.year,
                               date_bank.month,
                               date_bank.day),
-                    disabled=disabled),
+                    disabled=True),
                 ],
                 style={'width': '50%'}
             )],
@@ -64,7 +64,6 @@ def create_canvas_content_with_transaction_details(df, disabled=True):
                 value=df.amount,
                 style={'width': '100%'},
                 type='number',
-                step=10,
                 disabled=disabled),
              ],
             style={'margin-top': 10}),
@@ -128,13 +127,6 @@ def create_canvas_content_with_transaction_details(df, disabled=True):
                 disabled=disabled),
             ],
             style={'margin-top': 10}),
-        html.Button(
-            'Enregistrer',
-            id='save_trans_details',
-            n_clicks=0,
-            disabled=disabled,
-            style={'width': '100%',
-                   'margin-top': 10}),
     ])
 
     return layout
