@@ -69,6 +69,7 @@ transaction_details_layout = html.Div([
             disabled=True),
         dcc.Dropdown(
             id='canvas_sub_category',
+            options=None,
             multi=False,
             style={'width': '100%'},
             disabled=True),
@@ -139,8 +140,6 @@ canvas = dbc.Offcanvas(
      Output("canvas_description", "value"),
      Output("canvas_amount", "value"),
      Output("canvas_category", "value"),
-     Output("canvas_sub_category", "options"),
-     Output("canvas_sub_category", "value"),
      Output("canvas_occasion", "value"),
      Output("canvas_type", "value"),
      Output("canvas_note", "value"),
@@ -160,7 +159,7 @@ def update_transaction_values(jsonified_data_disabled_trans, jsonified_data_enab
         df = pd.Series(parsed)
         transaction_values = get_transaction_values(df)
     else:
-        transaction_values = (None,) * 12
+        transaction_values = (None,) * 10
 
     return transaction_values
 
@@ -197,6 +196,29 @@ def update_transaction_disable(jsonified_data_disabled_trans, jsonified_data_ena
 
 
 @app.callback(
+    [Output('canvas_sub_category', 'options'),
+     Output('canvas_sub_category', 'value')],
+    Input('canvas_category', 'value'),
+    [State('store_transaction_disabled', 'data'),
+     State('store_transaction_enabled', 'data')],
+)
+def update_sub_category(canvas_category, df1, df2):
+    # Default value
+    dropdown_sub_category = []
+    value_sub_category = None
+
+    if canvas_category is not None and len(canvas_category) > 0:
+        dropdown_sub_category = get_sub_categories(
+            db_connection=DB_CONN_ACCOUNT,
+            account_id=ACCOUNT_ID,
+            categories=[canvas_category],
+            add_suffix_cat=False),
+        dropdown_sub_category = dropdown_sub_category[0]
+
+    return dropdown_sub_category, value_sub_category
+
+
+@app.callback(
     Output("off_canvas", "is_open"),
     [Input('store_transaction_disabled', 'data'),
      Input('store_transaction_enabled', 'data')],
@@ -213,21 +235,3 @@ def update_transaction_disable(data1, data2, canvas_is_open):
 
     return canvas_new_update
 
-
-# @app.callback(
-#     Output('canvas_sub_category', 'options'),
-#     Input('canvas_category', 'value')
-# )
-# def update_sub_category(value):
-#     # Default value
-#     dropdown_sub_category = [{}]
-#     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
-#
-#     if value is not None and len(value) > 0:
-#         dropdown_sub_category = get_sub_categories(
-#             db_connection=DB_CONN_ACCOUNT,
-#             account_id=ACCOUNT_ID,
-#             categories=[value],
-#             add_suffix_cat=False),
-#
-#     return dropdown_sub_category

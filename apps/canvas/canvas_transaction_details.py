@@ -152,19 +152,10 @@ def get_transaction_values(df):
     description = df.description
     amount = df.amount
     category = df.category
-    if df.category is not None:
-        sub_categories = get_sub_categories(
-                        db_connection=DB_CONN_ACCOUNT,
-                        account_id=df.account_id,
-                        categories=[df.category],
-                        add_suffix_cat=False)
-    else:
-        sub_categories = []
-    sub_category = df.sub_category
     occasion = df.occasion
     transaction_type = df.type_transaction
     note = df.note
     check = df.check
 
-    return (account_id, date_transaction, date_bank, description, amount, category, sub_categories, sub_category,
+    return (account_id, date_transaction, date_bank, description, amount, category,
             occasion, transaction_type, note, check)
