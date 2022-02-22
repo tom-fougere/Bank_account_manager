@@ -6,7 +6,7 @@ import dash_daq as daq
 import pandas as pd
 import json
 from datetime import date
-from apps.canvas.canvas_transaction_details import get_transaction_values
+from apps.canvas.canvas_transaction_details import get_transaction_values, get_sub_categories_dropdown
 from source.transactions.transaction_operations import get_sub_categories, get_occasion, get_categories
 from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
 
@@ -24,16 +24,16 @@ transaction_details_layout = html.Div([
         style={'margin-top': 10}),
     html.Div([
         html.Div([
-            html.Div('Date Transaction:'),
+            html.Div('Date à la banque:'),
             dcc.DatePickerSingle(
-                id='canvas_date_transaction',
+                id='canvas_date',
                 disabled=True),
         ],
             style={'width': '50%'}),
         html.Div([
-            html.Div('Date à la banque:'),
+            html.Div('Date Transaction:'),
             dcc.DatePickerSingle(
-                id='canvas_date',
+                id='canvas_date_transaction',
                 disabled=True),
         ],
             style={'width': '50%'}
@@ -177,43 +177,54 @@ def update_transaction_values(jsonified_data_disabled_trans, jsonified_data_enab
      Output("canvas_check", "disabled")],
     [Input('store_transaction_disabled', 'data'),
      Input('store_transaction_enabled', 'data')])
-def update_transaction_disable(jsonified_data_disabled_trans, jsonified_data_enabled_trans):
+def enable_disable_canvas_components(jsonified_data_disabled_trans, jsonified_data_enabled_trans):
     ctx = callback_context
     triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
 
     nb_outputs = 9
     disabled = True
     if (triggered_input == 'store_transaction_disabled') and (jsonified_data_disabled_trans is not None):
-        msg = (disabled,) * nb_outputs
+        disable_options = (disabled,) * nb_outputs
         save_button = disabled
     elif (triggered_input == 'store_transaction_enabled') and (jsonified_data_enabled_trans is not None):
-        msg = (not disabled,) * nb_outputs
+        disable_options = (not disabled,) * nb_outputs
         save_button = not disabled
     else:
-        msg = (disabled,) * nb_outputs
+        disable_options = (disabled,) * nb_outputs
         save_button = disabled
-    return (save_button,) + msg
+    return (save_button,) + disable_options
 
 
 @app.callback(
     [Output('canvas_sub_category', 'options'),
      Output('canvas_sub_category', 'value')],
-    Input('canvas_category', 'value'),
-    [State('store_transaction_disabled', 'data'),
-     State('store_transaction_enabled', 'data')],
+    [Input('canvas_category', 'value'),
+     Input('store_transaction_disabled', 'data'),
+     Input('store_transaction_enabled', 'data')],
 )
-def update_sub_category(canvas_category, df1, df2):
+def update_sub_category(canvas_category, jsonified_data_disabled_trans, jsonified_data_enabled_trans):
+    ctx = callback_context
+    triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
+
     # Default value
     dropdown_sub_category = []
     value_sub_category = None
 
-    if canvas_category is not None and len(canvas_category) > 0:
-        dropdown_sub_category = get_sub_categories(
-            db_connection=DB_CONN_ACCOUNT,
+    # get sub-categories
+    if canvas_category is not None:
+        dropdown_sub_category = get_sub_categories_dropdown(
             account_id=ACCOUNT_ID,
-            categories=[canvas_category],
-            add_suffix_cat=False),
-        dropdown_sub_category = dropdown_sub_category[0]
+            category=canvas_category)
+
+    # Set sub-category
+    if (triggered_input == 'store_transaction_disabled') and (jsonified_data_disabled_trans is not None):
+        parsed = json.loads(jsonified_data_disabled_trans)
+        df = pd.Series(parsed)
+        value_sub_category = df['sub_category']
+    elif (triggered_input == 'store_transaction_enabled') and (jsonified_data_enabled_trans is not None):
+        parsed = json.loads(jsonified_data_enabled_trans)
+        df = pd.Series(parsed)
+        value_sub_category = df['sub_category']
 
     return dropdown_sub_category, value_sub_category
 
@@ -223,7 +234,7 @@ def update_sub_category(canvas_category, df1, df2):
     [Input('store_transaction_disabled', 'data'),
      Input('store_transaction_enabled', 'data')],
     State("off_canvas", "is_open"))
-def update_transaction_disable(data1, data2, canvas_is_open):
+def open_close_canvas(data1, data2, canvas_is_open):
     ctx = callback_context
     triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
 

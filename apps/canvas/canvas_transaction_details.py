@@ -159,3 +159,20 @@ def get_transaction_values(df):
 
     return (account_id, date_transaction, date_bank, description, amount, category,
             occasion, transaction_type, note, check)
+
+
+def get_sub_categories_dropdown(account_id, category):
+    # default value
+    sub_categories = []
+
+    # get sub-category if category exists
+    if category is not None and len(category) > 0:
+        sub_categories = get_sub_categories(
+            db_connection=DB_CONN_ACCOUNT,
+            account_id=account_id,
+            categories=[category],
+            add_suffix_cat=False),
+        sub_categories = sub_categories[0]
+
+    return sub_categories
+
