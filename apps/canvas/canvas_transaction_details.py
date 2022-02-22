@@ -143,6 +143,7 @@ def get_transaction_values(df):
     datetime_bank = str_to_datetime(df.date_str, date_format='%d/%m/%Y')
 
     account_id = df.account_id
+    object_id = df['_id'] if '_id' in df.keys() else None
     date_transaction = date(datetime_transaction.year,
                             datetime_transaction.month,
                             datetime_transaction.day)
@@ -157,7 +158,7 @@ def get_transaction_values(df):
     note = df.note
     check = df.check
 
-    return (account_id, date_transaction, date_bank, description, amount, category,
+    return (account_id, object_id, date_transaction, date_bank, description, amount, category,
             occasion, transaction_type, note, check)
 
 

@@ -82,7 +82,7 @@ class TransactionExgest:
         result = self.aggregate(pipeline=pipeline)
 
         if len(result) > 0:
-            result.drop(columns=['date_transaction', 'date', '_id'], inplace=True)
+            result.drop(columns=['date_transaction', 'date'], inplace=True)
 
         return result
 

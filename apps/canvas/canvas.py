@@ -5,9 +5,8 @@ from dash import Input, Output, State, callback_context
 import dash_daq as daq
 import pandas as pd
 import json
-from datetime import date
 from apps.canvas.canvas_transaction_details import get_transaction_values, get_sub_categories_dropdown
-from source.transactions.transaction_operations import get_sub_categories, get_occasion, get_categories
+from source.transactions.transaction_operations import get_occasion, get_categories
 from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
 
 from app import app
@@ -18,6 +17,14 @@ transaction_details_layout = html.Div([
         'Compte bancaire:',
         dcc.Input(
             id='canvas_account_id',
+            style={'width': '100%'},
+            disabled=True),
+    ],
+        style={'margin-top': 10}),
+    html.Div([
+        'ObjectID:',
+        dcc.Input(
+            id='canvas_object_id',
             style={'width': '100%'},
             disabled=True),
     ],
@@ -135,6 +142,7 @@ canvas = dbc.Offcanvas(
 
 @app.callback(
     [Output("canvas_account_id", "value"),
+     Output("canvas_object_id", "value"),
      Output("canvas_date_transaction", "date"),
      Output("canvas_date", "date"),
      Output("canvas_description", "value"),
@@ -159,7 +167,7 @@ def update_transaction_values(jsonified_data_disabled_trans, jsonified_data_enab
         df = pd.Series(parsed)
         transaction_values = get_transaction_values(df)
     else:
-        transaction_values = (None,) * 10
+        transaction_values = (None,) * 11
 
     return transaction_values
 

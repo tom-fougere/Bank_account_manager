@@ -199,8 +199,16 @@ def store_enabled_transaction(cell_search,
         df = search_transactions(connection_name=DB_CONN_TRANSACTION, filter=filter)
 
         selected_df = df.iloc[cell_search['row']]
+
+        # Convert objectID into string
+        replace_object_id(selected_df)
+
         data = selected_df.to_json(date_format='iso')
     else:
         data = None
 
     return data
+
+
+def replace_object_id(df):
+    df['_id'] = str(df['_id'])
