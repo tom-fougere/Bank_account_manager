@@ -5,7 +5,7 @@ from source.data_ingestion.ingest import TransactionIngest
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.data_ingestion.exgest import TransactionExgest
 
-ACCOUNT_ID = '007'
+ACCOUNT_ID = '008'
 data_reader = BankTSVReader('test/fake_data.tsv')
 df_transactions = data_reader.get_dataframe()
 db_connection = MongoDBConnection('db_ut')

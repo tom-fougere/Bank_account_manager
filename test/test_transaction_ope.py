@@ -1,4 +1,5 @@
 import unittest
+import datetime
 import numpy as np
 from source.data_reader.bank_file_reader import BankTSVReader
 
@@ -17,7 +18,7 @@ class TestDuplicate(unittest.TestCase):
         df_transactions = data_reader.get_dataframe()
         keys = list(df_transactions.keys())
 
-        df2 = pd.DataFrame({'account_id': ['007', '007', '007'],
+        df2 = pd.DataFrame({'account_id': ['008', '008', '008'],
                             'amount': [-20.0, -9.99, 10.],
                             'date_str': ['07/01/2022', '06/01/2022', '07/01/2022'],
                             'date_transaction_str': ['07/01/2022', '06/01/2022', '07/01/2022'],
@@ -79,6 +80,23 @@ class TestSelectedColumns(unittest.TestCase):
 
 
 class TestGetLists(unittest.TestCase):
+
+    def setUp(self) -> None:
+
+        my_connection = MongoDBConnection(DB_TITLE_CONNECTION)
+        self.metadata_db = MetadataDB(my_connection)
+
+        self.metadata_db.init_db(account_id=ACCOUNT_ID,
+                                 balance_in_db=10.34,
+                                 balance_in_bank=8.84,
+                                 balance_bias=712.70,
+                                 date_last_import=datetime.datetime(2022, 4, 13),
+                                 date_balance_in_bank=datetime.datetime(2021, 12, 28))
+
+    def tearDown(self) -> None:
+        # Remove all in the collection
+        self.metadata_db.connection.collection.remove({"account_id": ACCOUNT_ID})
+
     def test_get_categories(self):
         categories = get_categories(DB_TITLE_CONNECTION, ACCOUNT_ID)
 

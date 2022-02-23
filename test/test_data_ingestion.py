@@ -5,7 +5,7 @@ from source.data_ingestion.ingest import TransactionIngest
 from source.data_reader.bank_file_reader import BankTSVReader
 from utils.time_operations import str_to_datetime
 
-ACCOUNT_ID = '007'
+ACCOUNT_ID = '008'
 
 
 class TestTransactionIngest(unittest.TestCase):

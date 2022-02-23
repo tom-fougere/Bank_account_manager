@@ -8,7 +8,7 @@ from source.definitions import CATEGORIES, OCCASIONS
 BALANCE_IN_DB = -101.98
 BALANCE_IN_BANK = -223.67
 BALANCE_BIAS = 54.3
-ACCOUNT_ID = '007'
+ACCOUNT_ID = '008'
 DATE_LAST_IMPORT = datetime.datetime(2022, 4, 13)
 DATE_BALANCE_IN_BANK = datetime.datetime(2019, 12, 25)
 

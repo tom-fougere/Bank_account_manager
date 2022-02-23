@@ -116,7 +116,7 @@ class TestBankCSVReader(unittest.TestCase):
         self.assertEqual(df.shape, (3, 13))
         self.assertEqual(df['date_str'][0], '07/01/2022')
         self.assertEqual(df['date_dt'][0], str_to_datetime('07/01/2022', date_format='%d/%m/%Y'))
-        self.assertEqual(df['account_id'][0], '007')
+        self.assertEqual(df['account_id'][0], '008')
         self.assertEqual(df['description'][1], 'FOOD')
         self.assertEqual(df['amount'][1], -5.)
         self.assertEqual(df['type_transaction'][2], 'PRELEVEMENT')
@@ -130,7 +130,7 @@ class TestBankCSVReader(unittest.TestCase):
 
     def test_read_header(self):
 
-        self.assertEqual(self.reader.account_id, '007')
+        self.assertEqual(self.reader.account_id, '008')
         self.assertEqual(self.reader.date.day, 8)
         self.assertEqual(self.reader.date.month, 1)
         self.assertEqual(self.reader.date.year, 2022)
@@ -139,7 +139,7 @@ class TestBankCSVReader(unittest.TestCase):
     def test_get_account_info(self):
         info = self.reader.get_account_info()
 
-        self.assertEqual(info, {'account_id': '007',
+        self.assertEqual(info, {'account_id': '008',
                                 'balance': 300.48,
                                 'date': str_to_datetime('08/01/2022', date_format='%d/%m/%Y')})
 
