@@ -26,3 +26,10 @@ def remove_date_in_string(text, regex_date=r'\d{2}\.\d{2}\.\d{2}'):
 
 def str_to_datetime(text, date_format='%d.%m.%Y'):
     return datetime.strptime(text, date_format)
+
+
+def modify_date_str_format(original_date_str, current_format, new_format):
+    date_dt = datetime.strptime(original_date_str, current_format)
+
+    return date_dt.strftime(new_format)
+

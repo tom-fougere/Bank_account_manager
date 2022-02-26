@@ -1,9 +1,10 @@
 import unittest
+import pandas as pd
 
 from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.ingest import TransactionIngest
 from source.data_reader.bank_file_reader import BankTSVReader
-from utils.time_operations import str_to_datetime
+from utils.time_operations import str_to_datetime, modify_date_str_format
 
 ACCOUNT_ID = '008'
 
@@ -106,6 +107,94 @@ class TestTransactionIngest(unittest.TestCase):
             self.assertEqual(current_df.to_dict(), db_trans)
 
             idx += 1
+
+    def test_update_existing_transaction(self):
+
+        # Ingest test transactions
+        self.transInges.ingest()
+
+        # Find transaction to update
+        original_transaction = self.transInges.connection.collection.find_one(
+            {'account_id': ACCOUNT_ID,
+             'description': 'TEST'})
+        object_id = str(original_transaction['_id'])
+
+        # Transaction with new values
+        new_trans_dict = {
+            '_id': object_id,
+            'account_id': ACCOUNT_ID,
+            'date_transaction_str': '2022-01-10',
+            'date_str': '2022-01-11',
+            'description': "NEW",
+            'amount': 100.01,
+            'category': "Transport",
+            'sub_category': "Assurance",
+            'occasion': "ponctuel",
+            'transaction_type': "TYPE",
+            'note': "#note",
+            'check': True,
+        }
+        new_transaction = pd.DataFrame([new_trans_dict])
+
+        # Instantiate the ingestion class
+        transUpdate = TransactionIngest(self.my_connection, new_transaction)
+
+        # Ingestion of transactions
+        transUpdate.update()
+
+        # Previous transaction must be impossible to find
+        impossible_transaction = self.transInges.connection.collection.find_one(
+            {'account_id': ACCOUNT_ID,
+             'description': 'TEST'})
+        self.assertEqual(impossible_transaction, None)
+
+        # Find updated transaction
+        updated_transaction = self.transInges.connection.collection.find_one(
+            {'account_id': ACCOUNT_ID,
+             'description': 'NEW'})
+
+        # Assert every fields
+        for key in ['account_id', 'description', 'amount', 'category', 'sub_category', 'occasion', 'transaction_type',
+                    'note', 'check']:
+            self.assertEqual(new_trans_dict[key], updated_transaction[key])
+        self.assertEqual(modify_date_str_format(new_trans_dict['date_transaction_str'],
+                                                current_format='%Y-%m-%d',
+                                                new_format='%d/%m/%Y'),
+                         updated_transaction['date_transaction']['str'])
+        self.assertEqual(modify_date_str_format(new_trans_dict['date_str'],
+                                                current_format='%Y-%m-%d',
+                                                new_format='%d/%m/%Y'),
+                         updated_transaction['date']['str'])
+
+    def test_update_not_existing_transaction(self):
+        # Ingest test transactions
+        self.transInges.ingest()
+
+        object_id = '000000000000000000000000'
+
+        # Transaction with new values
+        new_trans_dict = {
+            '_id': object_id,
+            'account_id': ACCOUNT_ID,
+            'date_transaction_str': '2022-01-10',
+            'date_str': '2022-01-11',
+            'description': "NEW",
+            'amount': 100.01,
+            'category': "Transport",
+            'sub_category': "Assurance",
+            'occasion': "ponctuel",
+            'transaction_type': "TYPE",
+            'note': "#note",
+            'check': True,
+        }
+        new_transaction = pd.DataFrame([new_trans_dict])
+
+        # Instantiate the ingestion class
+        transUpdate = TransactionIngest(self.my_connection, new_transaction)
+
+        # Assert error during update
+        with self.assertRaises(ValueError):
+            transUpdate.update()
 
 
 if __name__ == '__main__':
