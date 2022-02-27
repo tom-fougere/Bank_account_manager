@@ -128,3 +128,17 @@ def get_occasion(db_connection, account_id):
         list_occasions.append({'label': occas, 'value': occas})
 
     return list_occasions
+
+
+def get_type_transaction(db_connection, account_id):
+
+    my_connection = MongoDBConnection(db_connection)
+    metadata_db = MetadataDB(my_connection)
+
+    types = metadata_db.get_types_transaction(account_id=account_id)
+
+    list_types = []
+    for type in types:
+        list_types.append({'label': type, 'value': type})
+
+    return list_types

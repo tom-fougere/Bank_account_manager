@@ -11,7 +11,9 @@ CATEGORIES = {'Travail': ['Salaire', 'Prime', 'Autre'],
               'Epargne': [],
               'Fêtes': ['Anniversaire', 'Fêtes', 'Autre']}
 
-OCCASIONS = ['regulier', 'ponctuel', 'loisir']
+OCCASIONS = ['Régulier', 'Ponctuel', 'Loisir']
+
+TYPE_TRANSACTIONS = ['PRELEVEMENT', 'CREDIT', 'VIREMENT', 'ACHAT']
 
 DATA_FOLDER = 'raw_data'
 DB_CONN_TRANSACTION = 'db_transaction_connection'

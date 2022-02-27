@@ -1,4 +1,4 @@
-from source.definitions import CATEGORIES, OCCASIONS
+from source.definitions import CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
 
 
 class MetadataDB:
@@ -10,6 +10,7 @@ class MetadataDB:
         self.balance_bias = None
         self.categories = None
         self.occasions = None
+        self.types_transaction = None
         self.date_balance_in_bank = {'dt': None,
                                      'str': None}
         self.date_last_import = {'dt': None,
@@ -17,13 +18,14 @@ class MetadataDB:
 
     def init_db(self, account_id, balance_in_bank, balance_in_db, balance_bias,
                 date_balance_in_bank, date_last_import,
-                categories=CATEGORIES, occasions=OCCASIONS):
+                categories=CATEGORIES, occasions=OCCASIONS, types=TYPE_TRANSACTIONS):
         self.account_id = account_id
         self.balance_in_bank = balance_in_bank
         self.balance_in_db = balance_in_db
         self.balance_bias = balance_bias
         self.categories = categories
         self.occasions = occasions
+        self.types_transaction = types
         self.date_balance_in_bank['dt'] = date_balance_in_bank
         self.date_balance_in_bank['str'] = date_balance_in_bank.strftime("%d/%m/%Y")
         self.date_last_import['dt'] = date_last_import
@@ -35,6 +37,7 @@ class MetadataDB:
                           'balance_bias': self.balance_bias,
                           'categories': self.categories,
                           'occasions': self.occasions,
+                          'types_transaction': self.types_transaction,
                           'date_balance_in_bank': self.date_balance_in_bank,
                           'date_last_import': self.date_last_import}
 
@@ -63,6 +66,10 @@ class MetadataDB:
     def get_occasions(self, account_id):
         result = self.connection.collection.find_one({'account_id': account_id}, ['occasions'])
         return result['occasions']
+
+    def get_types_transaction(self, account_id):
+        result = self.connection.collection.find_one({'account_id': account_id}, ['types_transaction'])
+        return result['types_transaction']
 
     def get_date_last_import(self, account_id):
         result = self.connection.collection.find_one({'account_id': account_id}, ['date_last_import.str'])

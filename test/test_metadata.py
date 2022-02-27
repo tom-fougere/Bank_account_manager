@@ -3,7 +3,7 @@ import datetime
 
 from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.metadata import MetadataDB
-from source.definitions import CATEGORIES, OCCASIONS
+from source.definitions import CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
 
 BALANCE_IN_DB = -101.98
 BALANCE_IN_BANK = -223.67
@@ -34,13 +34,14 @@ class TestMetadataDB(unittest.TestCase):
 
         result = self.metadata_db.connection.collection.find_one()
 
-        self.assertEqual(len(result), 9)
+        self.assertEqual(len(result), 10)
         self.assertEqual(result['account_id'], ACCOUNT_ID)
         self.assertEqual(result['balance_in_bank'], BALANCE_IN_BANK)
         self.assertEqual(result['balance_in_db'], BALANCE_IN_DB)
         self.assertEqual(result['balance_bias'], BALANCE_BIAS)
         self.assertEqual(result['categories'], CATEGORIES)
         self.assertEqual(result['occasions'], OCCASIONS)
+        self.assertEqual(result['types_transaction'], TYPE_TRANSACTIONS)
         self.assertEqual(result['date_last_import']['dt'], DATE_LAST_IMPORT)
         self.assertEqual(result['date_last_import']['str'], '13/04/2022')
         self.assertEqual(result['date_balance_in_bank']['dt'], DATE_BALANCE_IN_BANK)
@@ -79,6 +80,11 @@ class TestMetadataDB(unittest.TestCase):
         occasions = self.metadata_db.get_occasions(account_id=ACCOUNT_ID)
 
         self.assertEqual(occasions, OCCASIONS)
+
+    def test_get_types_transaction(self):
+        types = self.metadata_db.get_types_transaction(account_id=ACCOUNT_ID)
+
+        self.assertEqual(types, TYPE_TRANSACTIONS)
 
     def test_get_date_balance_in_bank(self):
         date_last_transaction = self.metadata_db.get_date_balance_in_bank(account_id=ACCOUNT_ID)
