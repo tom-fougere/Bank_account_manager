@@ -4,6 +4,7 @@ import dash_table as dt
 from dash import Input, Output, State, callback_context
 from app import app
 
+from datetime import date
 from apps.search_data.operations import search_transactions, create_datatable
 from source.transactions.transaction_operations import get_categories, get_sub_categories, get_occasion
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
@@ -12,7 +13,8 @@ layout = html.Div([
     html.Div([
         html.Div("Date de transaction:"),
         dcc.DatePickerRange(
-            id='search_date'),
+            id='search_date',
+            end_date=date.today())
         ]),
     html.Div([
         'Montant (€):',

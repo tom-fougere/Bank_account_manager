@@ -4,8 +4,10 @@ import dash_daq as daq
 from datetime import date
 
 from utils.time_operations import str_to_datetime
-from source.definitions import DB_CONN_ACCOUNT
+from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION
 from source.transactions.transaction_operations import get_categories, get_sub_categories, get_occasion
+from source.data_ingestion.ingest import TransactionIngest
+from source.db_connection.db_access import MongoDBConnection
 
 
 def create_canvas_content_with_transaction_details(df, disabled=True):
@@ -177,3 +179,14 @@ def get_sub_categories_dropdown(account_id, category):
 
     return sub_categories
 
+
+def update_transaction(df):
+
+    # Create connection
+    my_connection = MongoDBConnection(DB_CONN_TRANSACTION)
+
+    # Instantiate the ingestion class
+    transUpdate = TransactionIngest(my_connection, df)
+
+    # Ingestion of transactions
+    transUpdate.update()

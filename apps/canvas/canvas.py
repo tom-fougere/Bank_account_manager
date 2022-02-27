@@ -5,7 +5,8 @@ from dash import Input, Output, State, callback_context
 import dash_daq as daq
 import pandas as pd
 import json
-from apps.canvas.canvas_transaction_details import get_transaction_values, get_sub_categories_dropdown
+from apps.canvas.canvas_transaction_details import get_transaction_values,\
+    get_sub_categories_dropdown, update_transaction
 from source.transactions.transaction_operations import get_occasion, get_categories
 from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
 
@@ -126,13 +127,14 @@ canvas = dbc.Offcanvas(
         transaction_details_layout,
         html.Button(
             'Enregistrer',
-            id='save_trans_details',
+            id='btn_update_transaction',
             n_clicks=0,
             disabled=True,
             style={'width': '100%',
                    'margin-top': 10}),
         dcc.Store(id='store_transaction_enabled'),
-        dcc.Store(id='store_transaction_disabled')
+        dcc.Store(id='store_transaction_disabled'),
+        html.Div(id='msg_update_transaction')
         ]),
     id="off_canvas",
     title="Transaction",
@@ -173,10 +175,9 @@ def update_transaction_values(jsonified_data_disabled_trans, jsonified_data_enab
 
 
 @app.callback(
-    [Output("save_trans_details", "disabled"),
+    [Output("btn_update_transaction", "disabled"),
      Output("canvas_date", "disabled"),
      Output("canvas_description", "disabled"),
-     Output("canvas_amount", "disabled"),
      Output("canvas_category", "disabled"),
      Output("canvas_sub_category", "disabled"),
      Output("canvas_occasion", "disabled"),
@@ -189,7 +190,7 @@ def enable_disable_canvas_components(jsonified_data_disabled_trans, jsonified_da
     ctx = callback_context
     triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    nb_outputs = 9
+    nb_outputs = 8
     disabled = True
     if (triggered_input == 'store_transaction_disabled') and (jsonified_data_disabled_trans is not None):
         disable_options = (disabled,) * nb_outputs
@@ -254,3 +255,54 @@ def open_close_canvas(data1, data2, canvas_is_open):
 
     return canvas_new_update
 
+
+@app.callback(
+    Output("msg_update_transaction", "children"),
+    Input('btn_update_transaction', 'n_clicks'),
+    [State("canvas_account_id", "value"),
+     State("canvas_object_id", "value"),
+     State("canvas_date_transaction", "date"),
+     State("canvas_date", "date"),
+     State("canvas_description", "value"),
+     State("canvas_amount", "value"),
+     State("canvas_category", "value"),
+     State("canvas_sub_category", "value"),
+     State("canvas_occasion", "value"),
+     State("canvas_type", "value"),
+     State("canvas_note", "value"),
+     State("canvas_check", "value")],
+)
+def update_transaction_values(click,
+                              account_id, object_id, date_transaction, date_bank, description, amount, category,
+                              sub_category, occasion, transaction_type, note, check):
+
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+
+    # default value
+    update_msg = ''
+
+    if 'btn_update_transaction' in changed_id:
+
+        # Transaction with new values
+        new_trans_dict = {
+            '_id': object_id,
+            'account_id': account_id,
+            'date_transaction_str': date_transaction,
+            'date_str': date_bank,
+            'description': description,
+            'amount': amount,
+            'category': category,
+            'sub_category': sub_category,
+            'occasion': occasion,
+            'transaction_type': transaction_type,
+            'note': note,
+            'check': check,
+        }
+        new_transaction = pd.DataFrame([new_trans_dict])
+
+        # Update transaction in DB
+        update_transaction(new_transaction)
+
+        update_msg = 'Transaction mise à jour !'
+
+    return update_msg
