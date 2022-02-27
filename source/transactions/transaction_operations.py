@@ -130,7 +130,7 @@ def get_occasion(db_connection, account_id):
     return list_occasions
 
 
-def get_type_transaction(db_connection, account_id):
+def get_types_transaction(db_connection, account_id):
 
     my_connection = MongoDBConnection(db_connection)
     metadata_db = MetadataDB(my_connection)

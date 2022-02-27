@@ -7,7 +7,7 @@ import pandas as pd
 import json
 from apps.canvas.canvas_transaction_details import get_transaction_values,\
     get_sub_categories_dropdown, update_transaction
-from source.transactions.transaction_operations import get_occasion, get_categories
+from source.transactions.transaction_operations import get_occasion, get_categories, get_types_transaction
 from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
 
 from app import app
@@ -98,7 +98,8 @@ transaction_details_layout = html.Div([
         html.Div('Type:'),
         dcc.Dropdown(
             id='canvas_type',
-            options=[],
+            options=get_types_transaction(db_connection=DB_CONN_ACCOUNT,
+                                          account_id=ACCOUNT_ID),
             multi=False,
             style={'width': '100%'},
             disabled=True),
@@ -181,7 +182,6 @@ def update_transaction_values(jsonified_data_disabled_trans, jsonified_data_enab
      Output("canvas_category", "disabled"),
      Output("canvas_sub_category", "disabled"),
      Output("canvas_occasion", "disabled"),
-     Output("canvas_type", "disabled"),
      Output("canvas_note", "disabled"),
      Output("canvas_check", "disabled")],
     [Input('store_transaction_disabled', 'data'),
@@ -190,18 +190,43 @@ def enable_disable_canvas_components(jsonified_data_disabled_trans, jsonified_da
     ctx = callback_context
     triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    nb_outputs = 8
+    nb_outputs = 7
     disabled = True
     if (triggered_input == 'store_transaction_disabled') and (jsonified_data_disabled_trans is not None):
         disable_options = (disabled,) * nb_outputs
         save_button = disabled
+
     elif (triggered_input == 'store_transaction_enabled') and (jsonified_data_enabled_trans is not None):
         disable_options = (not disabled,) * nb_outputs
         save_button = not disabled
     else:
         disable_options = (disabled,) * nb_outputs
         save_button = disabled
+
     return (save_button,) + disable_options
+
+
+@app.callback(
+    Output("canvas_type", "disabled"),
+    [Input('store_transaction_disabled', 'data'),
+     Input('store_transaction_enabled', 'data')])
+def enable_type_transaction(jsonified_data_disabled_trans, jsonified_data_enabled_trans):
+    ctx = callback_context
+    triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    disable = True
+    if (triggered_input == 'store_transaction_disabled') and (jsonified_data_disabled_trans is not None):
+        disable = True
+    elif (triggered_input == 'store_transaction_enabled') and (jsonified_data_enabled_trans is not None):
+        parsed = json.loads(jsonified_data_enabled_trans)
+        df = pd.Series(parsed)
+        type_transaction = df['type_transaction']
+        if type_transaction is None:
+            disable = False
+        else:
+            disable = True
+
+    return disable
 
 
 @app.callback(
