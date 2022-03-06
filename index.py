@@ -9,6 +9,7 @@ from apps.content import content
 from apps.canvas.canvas import canvas
 from apps.search_data import search_data
 from apps.import_new_data import import_new_data
+from apps.graphs import graphs
 
 app.layout = html.Div([
     dcc.Location(id='url'),
@@ -27,6 +28,8 @@ def display_page(pathname):
         return import_new_data.layout
     if pathname == '/all_data_page':
         return search_data.layout
+    if pathname == '/graphs':
+        return graphs.layout
     else:
         return '404'
 
