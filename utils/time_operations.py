@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import numpy as np
 
 
@@ -33,3 +34,6 @@ def modify_date_str_format(original_date_str, current_format, new_format):
 
     return date_dt.strftime(new_format)
 
+
+def get_first_day_several_month_before(date, nb_months):
+    return date.replace(day=1) + relativedelta(months=-nb_months)
