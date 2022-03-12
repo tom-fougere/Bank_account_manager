@@ -52,7 +52,8 @@ def search_transactions(connection_name, filter):
         elif filter[key] is not None:
             searches[key] = filter[key]
 
-    data_extractor = TransactionExgest(db_connection, dict_searches=searches)
+    data_extractor = TransactionExgest(db_connection)
+    data_extractor.set_search_criteria(dict_searches=searches)
     return data_extractor.exgest()
 
 
