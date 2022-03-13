@@ -1,4 +1,4 @@
-p_expenses_gains_per_date = [
+p_expenses_revenue_per_date = [
     {
         '$group': {
             '_id': {
@@ -8,7 +8,7 @@ p_expenses_gains_per_date = [
                     '$year': "$date.dt"},
             },
             'Total_positive': {
-                '$sum':{
+                '$sum': {
                     '$cond': [
                         {
                             '$gt': ['$amount', 0]
@@ -49,17 +49,60 @@ p_balance_category_per_date = [
 
 p_balance_occasion_per_date = [
     {
+        '$match': {
+            'category': {'$ne': 'Travail'}
+        }
+    },
+    {
         '$group': {
             '_id': {
                 'Mois': {
                     '$month': "$date.dt"},
                 'Année': {
                     '$year': "$date.dt"},
-                'Categorie': '$category',
                 'Occasion': '$occasion',
             },
             'Balance': {
                 '$sum': "$amount"}
         }
+    }
+]
+
+
+p_savings_per_date = [
+    {
+        '$match': {
+            'category': "Epargne"
+        },
+    },
+    {
+        '$group': {
+            '_id': {
+                'Mois': {
+                    '$month': "$date.dt"},
+                'Année': {
+                    '$year': "$date.dt"},
+            }
+        },
+    }
+]
+
+
+p_loan_per_date = [
+    {
+        '$match': {
+            'category': "Logement",
+            'sub_category': "Loyer / prêt",
+        },
+    },
+    {
+        '$group': {
+            '_id': {
+                'Mois': {
+                    '$month': "$date.dt"},
+                'Année': {
+                    '$year': "$date.dt"},
+            }
+        },
     }
 ]
