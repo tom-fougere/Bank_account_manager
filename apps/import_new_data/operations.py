@@ -78,8 +78,9 @@ def read_and_format_data(full_filename, db_connection):
 
     # Extract from the database the same dates
     my_connection = MongoDBConnection(db_connection)
-    data_extractor = TransactionExgest(my_connection, {"account_id": account_id,
-                                                       "date": [min_date, max_date]})
+    data_extractor = TransactionExgest(my_connection)
+    data_extractor.set_search_criteria({"account_id": account_id,
+                                        "date": [min_date, max_date]})
     db = data_extractor.exgest()
 
     # check duplicates

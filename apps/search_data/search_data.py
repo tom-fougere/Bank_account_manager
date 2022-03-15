@@ -140,6 +140,8 @@ def display_searched_transactions(n_clicks, date, description, amount_min, amoun
         }
         df_transaction = search_transactions(connection_name=DB_CONN_TRANSACTION, filter=filter)
 
+        df_transaction = df_transaction.sort_values(by='date_dt', ascending=False)
+
         dt_transactions = create_datatable(df_transaction)
 
     return dt_transactions
