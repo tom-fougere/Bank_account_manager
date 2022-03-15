@@ -82,8 +82,10 @@ p_savings_per_date = [
                     '$month': "$date.dt"},
                 'Année': {
                     '$year': "$date.dt"},
-            }
-        },
+            },
+            'Balance': {
+                '$sum': "$amount"}
+        }
     }
 ]
 
@@ -92,7 +94,7 @@ p_loan_per_date = [
     {
         '$match': {
             'category': "Logement",
-            'sub_category': "Loyer / prêt",
+            'sub_category': "Loyer/Prêt",
         },
     },
     {
@@ -102,7 +104,9 @@ p_loan_per_date = [
                     '$month': "$date.dt"},
                 'Année': {
                     '$year': "$date.dt"},
-            }
-        },
+            },
+            'Balance': {
+                '$sum': "$amount"}
+        }
     }
 ]

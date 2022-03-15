@@ -142,10 +142,16 @@ def fig_loan():
 
     # Get data
     df = get_data_for_graph(p_loan_per_date)
+    
+    # Inverse expenses sign
+    df['Balance'] = -df['Balance']
 
     # Figures
     if len(df) > 0:
-        figure = px.line(df, x='date', y='Balance')
+        # figure = px.line(df, x='date', y='Balance', markers=True)
+        figure = go.Figure()
+        figure.add_trace(
+            go.Scatter(x=df['date'], y=df['Balance'], mode='lines+markers'))
     else:
         figure = {}
 
