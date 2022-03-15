@@ -154,7 +154,7 @@ canvas = dbc.Offcanvas(
      Output("canvas_occasion", "value"),
      Output("canvas_type", "value"),
      Output("canvas_note", "value"),
-     Output("canvas_check", "value")],
+     Output("canvas_check", "on")],
     [Input('store_transaction_disabled', 'data'),
      Input('store_transaction_enabled', 'data')])
 def update_transaction_values(jsonified_data_disabled_trans, jsonified_data_enabled_trans):
@@ -283,7 +283,8 @@ def open_close_canvas(data1, data2, canvas_is_open):
 
 @app.callback(
     Output("msg_update_transaction", "children"),
-    Input('btn_update_transaction', 'n_clicks'),
+    [Input('btn_update_transaction', 'n_clicks'),
+     Input("off_canvas", "is_open")],
     [State("canvas_account_id", "value"),
      State("canvas_object_id", "value"),
      State("canvas_date_transaction", "date"),
@@ -295,9 +296,9 @@ def open_close_canvas(data1, data2, canvas_is_open):
      State("canvas_occasion", "value"),
      State("canvas_type", "value"),
      State("canvas_note", "value"),
-     State("canvas_check", "value")],
+     State("canvas_check", "on")],
 )
-def update_transaction_values(click,
+def update_transaction_values(click, off_canvas,
                               account_id, object_id, date_transaction, date_bank, description, amount, category,
                               sub_category, occasion, transaction_type, note, check):
 
