@@ -54,7 +54,10 @@ def search_transactions(connection_name, filter):
 
     data_extractor = TransactionExgest(db_connection)
     data_extractor.set_search_criteria(dict_searches=searches)
-    return data_extractor.exgest()
+
+    df_transaction = data_extractor.exgest()
+    df_transaction = df_transaction.sort_values(by='date_dt', ascending=False)
+    return df_transaction
 
 
 def create_datatable(df):
