@@ -155,13 +155,12 @@ def get_transaction_values(df):
     description = df.description
     amount = df.amount
     category = df.category
-    occasion = df.occasion
     transaction_type = df.type_transaction
     note = df.note
     check = df.check
 
     return (account_id, object_id, date_transaction, date_bank, description, amount, category,
-            occasion, transaction_type, note, check)
+            transaction_type, note, check)
 
 
 def get_sub_categories_dropdown(account_id, category):

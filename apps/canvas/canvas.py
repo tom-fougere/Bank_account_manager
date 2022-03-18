@@ -8,7 +8,7 @@ import json
 from apps.canvas.canvas_transaction_details import get_transaction_values,\
     get_sub_categories_dropdown, update_transaction
 from source.transactions.transaction_operations import get_occasion, get_categories, get_types_transaction
-from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
+from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID, DEFAULT_OCCASION_FOR_CAT
 
 from app import app
 
@@ -151,7 +151,6 @@ canvas = dbc.Offcanvas(
      Output("canvas_description", "value"),
      Output("canvas_amount", "value"),
      Output("canvas_category", "value"),
-     Output("canvas_occasion", "value"),
      Output("canvas_type", "value"),
      Output("canvas_note", "value"),
      Output("canvas_check", "on")],
@@ -170,7 +169,7 @@ def update_transaction_values(jsonified_data_disabled_trans, jsonified_data_enab
         df = pd.Series(parsed)
         transaction_values = get_transaction_values(df)
     else:
-        transaction_values = (None,) * 11
+        transaction_values = (None,) * 10
 
     return transaction_values
 
@@ -261,6 +260,41 @@ def update_sub_category(canvas_category, jsonified_data_disabled_trans, jsonifie
         value_sub_category = df['sub_category']
 
     return dropdown_sub_category, value_sub_category
+
+
+@app.callback(
+    Output('canvas_occasion', 'value'),
+    [Input('canvas_category', 'value'),
+     Input('canvas_sub_category', 'value'),
+     Input('store_transaction_disabled', 'data'),
+     Input('store_transaction_enabled', 'data')],
+    State('canvas_occasion', 'value')
+)
+def update_occasion(canvas_category, canvas_sub_category, jsonified_data_disabled_trans, jsonified_data_enabled_trans,
+                    current_occasion):
+    ctx = callback_context
+    triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    # Default value
+    value_occasion = current_occasion
+
+    # Set sub-category
+    if (triggered_input == 'store_transaction_disabled') and (jsonified_data_disabled_trans is not None):
+        parsed = json.loads(jsonified_data_disabled_trans)
+        df = pd.Series(parsed)
+        value_occasion = df['occasion']
+    elif (triggered_input == 'store_transaction_enabled') and (jsonified_data_enabled_trans is not None):
+        parsed = json.loads(jsonified_data_enabled_trans)
+        df = pd.Series(parsed)
+        value_occasion = df['occasion']
+    elif triggered_input == 'canvas_category':
+        if not isinstance(DEFAULT_OCCASION_FOR_CAT[canvas_category], dict):
+            value_occasion = DEFAULT_OCCASION_FOR_CAT[canvas_category]
+    elif triggered_input == 'canvas_sub_category':
+        if isinstance(DEFAULT_OCCASION_FOR_CAT[canvas_category], dict):
+            value_occasion = DEFAULT_OCCASION_FOR_CAT[canvas_category][canvas_sub_category]
+
+    return value_occasion
 
 
 @app.callback(
