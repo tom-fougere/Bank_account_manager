@@ -21,22 +21,26 @@ layout = html.Div([
                 end_date=date.today())
             ], style={'width': '50%'}),
         html.Div([
-            html.Div("Pointage:"),
-            dbc.RadioItems(
-                id="radios",
-                className="btn-group",
-                inputClassName="btn-check",  # Remove items circles
-                labelClassName="btn btn-outline-primary",
-                labelCheckedClassName="active",
-                options=[
-                    {"label": "Non", "value": 1},
-                    {"label": "-", "value": 2},
-                    {"label": "Oui", "value": 3},
+            html.Div([
+                html.Div('Pointage:'),
+                daq.BooleanSwitch(
+                    id='bool_check',
+                    on=False,
+                    style={"margin-left": 10}),
                 ],
-                value=2,
-                style={"height": 30}
+                style={'margin-top': 10,
+                       "display": 'flex'}),
+            dcc.Dropdown(
+                id='search_check',
+                options=[{'label': 'Oui', 'value': 'True'},
+                         {'label': 'Non', 'value': 'False'}],
+                value='False',
+                clearable=False,
+                style={'width': '100%',
+                       'margin-top': 10}
             ),
-        ], className="radio-group"),
+
+        ])
     ], style={'display': 'flex',
               'margin-top': 10}),
     html.Div([
@@ -86,8 +90,13 @@ layout = html.Div([
                 multi=True,
                 style={'width': '100%'}
             ),
-            html.Div(id='search_sub_category',
-                     style={'width': '100%'})],  # Dropdown for sub-categories
+            dcc.Dropdown(
+                id='search_sub_category',
+                options=[],
+                value=[],
+                multi=True,
+                style={'width': '100%'}
+            )],
             style={"display": 'flex'})
         ],
         style={'margin-top': 10}),
@@ -219,27 +228,19 @@ def display_searched_transactions(n_clicks, date, description, amount_min, amoun
 
 
 @app.callback(
-    Output('search_sub_category', 'children'),
+    Output('search_sub_category', 'options'),
     Input('search_category', 'value')
 )
 def update_sub_category(value):
     # Default value
-    dropdown_sub_category = dcc.Dropdown(
-        value=[],
-        multi=True,
-        style={'width': '100%'}
-    )
+    options = []
 
     if len(value) > 0:
-        dropdown_sub_category = dcc.Dropdown(
-            options=get_sub_categories(db_connection=DB_CONN_ACCOUNT,
-                                       account_id=ACCOUNT_ID,
-                                       categories=value),
-            value=[],
-            multi=True,
-            style={'width': '100%'})
+        options = get_sub_categories(db_connection=DB_CONN_ACCOUNT,
+                                     account_id=ACCOUNT_ID,
+                                     categories=value)
 
-    return dropdown_sub_category
+    return options
 
 
 @app.callback(
@@ -293,21 +294,25 @@ def store_enabled_transaction(cell_search,
      Output('search_sub_category', 'disabled'),
      Output('search_occasion', 'disabled'),
      Output('search_description', 'disabled'),
-     Output('search_note', 'disabled')],
+     Output('search_note', 'disabled'),
+     Output('search_check', 'disabled')],
     [Input('bool_amount', 'on'),
      Input('bool_category', 'on'),
      Input('bool_type', 'on'),
      Input('bool_occasion', 'on'),
      Input('bool_description', 'on'),
-     Input('bool_note', 'on')])
-def store_enabled_transaction(bool_amount, bool_category, bool_type, bool_occasion, bool_description, bool_note):
+     Input('bool_note', 'on'),
+     Input('bool_check', 'on')])
+def disable_enable_search_components(bool_amount, bool_category, bool_type, bool_occasion, bool_description, bool_note,
+                                     bool_check):
 
     list_enabled_components = [not bool_amount, not bool_amount,
                                not bool_type,
                                not bool_category, not bool_category,
                                not bool_occasion,
                                not bool_description,
-                               not bool_note]
+                               not bool_note,
+                               not bool_check]
 
     return list_enabled_components
 
