@@ -192,7 +192,8 @@ layout = html.Div([
 @app.callback(
     Output('table_search', 'children'),
     Input('btn_search', 'n_clicks'),
-    [State('search_date', 'value'),
+    [State('search_date', 'start_date'),
+     State('search_date', 'end_date'),
      State('search_description', 'value'),
      State('search_amount_min', 'value'),
      State('search_amount_max', 'value'),
@@ -200,27 +201,40 @@ layout = html.Div([
      State('search_category', 'value'),
      State('search_sub_category', 'value'),
      State('search_occasion', 'value'),
-     State('search_note', 'value')]
+     State('search_note', 'value'),
+     State('search_check', 'value'),
+     State('bool_description', 'on'),
+     State('bool_amount', 'on'),
+     State('bool_type', 'on'),
+     State('bool_category', 'on'),
+     State('bool_occasion', 'on'),
+     State('bool_note', 'on'),
+     State('bool_check', 'on')
+     ]
 )
-def display_searched_transactions(n_clicks, date, description, amount_min, amount_max,
-                        type, category, sub_category, occasion, note):
+def display_searched_transactions(n_clicks,
+                                  start_date, end_date, description, amount_min, amount_max,
+                                  type, category, sub_category, occasion, note, check,
+                                  bool_description, bool_amount, bool_type, bool_category,
+                                  bool_occasion, bool_note, bool_check):
     dt_transactions = dt.DataTable()
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
     if 'btn_search' in changed_id:
-        filter = {
-            'account_id': ACCOUNT_ID,
-            'date': date,
-            'description': description,
-            'amount': [amount_min, amount_max],
-            'type': type,
-            'category': category,
-            'sub_category': sub_category,
-            'occasion': occasion,
-            'note': note
+        filters = {
+            'account_id': (True, ACCOUNT_ID),
+            'date': (True, [start_date, end_date]),
+            'description': (bool_description, description),
+            'amount': (bool_amount, [amount_min, amount_max]),
+            'type': (bool_type, type),
+            'category': (bool_category, category),
+            'sub_category': (bool_category, sub_category),
+            'occasion': (bool_occasion, occasion),
+            'note': (bool_note, note),
+            'check': (bool_check, eval(check))
         }
-        df_transaction = search_transactions(connection_name=DB_CONN_TRANSACTION, filter=filter)
+        df_transaction = search_transactions(connection_name=DB_CONN_TRANSACTION, filters=filters)
 
         dt_transactions = create_datatable(df_transaction)
 
@@ -246,7 +260,8 @@ def update_sub_category(value):
 @app.callback(
     Output('store_transaction_enabled', 'data'),
     [Input('cell_search', 'active_cell')],
-    [State('search_date', 'value'),
+    [State('search_date', 'start_date'),
+     State('search_date', 'end_date'),
      State('search_description', 'value'),
      State('search_amount_min', 'value'),
      State('search_amount_max', 'value'),
@@ -254,25 +269,36 @@ def update_sub_category(value):
      State('search_category', 'value'),
      State('search_sub_category', 'value'),
      State('search_occasion', 'value'),
-     State('search_note', 'value')])
+     State('search_note', 'value'),
+     State('search_check', 'value'),
+     State('bool_description', 'on'),
+     State('bool_amount', 'on'),
+     State('bool_type', 'on'),
+     State('bool_category', 'on'),
+     State('bool_occasion', 'on'),
+     State('bool_note', 'on'),
+     State('bool_check', 'on')])
 def store_enabled_transaction(cell_search,
-                              date, description, amount_min, amount_max,
-                              type, category, sub_category, occasion, note):
+                              start_date, end_date, description, amount_min, amount_max,
+                              type, category, sub_category, occasion, note, check,
+                              bool_description, bool_amount, bool_type, bool_category,
+                              bool_occasion, bool_note, bool_check):
 
     if cell_search is not None:
 
-        filter = {
-            'account_id': ACCOUNT_ID,
-            'date': date,
-            'description': description,
-            'amount': [amount_min, amount_max],
-            'type': type,
-            'category': category,
-            'sub_category': sub_category,
-            'occasion': occasion,
-            'note': note
+        filters = {
+            'account_id': (True, ACCOUNT_ID),
+            'date': (True, [start_date, end_date]),
+            'description': (bool_description, description),
+            'amount': (bool_amount, [amount_min, amount_max]),
+            'type': (bool_type, type),
+            'category': (bool_category, category),
+            'sub_category': (bool_category, sub_category),
+            'occasion': (bool_occasion, occasion),
+            'note': (bool_note, note),
+            'check': (bool_check, eval(check))
         }
-        df = search_transactions(connection_name=DB_CONN_TRANSACTION, filter=filter)
+        df = search_transactions(connection_name=DB_CONN_TRANSACTION, filters=filters)
 
         selected_df = df.iloc[cell_search['row']]
 

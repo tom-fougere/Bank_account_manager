@@ -38,25 +38,29 @@ style_data_conditional = (
 )
 
 
-def search_transactions(connection_name, filter):
+def search_transactions(connection_name, filters):
     db_connection = MongoDBConnection(connection_name)
 
     # Init
     searches = dict()
 
-    # Keep only when it's not None and the list isn"t empty
-    for key in filter:
-        if isinstance(filter[key], list):
-            if len(filter[key]) > 0 and all(x is not None for x in filter[key]):
-                searches[key] = filter[key]
-        elif filter[key] is not None:
-            searches[key] = filter[key]
+    for filter_name in filters.keys():
+        filter_enable, condition = filters[filter_name]
+        if filter_enable:
+            if isinstance(condition, list) and len(condition) == 0:
+                searches[filter_name] = None
+            else:
+                searches[filter_name] = condition
 
     data_extractor = TransactionExgest(db_connection)
     data_extractor.set_search_criteria(dict_searches=searches)
 
     df_transaction = data_extractor.exgest()
-    df_transaction = df_transaction.sort_values(by='date_dt', ascending=False)
+
+    # Sort by date
+    if len(df_transaction) > 0:
+        df_transaction = df_transaction.sort_values(by='date_dt', ascending=False)
+
     return df_transaction
 
 
