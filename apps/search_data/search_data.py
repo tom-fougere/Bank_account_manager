@@ -8,9 +8,10 @@ from app import app
 
 from datetime import date
 from apps.search_data.operations import search_transactions, create_datatable
-from source.transactions.transaction_operations import get_categories, get_sub_categories, get_occasion
+from source.transactions.transaction_operations import get_sub_categories
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID,\
     CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
+from utils.time_operations import str_to_datetime
 
 layout = html.Div([
     html.Div([
@@ -18,6 +19,7 @@ layout = html.Div([
             html.Div("Date de transaction:"),
             dcc.DatePickerRange(
                 id='search_date',
+                clearable=True,
                 end_date=date.today())
             ], style={'width': '50%'}),
         html.Div([
@@ -224,7 +226,9 @@ def display_searched_transactions(n_clicks,
     if 'btn_search' in changed_id:
         filters = {
             'account_id': (True, ACCOUNT_ID),
-            'date': (True, [start_date, end_date]),
+            'date_transaction': (True, [
+                str_to_datetime(start_date, date_format='%Y-%m-%d') if start_date else start_date,
+                str_to_datetime(end_date, date_format='%Y-%m-%d') if end_date else end_date]),
             'description': (bool_description, description),
             'amount': (bool_amount, [amount_min, amount_max]),
             'type': (bool_type, type),
@@ -288,7 +292,9 @@ def store_enabled_transaction(cell_search,
 
         filters = {
             'account_id': (True, ACCOUNT_ID),
-            'date': (True, [start_date, end_date]),
+            'date_transaction': (True, [
+                str_to_datetime(start_date, date_format='%Y-%m-%d') if start_date else start_date,
+                str_to_datetime(end_date, date_format='%Y-%m-%d') if end_date else end_date]),
             'description': (bool_description, description),
             'amount': (bool_amount, [amount_min, amount_max]),
             'type': (bool_type, type),
