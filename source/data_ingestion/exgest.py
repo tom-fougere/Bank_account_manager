@@ -61,28 +61,41 @@ class TransactionExgest:
             if is_var_empty(att_value) is False:
 
                 # Manage dates
-                if 'date' in att:
+                if att in ['date', 'date_transaction']:
+                    if att_value[0] is None:
+                        cond = {"$lte": att_value[1]}
+                    else:
+                        cond = {"$gte": att_value[0],
+                                "$lte": att_value[1]}
                     self.pipeline.append({
                         "$match": {
-                            '.'.join([att, 'dt']): {"$gte": att_value[0],
-                                                    "$lte": att_value[1]}
+                            '.'.join([att, 'dt']): cond
                         }
                     })
-                # Manage numeric value
-                elif 'amount' in att:
-                    self.pipeline.append({
-                        "$match": {
-                            att: {"$gte": min(att_value[0], att_value[1]),
-                                  "$lte": max(att_value[0], att_value[1])}
-                        }
-                    })
-                # Manage description
-                elif 'description' in att:
+
+                # Manage text areas
+                elif att in ['description', 'note']:
                     self.pipeline.append({
                         "$match": {
                             att: {"$regex": ''.join(['/*', att_value, '/*']), "$options": 'i'}
                         }
                     })
+
+                # Manage numeric value
+                elif att in ['amount']:
+                    self.pipeline.append({
+                        "$match": {
+                            att: {cond: value for cond, value in zip(['$gte', '$lte'], att_value) if value is not None}
+                            # att: {"$gte": min(att_value[0], att_value[1]),
+                            #       "$lte": max(att_value[0], att_value[1])}
+                        }
+                    })
+
+                elif isinstance(att_value, list):
+                    self.pipeline.append({
+                        "$match": {
+                            att: {"$in": att_value}
+                        }})
                 else:
                     self.pipeline.append({
                         "$match": {
