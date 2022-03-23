@@ -20,6 +20,7 @@ layout = html.Div([
             dcc.DatePickerRange(
                 id='search_date',
                 clearable=True,
+                display_format='DD/MM/YYYY',
                 end_date=date.today())
             ], style={'width': '50%'}),
         html.Div([
