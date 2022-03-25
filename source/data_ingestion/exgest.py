@@ -33,11 +33,13 @@ class TransactionExgest:
         self.date_transaction = dict_searches.get('date_transaction', [])
         self.check = dict_searches.get('check', None)
 
+        searched_attributes = [key for key in dict_searches if key in self.attributes]
+
         # Set categories and sub-categories
         self._set_categories(dict_searches)
 
         # Generate the pipeline
-        self.create_pipeline_from_search_criteria()
+        self.create_pipeline_from_search_criteria(searched_attributes)
 
     def set_pipeline(self, pipeline):
         self.pipeline = pipeline
@@ -52,10 +54,10 @@ class TransactionExgest:
             result = pd.DataFrame(list(self.connection.collection.aggregate(pipeline)))
         return result
 
-    def create_pipeline_from_search_criteria(self):
+    def create_pipeline_from_search_criteria(self, searched_attributes):
         self.pipeline = []
 
-        for att in self.attributes:
+        for att in searched_attributes:
             att_value = getattr(self, att)
 
             if is_var_empty(att_value) is False:
@@ -115,6 +117,11 @@ class TransactionExgest:
                         "$match": {
                             att: att_value
                         }})
+            else:
+                self.pipeline.append({
+                    "$match": {
+                        att: None
+                    }})
 
         self.pipeline.append({
             "$addFields": {
@@ -127,7 +134,7 @@ class TransactionExgest:
 
     def _set_categories(self, dict_searches):
 
-        if 'category' in dict_searches.keys():
+        if 'category' in dict_searches.keys() and dict_searches['category'] is not None:
             self.category = join_cat_and_subcat(
                 categories=dict_searches.get('category'),
                 sub_categories=dict_searches.get('sub_category', None)
@@ -157,17 +164,18 @@ def is_var_empty(var):
 def join_cat_and_subcat(categories, sub_categories):
 
     list_cat = []
-    for sub_cat in sub_categories:
-        # Extract category and sub-category
-        cat = sub_cat[:sub_cat.find('/')]
-        sub_cat = sub_cat[sub_cat.find('/')+1:]
+    if sub_categories is not None:
+        for sub_cat in sub_categories:
+            # Extract category and sub-category
+            cat = sub_cat[:sub_cat.find('/')]
+            sub_cat = sub_cat[sub_cat.find('/')+1:]
 
-        # Add to the list to search
-        list_cat.append((cat, sub_cat))
+            # Add to the list to search
+            list_cat.append((cat, sub_cat))
 
-        # Remove category from list of categories
-        if cat in categories:
-            categories.remove(cat)
+            # Remove category from list of categories
+            if cat in categories:
+                categories.remove(cat)
 
     for cat in categories:
         list_cat.append((cat, None))
