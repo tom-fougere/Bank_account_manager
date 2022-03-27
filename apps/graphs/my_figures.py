@@ -94,14 +94,16 @@ def fig_expenses_vs_revenue():
         x=df['date'],
         y=df['Balance'],
         name='Gain',
-        marker_color=df['Color']
+        marker_color=df['Color'],
+        showlegend=False
         ),
         row=2, col=1)
     figure.add_trace(go.Scatter(
         x=df['date'],
         y=np.zeros(df['date'].shape),
         mode='lines',
-        line=dict(dash='dash', color='black')
+        line=dict(dash='dash', color='black'),
+        showlegend=False
         ),
         row=2, col=1)
     figure.update_layout(xaxis=dict(tickformat="%b \n%Y"))
@@ -215,6 +217,45 @@ def fig_categories():
     df_filter = df_filter[(df_filter['Somme'] >= 0) & (df_filter['Catégorie'] != 'Salaire')]
 
     figure = px.sunburst(df_filter, path=['Catégorie', 'Sous-catégorie'], values='Somme')
+
+    return figure
+
+
+def fig_cum_balance():
+
+    now = datetime.datetime.now()
+    start_date = datetime.datetime(year=now.year, month=1, day=1)
+
+    # Get data
+    df = get_data_for_graph(p_salary_vs_other, date_range=(start_date, now))
+
+    # Transform df
+    df['CumulativeBalance'] = df['Balance'].cumsum()
+    df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
+
+    # Figures
+    figure = make_subplots(specs=[[{"secondary_y": True}]])
+    figure.add_trace(go.Bar(
+        x=df['date'],
+        y=df['Balance'],
+        name='Gain',
+        marker_color=df['Color']
+        ),
+        secondary_y=False)
+    figure.add_trace(go.Scatter(
+        x=df['date'],
+        y=df['CumulativeBalance'],
+        mode='lines',
+        line=dict(dash='dash', color='black'),
+        name='Cumulative gain'
+        ),
+        secondary_y=True)
+
+    # Set titles
+    figure.update_layout(xaxis=dict(tickformat="%b \n%Y"))
+    figure.update_yaxes(title_text="Balance", secondary_y=False)
+    figure.update_yaxes(title_text="<b>Cumulative balance</b>", secondary_y=True)
+    figure.update_layout(yaxis_showgrid=False)
 
     return figure
 
