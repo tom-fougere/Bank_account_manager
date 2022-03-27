@@ -27,8 +27,10 @@ def get_data_for_graph(pipeline, date_range=None):
     # Transform df
     if len(df) > 0:
         df = expand_columns_of_dataframe(df, column='_id')  # Expand ID to get date
-        df['date'] = [datetime.datetime(int(row['Année']), int(row['Mois']), 1) for _, row in df.iterrows()]  # convert in datetime
-        df.sort_values(by='date', inplace=True)
+
+        if ('Année' in df.keys()) and ('Mois' in df.keys()):
+            df['date'] = [datetime.datetime(int(row['Année']), int(row['Mois']), 1) for _, row in df.iterrows()]  # convert in datetime
+            df.sort_values(by='date', inplace=True)
 
     return df
 

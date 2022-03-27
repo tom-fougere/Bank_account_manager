@@ -1,11 +1,44 @@
-p_expenses_revenue_per_date = [
+p_salary_vs_other = [
     {
         '$group': {
             '_id': {
                 'Mois': {
-                    '$month': "$date.dt"},
+                    '$month': "$date_transaction.dt"},
                 'Année': {
-                    '$year': "$date.dt"},
+                    '$year': "$date_transaction.dt"},
+            },
+            'Revenues': {
+                '$sum': {
+                    '$cond': [
+                        {
+                            '$eq': ['$category', 'Travail']
+                        },
+                        "$amount", 0]
+                }
+            },
+            'Expenses': {
+                '$sum': {
+                    '$cond': [
+                        {
+                            '$ne': ['$category', 'Travail']
+                        },
+                        "$amount", 0]
+                }
+            },
+            'Balance': {
+                '$sum': "$amount"}
+        }
+    }
+]
+
+p_positive_vs_negative_per_date = [
+    {
+        '$group': {
+            '_id': {
+                'Mois': {
+                    '$month': "$date_transaction.dt"},
+                'Année': {
+                    '$year': "$date_transaction.dt"},
             },
             'Total_positive': {
                 '$sum': {
@@ -35,13 +68,25 @@ p_balance_category_per_date = [
         '$group': {
             '_id': {
                 'Mois': {
-                    '$month': "$date.dt"},
+                    '$month': "$date_transaction.dt"},
                 'Année': {
-                    '$year': "$date.dt"},
+                    '$year': "$date_transaction.dt"},
                 'Categorie': '$category',
-                'Sous-categorie': '$sub_category',
             },
             'Balance': {
+                '$sum': "$amount"}
+        }
+    }
+]
+
+p_expenses_category = [
+    {
+        '$group': {
+            '_id': {
+                'Catégorie': '$category',
+                'Sous-catégorie': '$sub_category',
+            },
+            'Somme': {
                 '$sum': "$amount"}
         }
     }
@@ -57,9 +102,9 @@ p_balance_occasion_per_date = [
         '$group': {
             '_id': {
                 'Mois': {
-                    '$month': "$date.dt"},
+                    '$month': "$date_transaction.dt"},
                 'Année': {
-                    '$year': "$date.dt"},
+                    '$year': "$date_transaction.dt"},
                 'Occasion': '$occasion',
             },
             'Balance': {
@@ -79,9 +124,9 @@ p_savings_per_date = [
         '$group': {
             '_id': {
                 'Mois': {
-                    '$month': "$date.dt"},
+                    '$month': "$date_transaction.dt"},
                 'Année': {
-                    '$year': "$date.dt"},
+                    '$year': "$date_transaction.dt"},
             },
             'Balance': {
                 '$sum': "$amount"}
@@ -101,9 +146,9 @@ p_loan_per_date = [
         '$group': {
             '_id': {
                 'Mois': {
-                    '$month': "$date.dt"},
+                    '$month': "$date_transaction.dt"},
                 'Année': {
-                    '$year': "$date.dt"},
+                    '$year': "$date_transaction.dt"},
             },
             'Balance': {
                 '$sum': "$amount"}

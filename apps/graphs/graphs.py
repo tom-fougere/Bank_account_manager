@@ -3,7 +3,7 @@ import dash_html_components as html
 from apps.graphs.my_figures import \
     fig_indicators_revenue_expense_balance,\
     fig_expenses_vs_revenue, fig_expenses_vs_category, fig_expenses_vs_occasion, \
-    fig_savings, fig_loan
+    fig_savings, fig_loan, fig_categories
 
 layout = html.Div(
     [
@@ -27,6 +27,8 @@ layout = html.Div(
         dcc.Graph(id='fig_saving',
                   figure=fig_savings()),
         dcc.Graph(id='fig_loan',
-                  figure=fig_loan())
+                  figure=fig_loan()),
+        dcc.Graph(id='fig_categories',
+                  figure=fig_categories())
     ]
 )
