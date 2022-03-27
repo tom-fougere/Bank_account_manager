@@ -37,14 +37,16 @@ def get_data_for_graph(pipeline, date_range=None):
 
 def add_date_condition_to_pipeline(pipeline, start_date, end_date):
 
+    pip = pipeline.copy()
+
     date_condition = {
         '$match': {
-            'date.dt': {
+            'date_transaction.dt': {
                 '$gte': start_date,
                 '$lte': end_date}
         },
     }
-    pipeline.insert(0, date_condition)
+    pip.insert(0, date_condition)
 
-    return pipeline
+    return pip
 
