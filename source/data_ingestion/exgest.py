@@ -44,6 +44,8 @@ class TransactionExgest:
     def set_pipeline(self, pipeline):
         self.pipeline = pipeline
 
+        self._add_date_fields()
+
     def exgest_all(self):
         return pd.DataFrame(list(self.connection.collection.find()))
 
@@ -123,14 +125,7 @@ class TransactionExgest:
                         att: None
                     }})
 
-        self.pipeline.append({
-            "$addFields": {
-                "date_str": "$date.str",
-                "date_dt": "$date.dt",
-                "date_transaction_str": "$date_transaction.str",
-                "date_transaction_dt": "$date_transaction.dt",
-            }
-        })
+        self._add_date_fields()
 
     def _set_categories(self, dict_searches):
 
@@ -141,6 +136,16 @@ class TransactionExgest:
             )
         else:
             self.category = None
+
+    def _add_date_fields(self):
+        self.pipeline.append({
+            "$addFields": {
+                "date_str": "$date.str",
+                "date_dt": "$date.dt",
+                "date_transaction_str": "$date_transaction.str",
+                "date_transaction_dt": "$date_transaction.dt",
+            }
+        })
 
     def exgest(self):
         result = self.aggregate(pipeline=self.pipeline)
