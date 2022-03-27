@@ -41,7 +41,7 @@ def add_date_condition_to_pipeline(pipeline, start_date, end_date):
 
     date_condition = {
         '$match': {
-            'date_transaction.dt': {
+            'date.dt': {
                 '$gte': start_date,
                 '$lte': end_date}
         },
