@@ -161,9 +161,35 @@ def fig_savings():
     # Get data
     df = get_data_for_graph(p_savings_per_date, date_range=(start_date, now))
 
+    # Transform df
+    df['CumulativeBalance'] = df['Balance'].cumsum()
+    df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
+
     # Figures
     if len(df) > 0:
-        figure = px.line(df, x='date', y='Balance')
+        # Figures
+        figure = make_subplots(specs=[[{"secondary_y": True}]])
+        figure.add_trace(go.Bar(
+            x=df['date'],
+            y=df['Balance'],
+            name='Epargne',
+            marker_color=df['Color']
+        ),
+            secondary_y=False)
+        figure.add_trace(go.Scatter(
+            x=df['date'],
+            y=df['CumulativeBalance'],
+            mode='lines',
+            line=dict(dash='dash', color='black'),
+            name='Cumulative épargne'
+        ),
+            secondary_y=True)
+
+        # Set titles
+        figure.update_layout(xaxis=dict(tickformat="%b \n%Y"))
+        figure.update_yaxes(title_text="Epargne", secondary_y=False)
+        figure.update_yaxes(title_text="<b>Cumulative épargne</b>", secondary_y=True)
+        figure.update_layout(yaxis_showgrid=False)
     else:
         figure = {}
 
