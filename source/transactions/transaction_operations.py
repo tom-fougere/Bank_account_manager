@@ -26,7 +26,6 @@ def check_duplicates_in_df(df1, df2):
             # Check if the same transaction exists
             df2_same = df2.loc[(df2['account_id'] == row['account_id']) &
                                (df2['amount'] == row['amount']) &
-                               (df2['date_str'] == row['date_str']) &
                                (df2['date_transaction_str'] == row['date_transaction_str']) &
                                (df2['description'] == row['description'])].reset_index()
 

@@ -80,7 +80,7 @@ def read_and_format_data(full_filename, db_connection):
     my_connection = MongoDBConnection(db_connection)
     data_extractor = TransactionExgest(my_connection)
     data_extractor.set_search_criteria({"account_id": account_id,
-                                        "date": [min_date, max_date]})
+                                        "date_transaction": [min_date, max_date]})
     db = data_extractor.exgest()
 
     # check duplicates

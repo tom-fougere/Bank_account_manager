@@ -30,19 +30,19 @@ class TransactionIngest:
 
         transaction_dict = transaction_series.to_dict()
         db_trans = self.connection.collection.find({'account_id': transaction_dict['account_id'],
-                                                    'date.str': transaction_dict['date']['str'],
                                                     'date_transaction.str': transaction_dict['date_transaction']['str'],
-                                                    'amount': transaction_dict['amount']})
+                                                    'amount': transaction_dict['amount'],
+                                                    'description': transaction_dict['description']})
 
         if len(list(db_trans)) >= 1:
             raise ValueError('There is 1 or more documents in the DB with the same attributes: '
                              ' - account_id: {},'
-                             ' - date: {},'
                              ' - date_transaction: {},'
-                             ' - amount: {}'.format(transaction_dict['account_id'],
-                                                    transaction_dict['date']['str'],
-                                                    transaction_dict['date_transaction']['str'],
-                                                    transaction_dict['amount']))
+                             ' - amount: {}'
+                             ' - description: {}'.format(transaction_dict['account_id'],
+                                                         transaction_dict['date']['str'],
+                                                         transaction_dict['date_transaction']['str'],
+                                                         transaction_dict['description']))
         else:
             self.connection.collection.insert(transaction_dict)
 
