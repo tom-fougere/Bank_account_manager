@@ -161,12 +161,13 @@ def fig_savings():
     # Get data
     df = get_data_for_graph(p_savings_per_date, date_range=(start_date, now))
 
-    # Transform df
-    df['CumulativeBalance'] = df['Balance'].cumsum()
-    df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
-
     # Figures
     if len(df) > 0:
+
+        # Transform df
+        df['CumulativeBalance'] = df['Balance'].cumsum()
+        df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
+        
         # Figures
         figure = make_subplots(specs=[[{"secondary_y": True}]])
         figure.add_trace(go.Bar(
