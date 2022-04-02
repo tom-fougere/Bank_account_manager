@@ -299,17 +299,20 @@ def update_occasion(canvas_category, canvas_sub_category, jsonified_data_disable
 @app.callback(
     Output("off_canvas", "is_open"),
     [Input('store_transaction_disabled', 'data'),
-     Input('store_transaction_enabled', 'data')],
+     Input('store_transaction_enabled', 'data'),
+     Input('btn_update_transaction', 'n_clicks')],
     State("off_canvas", "is_open"))
-def open_close_canvas(data1, data2, canvas_is_open):
+def open_close_canvas(data1, data2, click_save_transaction, canvas_is_open):
     ctx = callback_context
     triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
 
     canvas_new_update = canvas_is_open
-    if (triggered_input == 'store_transaction_disabled') and (data1 is not None):
-        canvas_new_update = not canvas_is_open
+    if triggered_input == 'btn_update_transaction':
+        canvas_new_update = False
+    elif (triggered_input == 'store_transaction_disabled') and (data1 is not None):
+        canvas_new_update = True
     elif (triggered_input == 'store_transaction_enabled') and (data2 is not None):
-        canvas_new_update = not canvas_is_open
+        canvas_new_update = True
 
     return canvas_new_update
 

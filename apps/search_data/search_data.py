@@ -5,6 +5,7 @@ import dash_table as dt
 import dash_daq as daq
 from dash import Input, Output, State, callback_context
 from app import app
+import time
 
 from datetime import date
 from apps.search_data.operations import search_transactions, create_datatable
@@ -194,7 +195,8 @@ layout = html.Div([
 
 @app.callback(
     Output('table_search', 'children'),
-    Input('btn_search', 'n_clicks'),
+    [Input('btn_search', 'n_clicks'),
+     Input('btn_update_transaction', 'n_clicks')],
     [State('search_date', 'start_date'),
      State('search_date', 'end_date'),
      State('search_description', 'value'),
@@ -215,7 +217,7 @@ layout = html.Div([
      State('bool_check', 'on')
      ]
 )
-def display_searched_transactions(n_clicks,
+def display_searched_transactions(n_clicks_search, n_clicks_save_transaction,
                                   start_date, end_date, description, amount_min, amount_max,
                                   type, category, sub_category, occasion, note, check,
                                   bool_description, bool_amount, bool_type, bool_category,
@@ -224,7 +226,10 @@ def display_searched_transactions(n_clicks,
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
-    if 'btn_search' in changed_id:
+    if ('btn_search' in changed_id) or ('btn_update_transaction' in changed_id):
+
+        time.sleep(0.5)
+
         filters = {
             'account_id': (True, ACCOUNT_ID),
             'date_transaction': (True, [
