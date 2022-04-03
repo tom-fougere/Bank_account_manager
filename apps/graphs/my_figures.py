@@ -12,13 +12,14 @@ from apps.graphs.pipelines import p_positive_vs_negative_per_date, p_balance_cat
 from source.definitions import MONTHS
 
 
-def fig_indicators_revenue_expense_balance():
+def fig_indicators_revenue_expense_balance(year=datetime.datetime.now().year):
     now = datetime.datetime.now()
-    start_date = datetime.datetime(year=now.year, month=1, day=1)
+    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data from this year
     df_current_year = get_data_for_graph(p_salary_vs_other,
-                                         date_range=(start_date, now))
+                                         date_range=(start_date, end_date))
 
     revenues_current_year = df_current_year['Revenues'].sum()
     expenses_current_year = -df_current_year['Expenses'].sum()
@@ -65,13 +66,14 @@ def fig_indicators_revenue_expense_balance():
     return figure
 
 
-def fig_expenses_vs_revenue():
+def fig_expenses_vs_revenue(year=datetime.datetime.now().year):
 
     now = datetime.datetime.now()
-    start_date = datetime.datetime(year=now.year, month=1, day=1)
+    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
-    df = get_data_for_graph(p_salary_vs_other, date_range=(start_date, now))
+    df = get_data_for_graph(p_salary_vs_other, date_range=(start_date, end_date))
 
     # Transform df
     df['Expenses'] = - df['Expenses']  # Negative becomes Positive
@@ -113,13 +115,14 @@ def fig_expenses_vs_revenue():
     return figure
 
 
-def fig_expenses_vs_category():
+def fig_expenses_vs_category(year=datetime.datetime.now().year):
 
     now = datetime.datetime.now()
-    start_date = datetime.datetime(year=now.year, month=1, day=1)
+    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
-    df = get_data_for_graph(p_balance_category_per_date, date_range=(start_date, now))
+    df = get_data_for_graph(p_balance_category_per_date, date_range=(start_date, end_date))
 
     # Drop Revenue
     df = df[df['Categorie'] != 'Travail']
@@ -133,18 +136,19 @@ def fig_expenses_vs_category():
     # Rename months
     df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
 
-    figure = px.bar(df, x='Mois', y='Balance', color='Categorie', text="Categorie")
+    figure = px.bar(df, x='Mois', y='Balance', color='Categorie', text="Categorie", title='Dépenses vs catégories')
 
     return figure
 
 
-def fig_expenses_vs_occasion():
+def fig_expenses_vs_occasion(year=datetime.datetime.now().year):
 
     now = datetime.datetime.now()
-    start_date = datetime.datetime(year=now.year, month=1, day=1)
+    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
-    df = get_data_for_graph(p_balance_occasion_per_date, date_range=(start_date, now))
+    df = get_data_for_graph(p_balance_occasion_per_date, date_range=(start_date, end_date))
 
     # Inverse expenses sign
     df['Balance'] = -df['Balance']
@@ -155,18 +159,19 @@ def fig_expenses_vs_occasion():
     # Rename months
     df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
 
-    figure = px.bar(df, x='Mois', y='Balance', color='Occasion', text="Occasion")
+    figure = px.bar(df, x='Mois', y='Balance', color='Occasion', text="Occasion", title='Dépenses vs occasions')
 
     return figure
 
 
-def fig_savings():
+def fig_savings(year=datetime.datetime.now().year):
 
     now = datetime.datetime.now()
-    start_date = datetime.datetime(year=now.year, month=1, day=1)
+    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
-    df = get_data_for_graph(p_savings_per_date, date_range=(start_date, now))
+    df = get_data_for_graph(p_savings_per_date, date_range=(start_date, end_date))
 
     # Figures
     if len(df) > 0:
@@ -194,23 +199,27 @@ def fig_savings():
             secondary_y=True)
 
         # Set titles
-        figure.update_layout(xaxis=dict(tickformat="%b \n%Y"))
+        figure.update_layout(
+            xaxis=dict(tickformat="%b \n%Y"),
+            yaxis_showgrid=False,
+            title='Epargne'
+        )
         figure.update_yaxes(title_text="Epargne", secondary_y=False)
         figure.update_yaxes(title_text="<b>Cumulative épargne</b>", secondary_y=True)
-        figure.update_layout(yaxis_showgrid=False)
     else:
         figure = {}
 
     return figure
 
 
-def fig_loan():
+def fig_loan(year=datetime.datetime.now().year):
 
     now = datetime.datetime.now()
-    start_date = datetime.datetime(year=now.year, month=1, day=1)
+    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
-    df = get_data_for_graph(p_loan_per_date, date_range=(start_date, now))
+    df = get_data_for_graph(p_loan_per_date, date_range=(start_date, end_date))
     
     # Inverse expenses sign
     df['Balance'] = -df['Balance']
@@ -233,13 +242,14 @@ def fig_loan():
     return figure
 
 
-def fig_categories():
+def fig_categories(year=datetime.datetime.now().year):
 
     now = datetime.datetime.now()
-    start_date = datetime.datetime(year=now.year, month=1, day=1)
+    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
-    df = get_data_for_graph(p_expenses_category, date_range=(start_date, now))
+    df = get_data_for_graph(p_expenses_category, date_range=(start_date, end_date))
 
     # Adjust the data for the sunburst figure
     df.loc[df['Catégorie'].isna(), ['Catégorie', 'Sous-catégorie']] = 'None'
@@ -250,18 +260,22 @@ def fig_categories():
     df_filter = df.copy()
     df_filter = df_filter[(df_filter['Somme'] >= 0) & (df_filter['Catégorie'] != 'Salaire')]
 
-    figure = px.sunburst(df_filter, path=['Catégorie', 'Sous-catégorie'], values='Somme')
+    figure = px.sunburst(df_filter,
+                         path=['Catégorie', 'Sous-catégorie'],
+                         values='Somme',
+                         title='Catégories')
 
     return figure
 
 
-def fig_cum_balance():
+def fig_cum_balance(year=datetime.datetime.now().year):
 
     now = datetime.datetime.now()
-    start_date = datetime.datetime(year=now.year, month=1, day=1)
+    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
-    df = get_data_for_graph(p_salary_vs_other, date_range=(start_date, now))
+    df = get_data_for_graph(p_salary_vs_other, date_range=(start_date, end_date))
 
     # Transform df
     df['CumulativeBalance'] = df['Balance'].cumsum()
@@ -286,10 +300,13 @@ def fig_cum_balance():
         secondary_y=True)
 
     # Set titles
-    figure.update_layout(xaxis=dict(tickformat="%b \n%Y"))
+    figure.update_layout(
+        xaxis=dict(tickformat="%b \n%Y"),
+        yaxis_showgrid=False,
+        title='Balance cumulée'
+    )
     figure.update_yaxes(title_text="Balance", secondary_y=False)
     figure.update_yaxes(title_text="<b>Cumulative balance</b>", secondary_y=True)
-    figure.update_layout(yaxis_showgrid=False)
 
     return figure
 
