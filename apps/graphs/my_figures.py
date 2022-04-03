@@ -9,6 +9,7 @@ from utils.time_operations import get_first_day_several_month_before
 from apps.graphs.operations import get_data_for_graph
 from apps.graphs.pipelines import p_positive_vs_negative_per_date, p_balance_category_per_date,\
     p_balance_occasion_per_date, p_savings_per_date, p_loan_per_date, p_salary_vs_other, p_expenses_category
+from source.definitions import MONTHS
 
 
 def fig_indicators_revenue_expense_balance():
@@ -79,19 +80,19 @@ def fig_expenses_vs_revenue():
     # Figures
     figure = make_subplots(rows=2, cols=1, subplot_titles=('Revenus VS Dépenses', 'Gain'))
     figure.add_trace(go.Bar(
-        x=df['date'],
+        x=MONTHS[:len(df)],
         y=df['Revenues'],
         name='Revenus'
         ),
         row=1, col=1)
     figure.add_trace(go.Bar(
-        x=df['date'],
+        x=MONTHS[:len(df)],
         y=df['Expenses'],
         name='Dépenses'
         ),
         row=1, col=1)
     figure.add_trace(go.Bar(
-        x=df['date'],
+        x=MONTHS[:len(df)],
         y=df['Balance'],
         name='Gain',
         marker_color=df['Color'],
@@ -99,7 +100,7 @@ def fig_expenses_vs_revenue():
         ),
         row=2, col=1)
     figure.add_trace(go.Scatter(
-        x=df['date'],
+        x=MONTHS[:len(df)],
         y=np.zeros(df['date'].shape),
         mode='lines',
         line=dict(dash='dash', color='black'),
@@ -129,7 +130,10 @@ def fig_expenses_vs_category():
     # Rename empty category by 'None'
     df.loc[df['Categorie'].isna(), 'Categorie'] = 'None'
 
-    figure = px.bar(df, x='date', y='Balance', color='Categorie', text="Categorie")
+    # Rename months
+    df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
+
+    figure = px.bar(df, x='Mois', y='Balance', color='Categorie', text="Categorie")
 
     return figure
 
@@ -148,7 +152,10 @@ def fig_expenses_vs_occasion():
     # Rename empty category by 'None'
     df.loc[df['Occasion'].isna(), 'Occasion'] = 'None'
 
-    figure = px.bar(df, x='date', y='Balance', color='Occasion', text="Occasion")
+    # Rename months
+    df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
+
+    figure = px.bar(df, x='Mois', y='Balance', color='Occasion', text="Occasion")
 
     return figure
 
@@ -171,14 +178,14 @@ def fig_savings():
         # Figures
         figure = make_subplots(specs=[[{"secondary_y": True}]])
         figure.add_trace(go.Bar(
-            x=df['date'],
+            x=MONTHS[:len(df)],
             y=df['Balance'],
             name='Epargne',
             marker_color=df['Color']
         ),
             secondary_y=False)
         figure.add_trace(go.Scatter(
-            x=df['date'],
+            x=MONTHS[:len(df)],
             y=df['CumulativeBalance'],
             mode='lines',
             line=dict(dash='dash', color='black'),
@@ -213,7 +220,7 @@ def fig_loan():
         # figure = px.line(df, x='date', y='Balance', markers=True)
         figure = go.Figure()
         figure.add_trace(
-            go.Scatter(x=df['date'], y=df['Balance'], mode='lines+markers'))
+            go.Scatter(x=MONTHS[:len(df)], y=df['Balance'], mode='lines+markers'))
 
         # Edit the layout
         figure.update_layout(
@@ -263,14 +270,14 @@ def fig_cum_balance():
     # Figures
     figure = make_subplots(specs=[[{"secondary_y": True}]])
     figure.add_trace(go.Bar(
-        x=df['date'],
+        x=MONTHS[:len(df)],
         y=df['Balance'],
         name='Gain',
         marker_color=df['Color']
         ),
         secondary_y=False)
     figure.add_trace(go.Scatter(
-        x=df['date'],
+        x=MONTHS[:len(df)],
         y=df['CumulativeBalance'],
         mode='lines',
         line=dict(dash='dash', color='black'),

@@ -57,6 +57,21 @@ DEFAULT_OCCASION_FOR_CAT = {
               'Autre': 'Ponctuel'}
 }
 
+MONTHS = [
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre'
+]
+
 DATA_FOLDER = 'raw_data'
 DB_CONN_TRANSACTION = 'db_transaction_connection'
 DB_CONN_ACCOUNT = 'db_account_connection'
