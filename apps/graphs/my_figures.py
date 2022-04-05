@@ -14,7 +14,7 @@ from source.definitions import MONTHS
 
 def fig_indicators_revenue_expense_balance(year=datetime.datetime.now().year):
     now = datetime.datetime.now()
-    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    end_date = datetime.datetime(year=year, month=12, day=31)
     start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data from this year
@@ -68,8 +68,7 @@ def fig_indicators_revenue_expense_balance(year=datetime.datetime.now().year):
 
 def fig_expenses_vs_revenue(year=datetime.datetime.now().year):
 
-    now = datetime.datetime.now()
-    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    end_date = datetime.datetime(year=year, month=12, day=31)
     start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
@@ -117,8 +116,7 @@ def fig_expenses_vs_revenue(year=datetime.datetime.now().year):
 
 def fig_expenses_vs_category(year=datetime.datetime.now().year):
 
-    now = datetime.datetime.now()
-    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    end_date = datetime.datetime(year=year, month=12, day=31)
     start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
@@ -143,8 +141,7 @@ def fig_expenses_vs_category(year=datetime.datetime.now().year):
 
 def fig_expenses_vs_occasion(year=datetime.datetime.now().year):
 
-    now = datetime.datetime.now()
-    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    end_date = datetime.datetime(year=year, month=12, day=31)
     start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
@@ -166,8 +163,7 @@ def fig_expenses_vs_occasion(year=datetime.datetime.now().year):
 
 def fig_savings(year=datetime.datetime.now().year):
 
-    now = datetime.datetime.now()
-    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    end_date = datetime.datetime(year=year, month=12, day=31)
     start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
@@ -214,8 +210,7 @@ def fig_savings(year=datetime.datetime.now().year):
 
 def fig_loan(year=datetime.datetime.now().year):
 
-    now = datetime.datetime.now()
-    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    end_date = datetime.datetime(year=year, month=12, day=31)
     start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
@@ -244,8 +239,7 @@ def fig_loan(year=datetime.datetime.now().year):
 
 def fig_categories(year=datetime.datetime.now().year):
 
-    now = datetime.datetime.now()
-    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    end_date = datetime.datetime(year=year, month=12, day=31)
     start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
@@ -270,8 +264,7 @@ def fig_categories(year=datetime.datetime.now().year):
 
 def fig_cum_balance(year=datetime.datetime.now().year):
 
-    now = datetime.datetime.now()
-    end_date = datetime.datetime(year=year, month=now.month, day=now.day)
+    end_date = datetime.datetime(year=year, month=12, day=31)
     start_date = datetime.datetime(year=year, month=1, day=1)
 
     # Get data
