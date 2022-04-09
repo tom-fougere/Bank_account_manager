@@ -8,6 +8,8 @@ from apps.graphs.my_figures import \
     fig_indicators_revenue_expense_balance,\
     fig_expenses_vs_revenue, fig_expenses_vs_category, fig_expenses_vs_occasion, \
     fig_savings, fig_loan, fig_categories, fig_cum_balance
+from apps.graphs.operations import get_list_years
+from source.definitions import DB_CONN_TRANSACTION
 
 now = datetime.datetime.now()
 
@@ -18,12 +20,8 @@ layout = html.Div(
         html.Div([
             dbc.Button("Refresh", outline=True, color="secondary", className="btn_refresh", id="btn_refresh"),
             dcc.Dropdown(id='dropdown_year_stat',
-                         options=[
-                             {'label': '2021', 'value': 2021},
-                             {'label': '2022', 'value': 2022},
-                             {'label': '2023', 'value': 2023},
-                            ],
-                         value=2022,
+                         options=get_list_years(DB_CONN_TRANSACTION),
+                         value=now.year,
                          style={'width': '100%',
                                 'height': 40,
                                 'margin-left': 2}
@@ -61,7 +59,8 @@ layout = html.Div(
      Output('fig_saving', 'figure'),
      Output('fig_loan', 'figure'),
      Output('fig_categories', 'figure'),
-     Output('fig_cum_balance', 'figure'),],
+     Output('fig_cum_balance', 'figure'),
+     Output('dropdown_year_stat', 'options')],
     [Input('btn_refresh', 'n_clicks'),
      Input('dropdown_year_stat', 'value')])
 def refresh_page(n_click, selected_year):
@@ -75,6 +74,8 @@ def refresh_page(n_click, selected_year):
         fig_loan(selected_year),\
         fig_categories(selected_year),\
         fig_cum_balance(selected_year),\
+
+    outputs = outputs + (get_list_years(DB_CONN_TRANSACTION),)
 
     return outputs
 

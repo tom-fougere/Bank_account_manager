@@ -50,3 +50,15 @@ def add_date_condition_to_pipeline(pipeline, start_date, end_date):
 
     return pip
 
+
+def get_list_years(name_db_connection):
+    db_connection = MongoDBConnection(name_db_connection)
+    data_extractor = TransactionExgest(db_connection)
+    distinct_years = data_extractor.get_distinct_years()
+
+    dropdown_list_years = [
+        {'label': str(year), 'value': year}
+        for year in distinct_years
+    ]
+
+    return dropdown_list_years
