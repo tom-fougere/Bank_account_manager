@@ -28,7 +28,6 @@ layout = html.Div(
                          ),
         ], style={'display': 'flex'}
         ),
-        html.Div(id='refresh_msg'),
         dcc.Graph(id='fig_indicators_revenue_expense_balance',
                   figure=fig_indicators_revenue_expense_balance(now.year),
                   style={'margin-top': 10}),
@@ -51,8 +50,7 @@ layout = html.Div(
 
 
 @app.callback(
-    [Output('refresh_msg', 'children'),
-     Output('fig_indicators_revenue_expense_balance', 'figure'),
+    [Output('fig_indicators_revenue_expense_balance', 'figure'),
      Output('fig_expenses_vs_revenue', 'figure'),
      Output('fig_expenses_vs_category', 'figure'),
      Output('fig_expenses_vs_occasion', 'figure'),
@@ -65,7 +63,6 @@ layout = html.Div(
      Input('dropdown_year_stat', 'value')])
 def refresh_page(n_click, selected_year):
     outputs = \
-        str(n_click),\
         fig_indicators_revenue_expense_balance(selected_year),\
         fig_expenses_vs_revenue(selected_year),\
         fig_expenses_vs_category(selected_year),\
