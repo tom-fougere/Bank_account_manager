@@ -4,7 +4,7 @@ from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.ingest import TransactionIngest
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.data_ingestion.exgest import TransactionExgest
-from apps.graphs.pipelines import p_expenses_gains_per_date
+from apps.graphs.pipelines import p_salary_vs_other
 
 ACCOUNT_ID = '008'
 data_reader = BankTSVReader('test/fake_data.tsv')
@@ -96,10 +96,18 @@ class TestTransactionExgest(unittest.TestCase):
 
     def test_exgest_set_pipeline(self):
         data_extractor = TransactionExgest(db_connection)
-        data_extractor.set_pipeline(p_expenses_gains_per_date)
+        data_extractor.set_pipeline(p_salary_vs_other)
         results = data_extractor.exgest()
 
         self.assertEqual(len(results), 1)
+
+    def test_get_distinct_year(self):
+
+        data_extractor = TransactionExgest(db_connection)
+        list_years = data_extractor.get_distinct_years()
+
+        self.assertEqual(len(list_years), 1)
+        self.assertEqual(list_years[0], 2022)
 
 
 if __name__ == '__main__':

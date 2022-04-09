@@ -1,4 +1,5 @@
 import pandas as pd
+from utils.mixed_utils import expand_columns_of_dataframe
 
 
 class TransactionExgest:
@@ -44,7 +45,8 @@ class TransactionExgest:
     def set_pipeline(self, pipeline):
         self.pipeline = pipeline
 
-        self._add_date_fields()
+        if len(self.pipeline) > 0:
+            self._add_date_fields()
 
     def exgest_all(self):
         return pd.DataFrame(list(self.connection.collection.find()))
@@ -154,6 +156,27 @@ class TransactionExgest:
             result.drop(columns=['date_transaction', 'date'], inplace=True, errors='ignore')
 
         return result
+
+    def get_distinct_years(self):
+        self.pipeline = [
+            {
+                "$group": {
+                    "_id": {
+                        "year": {
+                            "$year": "$date.dt"
+                        }
+                    },
+                    "total": {
+                        "$sum": 1
+                    }
+                }
+            }
+        ]
+        result = self.exgest()
+
+        df_result = expand_columns_of_dataframe(result, '_id')
+
+        return df_result['year'].values
 
 
 def is_var_empty(var):
