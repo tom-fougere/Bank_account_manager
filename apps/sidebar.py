@@ -20,15 +20,12 @@ sidebar = html.Div(
     [
         html.H2("Gestion des dépenses", className="display-4"),
         html.Hr(),
-        html.P(
-            "Selectionner une option", className="lead"
-        ),
         dbc.Nav(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
-                dbc.NavLink("Importer données", href="/import_data", active="exact"),
-                dbc.NavLink("All data", href="/all_data_page", active="exact"),
-                dbc.NavLink("Graphique", href="/graphs", active="exact")
+                dbc.NavLink("Importer des données", href="/import_data", active="exact"),
+                dbc.NavLink("Rechercher des données", href="/search_data", active="exact"),
+                dbc.NavLink("Stats de l'année", href="/stats_one_year", active="exact")
             ],
             vertical=True,
             pills=True,

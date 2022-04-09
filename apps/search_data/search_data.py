@@ -15,6 +15,9 @@ from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID,
 from utils.time_operations import str_to_datetime
 
 layout = html.Div([
+    html.H1('Recherche de données',
+            id='title_search_data_page',
+            style={'textAlign': 'center'}),
     html.Div([
         html.Div([
             html.Div("Date de transaction:"),

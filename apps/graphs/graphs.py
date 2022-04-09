@@ -15,7 +15,8 @@ now = datetime.datetime.now()
 
 layout = html.Div(
     [
-        html.H1('Mes statistiques',
+        html.H1('Statistiques ' + str(now.year),
+                id='title_stat_page',
                 style={'textAlign': 'center'}),
         html.Div([
             dbc.Button("Refresh", outline=True, color="secondary", className="btn_refresh", id="btn_refresh"),
@@ -50,7 +51,8 @@ layout = html.Div(
 
 
 @app.callback(
-    [Output('fig_indicators_revenue_expense_balance', 'figure'),
+    [Output('title_stat_page', 'children'),
+     Output('fig_indicators_revenue_expense_balance', 'figure'),
      Output('fig_expenses_vs_revenue', 'figure'),
      Output('fig_expenses_vs_category', 'figure'),
      Output('fig_expenses_vs_occasion', 'figure'),
@@ -63,6 +65,7 @@ layout = html.Div(
      Input('dropdown_year_stat', 'value')])
 def refresh_page(n_click, selected_year):
     outputs = \
+        ' '.join(['Statistiques', str(selected_year)]), \
         fig_indicators_revenue_expense_balance(selected_year),\
         fig_expenses_vs_revenue(selected_year),\
         fig_expenses_vs_category(selected_year),\

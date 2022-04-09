@@ -26,9 +26,9 @@ def display_page(pathname):
         return home.layout
     if pathname == '/import_data':
         return import_new_data.layout
-    if pathname == '/all_data_page':
+    if pathname == '/search_data':
         return search_data.layout
-    if pathname == '/graphs':
+    if pathname == '/stats_one_year':
         return graphs.layout
     else:
         return '404'

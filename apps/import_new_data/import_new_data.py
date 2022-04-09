@@ -13,6 +13,10 @@ from source.definitions import DB_CONN_TRANSACTION, DB_CONN_ACCOUNT, DATA_FOLDER
 
 layout = html.Div([
 
+    html.H1('Importation de données',
+            id='title_import_data_page',
+            style={'textAlign': 'center'}),
+
     dcc.Upload(
         id='drag_upload_file',
         children=html.Div([
