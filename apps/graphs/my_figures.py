@@ -21,8 +21,12 @@ def fig_indicators_revenue_expense_balance(year=datetime.datetime.now().year):
     df_current_year = get_data_for_graph(p_salary_vs_other,
                                          date_range=(start_date, end_date))
 
-    revenues_current_year = df_current_year['Revenues'].sum()
-    expenses_current_year = -df_current_year['Expenses'].sum()
+    if len(df_current_year) > 0:
+        revenues_current_year = df_current_year['Revenues'].sum()
+        expenses_current_year = -df_current_year['Expenses'].sum()
+    else:
+        revenues_current_year = 0
+        expenses_current_year = 0
 
     # Get data from last year
     df_previous_year = get_data_for_graph(p_salary_vs_other,
@@ -74,42 +78,45 @@ def fig_expenses_vs_revenue(year=datetime.datetime.now().year):
     # Get data
     df = get_data_for_graph(p_salary_vs_other, date_range=(start_date, end_date))
 
-    # Transform df
-    df['Expenses'] = - df['Expenses']  # Negative becomes Positive
-    df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
+    if len(df) > 0:
+        # Transform df
+        df['Expenses'] = - df['Expenses']  # Negative becomes Positive
+        df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
 
-    # Figures
-    figure = make_subplots(rows=2, cols=1, subplot_titles=('Revenus VS Dépenses', 'Gain'))
-    figure.add_trace(go.Bar(
-        x=MONTHS[:len(df)],
-        y=df['Revenues'],
-        name='Revenus'
-        ),
-        row=1, col=1)
-    figure.add_trace(go.Bar(
-        x=MONTHS[:len(df)],
-        y=df['Expenses'],
-        name='Dépenses'
-        ),
-        row=1, col=1)
-    figure.add_trace(go.Bar(
-        x=MONTHS[:len(df)],
-        y=df['Balance'],
-        name='Gain',
-        marker_color=df['Color'],
-        showlegend=False
-        ),
-        row=2, col=1)
-    figure.add_trace(go.Scatter(
-        x=MONTHS[:len(df)],
-        y=np.zeros(df['date'].shape),
-        mode='lines',
-        line=dict(dash='dash', color='black'),
-        showlegend=False
-        ),
-        row=2, col=1)
-    figure.update_layout(xaxis=dict(tickformat="%b \n%Y"))
-    figure.update_layout(xaxis2=dict(tickformat="%b \n%Y"))
+        # Figures
+        figure = make_subplots(rows=2, cols=1, subplot_titles=('Revenus VS Dépenses', 'Gain'))
+        figure.add_trace(go.Bar(
+            x=MONTHS[:len(df)],
+            y=df['Revenues'],
+            name='Revenus'
+            ),
+            row=1, col=1)
+        figure.add_trace(go.Bar(
+            x=MONTHS[:len(df)],
+            y=df['Expenses'],
+            name='Dépenses'
+            ),
+            row=1, col=1)
+        figure.add_trace(go.Bar(
+            x=MONTHS[:len(df)],
+            y=df['Balance'],
+            name='Gain',
+            marker_color=df['Color'],
+            showlegend=False
+            ),
+            row=2, col=1)
+        figure.add_trace(go.Scatter(
+            x=MONTHS[:len(df)],
+            y=np.zeros(df['date'].shape),
+            mode='lines',
+            line=dict(dash='dash', color='black'),
+            showlegend=False
+            ),
+            row=2, col=1)
+        figure.update_layout(xaxis=dict(tickformat="%b \n%Y"))
+        figure.update_layout(xaxis2=dict(tickformat="%b \n%Y"))
+    else:
+        figure = {}
 
     return figure
 
@@ -215,12 +222,13 @@ def fig_loan(year=datetime.datetime.now().year):
 
     # Get data
     df = get_data_for_graph(p_loan_per_date, date_range=(start_date, end_date))
-    
-    # Inverse expenses sign
-    df['Balance'] = -df['Balance']
 
     # Figures
     if len(df) > 0:
+
+        # Inverse expenses sign
+        df['Balance'] = -df['Balance']
+
         # figure = px.line(df, x='date', y='Balance', markers=True)
         figure = go.Figure()
         figure.add_trace(

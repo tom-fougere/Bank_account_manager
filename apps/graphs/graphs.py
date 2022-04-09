@@ -19,11 +19,11 @@ layout = html.Div(
             dbc.Button("Refresh", outline=True, color="secondary", className="btn_refresh", id="btn_refresh"),
             dcc.Dropdown(id='dropdown_year_stat',
                          options=[
-                             {'label': '2021', 'value': '2021'},
-                             {'label': '2022', 'value': '2022'},
-                             {'label': '2023', 'value': '2023'},
+                             {'label': '2021', 'value': 2021},
+                             {'label': '2022', 'value': 2022},
+                             {'label': '2023', 'value': 2023},
                             ],
-                         value='2021',
+                         value=2022,
                          style={'width': '100%',
                                 'height': 40,
                                 'margin-left': 2}
@@ -53,8 +53,28 @@ layout = html.Div(
 
 
 @app.callback(
-    Output('refresh_msg', 'children'),
-    Input('btn_refresh', 'n_clicks'))
-def refresh_page(n_click):
-    return str(n_click)
+    [Output('refresh_msg', 'children'),
+     Output('fig_indicators_revenue_expense_balance', 'figure'),
+     Output('fig_expenses_vs_revenue', 'figure'),
+     Output('fig_expenses_vs_category', 'figure'),
+     Output('fig_expenses_vs_occasion', 'figure'),
+     Output('fig_saving', 'figure'),
+     Output('fig_loan', 'figure'),
+     Output('fig_categories', 'figure'),
+     Output('fig_cum_balance', 'figure'),],
+    [Input('btn_refresh', 'n_clicks'),
+     Input('dropdown_year_stat', 'value')])
+def refresh_page(n_click, selected_year):
+    outputs = \
+        str(n_click),\
+        fig_indicators_revenue_expense_balance(selected_year),\
+        fig_expenses_vs_revenue(selected_year),\
+        fig_expenses_vs_category(selected_year),\
+        fig_expenses_vs_occasion(selected_year),\
+        fig_savings(selected_year),\
+        fig_loan(selected_year),\
+        fig_categories(selected_year),\
+        fig_cum_balance(selected_year),\
+
+    return outputs
 
