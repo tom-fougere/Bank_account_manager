@@ -7,7 +7,7 @@ from app import app
 from utils.text_operations import get_project_root
 from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.ingest import TransactionIngest
-from apps.import_new_data.operations import create_datatable, read_and_format_data, update_db_account
+from apps.import_new_data.operations import create_datatable, read_and_format_data, update_db_account, check_balances
 from source.definitions import DB_CONN_TRANSACTION, DB_CONN_ACCOUNT, DATA_FOLDER
 
 
@@ -35,12 +35,14 @@ layout = html.Div([
     html.Button('Import', id='btn_import_database', n_clicks=0, disabled=True),
     html.Div(id="btn_click"),
     html.Div(id="new_transaction_msg"),
+    html.Div(id="warning_msg"),
     html.Div(id="table_new_import"),
 ])
 
 
 @app.callback(
     Output("new_transaction_msg", 'children'),
+    Output("warning_msg", 'children'),
     Output("table_new_import", 'children'),
     Output('btn_import_database', 'disabled'),
     Input('drag_upload_file', 'contents'),
@@ -50,6 +52,7 @@ def upload_file(list_of_contents, filename, btn_disabled):
 
     # default outputs
     msg = ''
+    warning_msg = ''
     dt_transactions = dt.DataTable()
     btn_import_state = btn_disabled
 
@@ -61,13 +64,22 @@ def upload_file(list_of_contents, filename, btn_disabled):
         # Create message
         msg = 'New transactions = {}'.format(len(df))
 
+        # Check balances
+        is_same_balance, balance_gap = check_balances(
+            account_info=account_info,
+            db_connection=DB_CONN_ACCOUNT,
+            df=df,
+        )
+        if not is_same_balance:
+            warning_msg = "WARNING: the balances don't match ! ({:.2f}€)".format(balance_gap)
+
         # Convert to dataTable
         dt_transactions = create_datatable(df)
 
         # Enable button
         btn_import_state = False
 
-    return html.Div(msg), dt_transactions, btn_import_state
+    return html.Div(msg), html.Div(warning_msg), dt_transactions, btn_import_state
 
 
 @app.callback(
@@ -83,6 +95,7 @@ def import_transactions_in_database(n_clicks, filename):
         df_new = df[df['duplicate'] == 'False']
         df_new.drop(columns=['duplicate'])
 
+        # Update balance
         update_db_account(account_info=account_info,
                           df=df_new,
                           db_connection=DB_CONN_ACCOUNT)

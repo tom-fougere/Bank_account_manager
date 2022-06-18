@@ -113,3 +113,20 @@ def update_db_account(account_info, df, db_connection):
     metadata_db.update_date_last_import(account_id=account_id, date=newest_date)
 
 
+def check_balances(account_info, df, db_connection):
+    account_id = df['account_id'].unique()
+    assert len(account_id) == 1
+    account_id = account_id[0]
+
+    my_connection = MongoDBConnection(db_connection)
+    metadata_db = MetadataDB(my_connection)
+
+    # Get balance add the sum to the previous balance
+    previous_balance = metadata_db.get_balance_in_db(account_id=account_id) + \
+                       metadata_db.get_balance_bias(account_id=account_id)
+    new_potential_balance = round(previous_balance + df['amount'].sum(), 2)
+
+    # Get balance in the bank
+    balance_bank = account_info['balance']
+
+    return new_potential_balance == balance_bank, new_potential_balance - balance_bank
