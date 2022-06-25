@@ -34,7 +34,7 @@ class TestMetadataDB(unittest.TestCase):
 
         result = self.metadata_db.connection.collection.find_one()
 
-        self.assertEqual(len(result), 10)
+        self.assertEqual(len(result), 12)
         self.assertEqual(result['account_id'], ACCOUNT_ID)
         self.assertEqual(result['balance_in_bank'], BALANCE_IN_BANK)
         self.assertEqual(result['balance_in_db'], BALANCE_IN_DB)
@@ -42,6 +42,8 @@ class TestMetadataDB(unittest.TestCase):
         self.assertEqual(result['categories'], CATEGORIES)
         self.assertEqual(result['occasions'], OCCASIONS)
         self.assertEqual(result['types_transaction'], TYPE_TRANSACTIONS)
+        self.assertEqual(result['nb_transactions_db'], 0)
+        self.assertEqual(result['nb_transactions_bank'], 0)
         self.assertEqual(result['date_last_import']['dt'], DATE_LAST_IMPORT)
         self.assertEqual(result['date_last_import']['str'], '13/04/2022')
         self.assertEqual(result['date_balance_in_bank']['dt'], DATE_BALANCE_IN_BANK)
@@ -96,6 +98,16 @@ class TestMetadataDB(unittest.TestCase):
 
         self.assertEqual(date_last_import, "13/04/2022")
 
+    def test_get_nb_transactions_bank(self):
+        nb_transactions = self.metadata_db.get_nb_transactions_bank(account_id=ACCOUNT_ID)
+
+        self.assertEqual(nb_transactions, 0)
+
+    def test_get_nb_transactions_db(self):
+        nb_transactions = self.metadata_db.get_nb_transactions_db(account_id=ACCOUNT_ID)
+
+        self.assertEqual(nb_transactions, 0)
+
     def test_update_balance_in_bank(self):
         new_balance = 10.1
         self.metadata_db.update_balance_in_bank(account_id=ACCOUNT_ID, balance=new_balance)
@@ -129,4 +141,13 @@ class TestMetadataDB(unittest.TestCase):
         doc = self.metadata_db.connection.collection.find_one({'account_id': ACCOUNT_ID}, ['date_last_import'])
         self.assertEqual(doc['date_last_import']['dt'], new_date)
         self.assertEqual(doc['date_last_import']['str'], new_date.strftime("%d/%m/%Y"))
+
+    def test_update_nb_transactions(self):
+        self.metadata_db.update_nb_transactions(account_id=ACCOUNT_ID, new_nb_trans_db=3, new_nb_trans_bank=4)
+
+        doc = self.metadata_db.connection.collection.find_one({'account_id': ACCOUNT_ID},
+                                                              ['nb_transactions_db', 'nb_transactions_bank'])
+        self.assertEqual(doc['nb_transactions_db'], 3)
+        self.assertEqual(doc['nb_transactions_bank'], 4)
+
 

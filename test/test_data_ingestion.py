@@ -52,27 +52,6 @@ class TestTransactionIngest(unittest.TestCase):
         # check equality
         self.assertEqual(expected_transaction.to_dict(), db_trans)
 
-    def test_ingest_one_same_transaction(self):
-
-        # Get transactions
-        df = self.df_transactions
-
-        # Convert 2 fields of date as one with a dict
-        df['date_transaction'] = \
-            df.apply(lambda x: {'str': x.date_transaction_str, 'dt': x.date_transaction_dt}, axis=1)
-        df['date'] = \
-            df.apply(lambda x: {'str': x.date_str, 'dt': x.date_dt}, axis=1)
-        df.drop(columns=['date_str', 'date_dt', 'date_transaction_str', 'date_transaction_dt'],
-                axis=1,
-                inplace=True)
-        expected_transaction = df.iloc[0]
-
-        # Ingestion of one transaction
-        self.transInges.ingest_one_transaction(expected_transaction)
-
-        with self.assertRaises(Exception) as context:
-            self.transInges.ingest_one_transaction(expected_transaction)
-
     def test_ingest(self):
 
         # Ingestion of transactions

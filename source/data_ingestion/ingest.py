@@ -29,22 +29,7 @@ class TransactionIngest:
     def ingest_one_transaction(self, transaction_series):
 
         transaction_dict = transaction_series.to_dict()
-        db_trans = self.connection.collection.find({'account_id': transaction_dict['account_id'],
-                                                    'date_transaction.str': transaction_dict['date_transaction']['str'],
-                                                    'amount': transaction_dict['amount'],
-                                                    'description': transaction_dict['description']})
-
-        if len(list(db_trans)) >= 1:
-            raise ValueError('There is 1 or more documents in the DB with the same attributes: '
-                             ' - account_id: {},'
-                             ' - date_transaction: {},'
-                             ' - amount: {}'
-                             ' - description: {}'.format(transaction_dict['account_id'],
-                                                         transaction_dict['date']['str'],
-                                                         transaction_dict['date_transaction']['str'],
-                                                         transaction_dict['description']))
-        else:
-            self.connection.collection.insert(transaction_dict)
+        self.connection.collection.insert(transaction_dict)
 
     def update_one_transaction(self, transaction_series):
 
