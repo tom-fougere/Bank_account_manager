@@ -1,4 +1,5 @@
 from source.definitions import CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
+from utils.time_operations import str_to_datetime
 
 
 class MetadataDB:
@@ -49,6 +50,60 @@ class MetadataDB:
                           'date_last_import': self.date_last_import}
 
         self.connection.collection.insert_one(data_to_ingest)
+
+    def write_values_in_db(self):
+
+        data_to_ingest = {'balance_in_bank': self.balance_in_bank,
+                          'balance_in_db': self.balance_in_db,
+                          'balance_bias': self.balance_bias,
+                          'categories': self.categories,
+                          'occasions': self.occasions,
+                          'nb_transactions_bank': self.nb_transactions_bank,
+                          'nb_transactions_db': self.nb_transactions_db,
+                          'types_transaction': self.types_transaction,
+                          'date_balance_in_bank': self.date_balance_in_bank,
+                          'date_last_import': self.date_last_import}
+
+        self.connection.collection.update(
+            {
+                'account_id': self.account_id
+            },
+            {
+                "$set": data_to_ingest
+            },
+            upsert=False
+        )
+
+    def get_all_values(self, account_id):
+        self.account_id = account_id
+
+        self.balance_in_bank = self.get_balance_in_bank(account_id=account_id)
+        self.balance_in_db = self.get_balance_in_db(account_id=account_id)
+        self.balance_bias = self.get_balance_bias(account_id=account_id)
+        self.categories = self.get_categories(account_id=account_id)
+        self.occasions = self.get_occasions(account_id=account_id)
+        self.types_transaction = self.get_types_transaction(account_id=account_id)
+        self.nb_transactions_db = self.get_nb_transactions_db(account_id=account_id)
+        self.nb_transactions_bank = self.get_nb_transactions_bank(account_id=account_id)
+
+        date_balance_in_bank = self.get_date_balance_in_bank(account_id=account_id)
+        self.date_balance_in_bank = {'dt': str_to_datetime(date_balance_in_bank, date_format="%d/%m/%Y"),
+                                     'str': date_balance_in_bank}
+
+        date_last_import = self.get_date_last_import(account_id=account_id)
+        self.date_last_import = {'dt': str_to_datetime(date_last_import, date_format="%d/%m/%Y"),
+                                 'str': date_last_import}
+
+    def update_values(self, new_values):
+        for key, value in new_values.items():
+            if (key == 'date_balance_in_bank') or (key == 'date_last_import'):
+                value_dict = {
+                    'dt': value,
+                    'str': value.strftime("%d/%m/%Y"),
+                }
+                self.__setattr__(key, value_dict)
+            elif key in self.__dict__.keys():
+                self.__setattr__(key, value)
 
     def get_balance_in_bank(self, account_id):
         result = self.connection.collection.find_one({'account_id': account_id}, ['balance_in_bank'])

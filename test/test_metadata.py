@@ -150,4 +150,103 @@ class TestMetadataDB(unittest.TestCase):
         self.assertEqual(doc['nb_transactions_db'], 3)
         self.assertEqual(doc['nb_transactions_bank'], 4)
 
+    def test_get_all_values(self):
 
+        my_connection = MongoDBConnection('db_metadata_ut')
+        metadata_db = MetadataDB(my_connection)
+
+        metadata_db.init_db(account_id="009",
+                            balance_in_db=BALANCE_IN_DB,
+                            balance_in_bank=BALANCE_IN_BANK,
+                            balance_bias=BALANCE_BIAS,
+                            date_last_import=DATE_LAST_IMPORT,
+                            date_balance_in_bank=DATE_BALANCE_IN_BANK,
+                            nb_trans_db=3,
+                            nb_trans_bank=5)
+
+        metadata_db.get_all_values(account_id="009")
+
+        self.assertEqual(metadata_db.balance_in_bank, BALANCE_IN_BANK)
+        self.assertEqual(metadata_db.balance_in_db, BALANCE_IN_DB)
+        self.assertEqual(metadata_db.balance_bias, BALANCE_BIAS)
+        self.assertEqual(metadata_db.nb_transactions_bank, 5)
+        self.assertEqual(metadata_db.nb_transactions_db, 3)
+        self.assertEqual(metadata_db.date_balance_in_bank['dt'], DATE_BALANCE_IN_BANK)
+        self.assertEqual(metadata_db.date_balance_in_bank['str'], DATE_BALANCE_IN_BANK.strftime("%d/%m/%Y"))
+        self.assertEqual(metadata_db.date_last_import['dt'], DATE_LAST_IMPORT)
+        self.assertEqual(metadata_db.date_last_import['str'], DATE_LAST_IMPORT.strftime("%d/%m/%Y"))
+
+        metadata_db.connection.collection.remove({"account_id": "009"})
+
+    def test_update_values(self):
+        my_connection = MongoDBConnection('db_metadata_ut')
+        metadata_db = MetadataDB(my_connection)
+
+        metadata_db.init_db(account_id="009",
+                            balance_in_db=BALANCE_IN_DB,
+                            balance_in_bank=BALANCE_IN_BANK,
+                            balance_bias=BALANCE_BIAS,
+                            date_last_import=DATE_LAST_IMPORT,
+                            date_balance_in_bank=DATE_BALANCE_IN_BANK,
+                            nb_trans_db=3,
+                            nb_trans_bank=5)
+
+        new_values = {
+            'balance_in_db': 100.01,
+            'balance_in_bank': -99.99,
+            'balance_bias': 0.75,
+            'date_last_import': datetime.datetime(2021, 9, 10),
+            'date_balance_in_bank': datetime.datetime(2021, 3, 17),
+            'nb_transactions_db': 10,
+            'nb_transactions_bank': 11,
+        }
+
+        metadata_db.update_values(new_values)
+
+        self.assertEqual(metadata_db.balance_in_db, new_values['balance_in_db'])
+        self.assertEqual(metadata_db.balance_in_bank, new_values['balance_in_bank'])
+        self.assertEqual(metadata_db.balance_bias, new_values['balance_bias'])
+        self.assertEqual(metadata_db.date_last_import['dt'], new_values['date_last_import'])
+        self.assertEqual(metadata_db.date_balance_in_bank['dt'], new_values['date_balance_in_bank'])
+        self.assertEqual(metadata_db.nb_transactions_db, new_values['nb_transactions_db'])
+        self.assertEqual(metadata_db.nb_transactions_bank, new_values['nb_transactions_bank'])
+
+        metadata_db.connection.collection.remove({"account_id": "009"})
+
+    def test_write_values_in_db(self):
+        my_connection = MongoDBConnection('db_metadata_ut')
+        metadata_db = MetadataDB(my_connection)
+
+        metadata_db.init_db(account_id="009",
+                            balance_in_db=BALANCE_IN_DB,
+                            balance_in_bank=BALANCE_IN_BANK,
+                            balance_bias=BALANCE_BIAS,
+                            date_last_import=DATE_LAST_IMPORT,
+                            date_balance_in_bank=DATE_BALANCE_IN_BANK,
+                            nb_trans_db=3,
+                            nb_trans_bank=5)
+
+        new_values = {
+            'balance_in_db': 100.01,
+            'balance_in_bank': -99.99,
+            'balance_bias': 0.75,
+            'date_last_import': datetime.datetime(2021, 9, 10),
+            'date_balance_in_bank': datetime.datetime(2021, 3, 17),
+            'nb_transactions_db': 10,
+            'nb_transactions_bank': 11,
+        }
+
+        metadata_db.update_values(new_values)
+        metadata_db.write_values_in_db()
+
+        results = list(metadata_db.connection.collection.find({"account_id": "009"}))[0]
+
+        self.assertEqual(results['balance_in_db'], new_values['balance_in_db'])
+        self.assertEqual(results['balance_in_bank'], new_values['balance_in_bank'])
+        self.assertEqual(results['balance_bias'], new_values['balance_bias'])
+        self.assertEqual(results['date_last_import']['dt'], new_values['date_last_import'])
+        self.assertEqual(results['date_balance_in_bank']['dt'], new_values['date_balance_in_bank'])
+        self.assertEqual(results['nb_transactions_db'], new_values['nb_transactions_db'])
+        self.assertEqual(results['nb_transactions_bank'], new_values['nb_transactions_bank'])
+
+        metadata_db.connection.collection.remove({"account_id": "009"})
