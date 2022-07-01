@@ -1,4 +1,5 @@
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash import Input, Output, State
 import dash_table as dt
@@ -31,8 +32,16 @@ layout = html.Div([
             'borderRadius': '5px',
             'textAlign': 'center'
         }),
-
-    html.Button('Import', id='btn_import_database', n_clicks=0, disabled=True),
+    dbc.Button("Importer",
+               outline=True,
+               color="secondary",
+               className="btn_import_database",
+               id="btn_import_database",
+               disabled=True,
+               n_clicks=0,
+               style={'width': '100%',
+                      'margin-top': 10}
+               ),
     html.Div(id="btn_click"),
     html.Div(id="new_transaction_msg"),
     html.Div(id="warning_msg"),

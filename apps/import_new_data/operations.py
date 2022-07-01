@@ -7,20 +7,19 @@ from source.data_ingestion.exgest import TransactionExgest
 from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.metadata import MetadataDB
 
-
 style_cell_conditional = (
-    [
-        {
-            'if': {'column_id': c},
-            'textAlign': 'left'
-        } for c in ['Libelé', 'Type']
-    ] +
-    [
-        {
-            'if': {'column_id': c},
-            'textAlign': 'center'
-        } for c in ['Date', 'Date (banque)']
-    ]
+        [
+            {
+                'if': {'column_id': c},
+                'textAlign': 'left'
+            } for c in ['Libelé', 'Type']
+        ] +
+        [
+            {
+                'if': {'column_id': c},
+                'textAlign': 'center'
+            } for c in ['Date', 'Date (banque)']
+        ]
 )
 
 style_data_conditional = (
@@ -33,8 +32,8 @@ style_data_conditional = (
         },
         {
             'if': {
-               'column_id': 'Montant (€)',
-               'filter_query': '{Montant (€)} > 0'
+                'column_id': 'Montant (€)',
+                'filter_query': '{Montant (€)} > 0'
             },
             'backgroundColor': '#B5EEB6'
         }
@@ -43,7 +42,6 @@ style_data_conditional = (
 
 
 def create_datatable(df):
-
     df_display, columns = format_dataframe_to_datatable(df, show_new_data=True, show_category=False)
 
     dt_transactions = dt.DataTable(id='cell_new_import',
