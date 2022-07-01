@@ -187,9 +187,8 @@ class TestTransactionDB(unittest.TestCase):
     def setUp(self) -> None:
 
         # Init databases with data
-        my_connection = MongoDBConnection(CONNECTION_METADATA)
         self.metadata = MetadataDB(
-            mongodb_connection=my_connection,
+            name_connection=CONNECTION_METADATA,
             account_id=ACCOUNT_ID,
         )
         self.metadata.init_db(
@@ -201,18 +200,16 @@ class TestTransactionDB(unittest.TestCase):
         )
 
         # Create database for UT
-        con_metadata = MongoDBConnection(CONNECTION_METADATA)
-        con_transaction = MongoDBConnection(CONNECTION_TRANSACTION)
         self.db = TransactionDB(
-            connection_transaction=con_transaction,
-            connection_metadata=con_metadata,
+            name_connection_transaction=CONNECTION_TRANSACTION,
+            name_connection_metadata=CONNECTION_METADATA,
             account_id=ACCOUNT_ID,
         )
 
     def tearDown(self) -> None:
         # Remove all in the collection
         self.db.connection_transaction.collection.remove({"account_id": ACCOUNT_ID})
-        self.db.connection_metadata.collection.remove({"account_id": ACCOUNT_ID})
+        self.db.metadata.connection.collection.remove({"account_id": ACCOUNT_ID})
 
     def test_update_metadata(self):
 

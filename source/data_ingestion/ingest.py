@@ -87,12 +87,12 @@ class TransactionIngest:
             self.update_one_transaction(trans)
 
 class TransactionDB:
-    def __init__(self, connection_metadata, connection_transaction, account_id):
-        self.connection_metadata = connection_metadata
-        self.connection_transaction = connection_transaction
+    def __init__(self, name_connection_metadata, name_connection_transaction, account_id):
+
+        self.connection_transaction = MongoDBConnection(name_connection_transaction)
         self.account_id = account_id
 
-        self.metadata = MetadataDB(mongodb_connection=self.connection_metadata,
+        self.metadata = MetadataDB(name_connection=name_connection_metadata,
                                    account_id=self.account_id)
         self.metadata.get_all_values()
 

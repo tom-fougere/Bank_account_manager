@@ -1,10 +1,10 @@
 import unittest
 import datetime
 
-from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.metadata import MetadataDB
 from source.definitions import CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
 
+METADATA_CONNECTION_NAME = 'db_metadata_ut'
 BALANCE_IN_DB = -101.98
 BALANCE_IN_BANK = -223.67
 BALANCE_BIAS = 54.3
@@ -16,8 +16,7 @@ DATE_BALANCE_IN_BANK = datetime.datetime(2019, 12, 25)
 class TestMetadataDB(unittest.TestCase):
     def setUp(self) -> None:
 
-        my_connection = MongoDBConnection('db_metadata_ut')
-        self.metadata_db = MetadataDB(my_connection, account_id=ACCOUNT_ID)
+        self.metadata_db = MetadataDB(METADATA_CONNECTION_NAME, account_id=ACCOUNT_ID)
 
         self.metadata_db.init_db(balance_in_db=BALANCE_IN_DB,
                                  balance_in_bank=BALANCE_IN_BANK,
@@ -151,8 +150,7 @@ class TestMetadataDB(unittest.TestCase):
 
     def test_get_all_values(self):
 
-        my_connection = MongoDBConnection('db_metadata_ut')
-        metadata_db = MetadataDB(my_connection, account_id="009")
+        metadata_db = MetadataDB(METADATA_CONNECTION_NAME, account_id="009")
 
         metadata_db.init_db(balance_in_db=BALANCE_IN_DB,
                             balance_in_bank=BALANCE_IN_BANK,
@@ -177,8 +175,7 @@ class TestMetadataDB(unittest.TestCase):
         metadata_db.connection.collection.remove({"account_id": "009"})
 
     def test_update_values(self):
-        my_connection = MongoDBConnection('db_metadata_ut')
-        metadata_db = MetadataDB(my_connection, account_id="009")
+        metadata_db = MetadataDB(METADATA_CONNECTION_NAME, account_id="009")
 
         metadata_db.init_db(balance_in_db=BALANCE_IN_DB,
                             balance_in_bank=BALANCE_IN_BANK,
@@ -211,8 +208,7 @@ class TestMetadataDB(unittest.TestCase):
         metadata_db.connection.collection.remove({"account_id": "009"})
 
     def test_write_values_in_db(self):
-        my_connection = MongoDBConnection('db_metadata_ut')
-        metadata_db = MetadataDB(my_connection, account_id="009")
+        metadata_db = MetadataDB(METADATA_CONNECTION_NAME, account_id="009")
 
         metadata_db.init_db(balance_in_db=BALANCE_IN_DB,
                             balance_in_bank=BALANCE_IN_BANK,

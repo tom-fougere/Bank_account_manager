@@ -1,10 +1,11 @@
 from source.definitions import CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
 from utils.time_operations import str_to_datetime
+from source.db_connection.db_access import MongoDBConnection
 
 
 class MetadataDB:
-    def __init__(self, mongodb_connection, account_id):
-        self.connection = mongodb_connection
+    def __init__(self, name_connection, account_id):
+        self.connection = MongoDBConnection(name_connection)
         self.account_id = account_id
         self.balance_in_bank = None
         self.balance_in_db = None
