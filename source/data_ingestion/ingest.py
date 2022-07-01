@@ -146,6 +146,71 @@ class TransactionDB:
             }
         )
 
+    def check(self, df_transactions, bank_info):
+
+        new_nb_transactions = self.metadata.nb_transactions_bank + len(df_transactions)
+
+        diff_nb_transaction = self.connection_transaction.collection.count(
+                {'account_id': self.account_id}) - new_nb_transactions
+        diff_balance = self._get_balance_in_db() - bank_info['balance']
+
+        return diff_nb_transaction, diff_balance
+
+    def update(self, df_transactions):
+
+        df_transaction = df_transactions.copy()
+
+        # Convert date in datetime
+        df_transaction['date_dt'] = df_transaction.apply(
+            lambda x: str_to_datetime(x.date_str, date_format='%Y-%m-%d'), axis=1)
+        df_transaction['date_transaction_dt'] = df_transaction.apply(
+            lambda x: str_to_datetime(x.date_transaction_str, date_format='%Y-%m-%d'), axis=1)
+
+        # Modify string format of dates
+        df_transaction['date_str'] = df_transaction.apply(
+            lambda x: modify_date_str_format(x.date_str,
+                                             current_format='%Y-%m-%d',
+                                             new_format='%d/%m/%Y'), axis=1)
+        df_transaction['date_transaction_str'] = df_transaction.apply(
+            lambda x: modify_date_str_format(x.date_transaction_str,
+                                             current_format='%Y-%m-%d',
+                                             new_format='%d/%m/%Y'), axis=1)
+
+        # Convert 2 fields of date as one with a dict
+        df_transaction['date'] = \
+            df_transaction.apply(lambda x: {'str': x.date_str,
+                                            'dt': x.date_dt}, axis=1)
+        df_transaction['date_transaction'] = \
+            df_transaction.apply(lambda x: {'str': x.date_transaction_str,
+                                            'dt': x.date_transaction_dt}, axis=1)
+
+        df_transaction.drop(columns=['date_str', 'date_dt', 'date_transaction_str', 'date_transaction_dt'],
+                            axis=1,
+                            inplace=True)
+
+        for _, trans in df_transaction.iterrows():
+            self.update_one_transaction(trans)
+
+    def update_one_transaction(self, transaction_series):
+
+        transaction_dict = transaction_series.to_dict()
+
+        # Filter to get the selected document
+        doc_filter = {'_id': ObjectId(transaction_dict['_id'])}
+
+        # Remove the useless columns
+        del transaction_dict['_id']
+
+        # Values to be updated
+        new_values = {"$set": transaction_dict}
+
+        # Update the document
+        current_doc = self.connection_transaction.collection.find_one(doc_filter)
+        if current_doc is not None:
+            self.connection_transaction.collection.update_one(doc_filter, new_values, upsert=False)
+        else:
+            raise ValueError("Impossible to update the doc because the object ID doesn't exist.")
+
     def _update_metadata(self, df, bank_info):
 
         new_nb_transactions = self.metadata.nb_transactions_bank + len(df)
