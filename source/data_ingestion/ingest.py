@@ -1,6 +1,7 @@
 from bson.objectid import ObjectId
 from utils.time_operations import str_to_datetime, modify_date_str_format
 from source.data_ingestion.metadata import MetadataDB
+from source.db_connection.db_access import MongoDBConnection
 
 class TransactionIngest:
     def __init__(self, mongodb_connection, transactions_df):
