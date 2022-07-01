@@ -280,15 +280,20 @@ class TestTransactionDB(unittest.TestCase):
 
     def test_check(self):
 
+        new_trans_dict = {
+            'amount': 9.81,
+        }
+        new_transaction = pd.DataFrame([new_trans_dict])
+
         diff_nb_trans, diff_balance = self.db.check(
-            df_transactions=[1],
+            df_transactions=new_transaction,
             bank_info={
                 'account_id': ACCOUNT_ID,
                 'balance': 72.01,
             }
         )
 
-        self.assertEqual(diff_balance, -69.81)
+        self.assertEqual(diff_balance, -60.0)
         self.assertEqual(diff_nb_trans, -1)
 
     def test_update(self):

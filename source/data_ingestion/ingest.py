@@ -149,10 +149,11 @@ class TransactionDB:
     def check(self, df_transactions, bank_info):
 
         new_nb_transactions = self.metadata.nb_transactions_bank + len(df_transactions)
+        new_balance = self._get_balance_in_db() + df_transactions['amount'].sum()
 
         diff_nb_transaction = self.connection_transaction.collection.count(
                 {'account_id': self.account_id}) - new_nb_transactions
-        diff_balance = self._get_balance_in_db() - bank_info['balance']
+        diff_balance = new_balance - bank_info['balance']
 
         return diff_nb_transaction, diff_balance
 
