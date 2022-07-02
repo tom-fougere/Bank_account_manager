@@ -3,7 +3,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from app import app
-from apps import home
+from apps.home import home
 from apps.sidebar import sidebar
 from apps.content import content
 from apps.canvas.canvas import canvas
