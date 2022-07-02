@@ -198,7 +198,8 @@ def update_transaction_values(jsonified_data_disabled_trans, jsonified_data_enab
 
 
 @app.callback(
-    [Output("btn_update_transaction", "disabled"),
+    [Output("btn_delete_transaction", "disabled"),
+     Output("btn_update_transaction", "disabled"),
      Output("canvas_date", "disabled"),
      Output("canvas_category", "disabled"),
      Output("canvas_sub_category", "disabled"),
@@ -211,7 +212,7 @@ def enable_disable_canvas_components(jsonified_data_disabled_trans, jsonified_da
     ctx = callback_context
     triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    nb_outputs = 6
+    nb_outputs = 7
     disabled = True
     if (triggered_input == 'store_transaction_disabled') and (jsonified_data_disabled_trans is not None):
         disable_options = (disabled,) * nb_outputs
