@@ -6,7 +6,7 @@ import dash_daq as daq
 import pandas as pd
 import json
 from apps.canvas.canvas_transaction_details import get_transaction_values,\
-    get_sub_categories_dropdown, update_transaction
+    get_sub_categories_dropdown, update_transaction, delete_transaction
 from source.transactions.transaction_operations import get_occasion, get_categories, get_types_transaction
 from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID, DEFAULT_OCCASION_FOR_CAT
 
@@ -120,6 +120,22 @@ transaction_details_layout = html.Div([
             disabled=True),
     ],
         style={'margin-top': 10}),
+    dbc.Modal(
+        [
+            dbc.ModalHeader(dbc.ModalTitle("Validation de la suppression")),
+            dbc.ModalBody("Etes vous certain de supprimer cette transaction ?"),
+            dbc.ModalFooter([
+                dbc.Button(
+                    "Annuler", id="button_delete_cancel", className="ms-auto", n_clicks=0
+                ),
+                dbc.Button(
+                    "Supprimer", id="button_delete_confirm", className="ms-auto", n_clicks=0
+                )
+            ]),
+        ],
+        id="modal_transaction_validation",
+        is_open=False,
+    ),
 ])
 
 
@@ -131,6 +147,13 @@ canvas = dbc.Offcanvas(
             id='btn_update_transaction',
             n_clicks=0,
             disabled=True,
+            style={'width': '100%',
+                   'margin-top': 10}),
+        html.Button(
+            'Supprimer',
+            id='btn_delete_transaction',
+            n_clicks=0,
+            disabled=False,
             style={'width': '100%',
                    'margin-top': 10}),
         dcc.Store(id='store_transaction_enabled'),
@@ -175,7 +198,8 @@ def update_transaction_values(jsonified_data_disabled_trans, jsonified_data_enab
 
 
 @app.callback(
-    [Output("btn_update_transaction", "disabled"),
+    [Output("btn_delete_transaction", "disabled"),
+     Output("btn_update_transaction", "disabled"),
      Output("canvas_date", "disabled"),
      Output("canvas_category", "disabled"),
      Output("canvas_sub_category", "disabled"),
@@ -188,7 +212,7 @@ def enable_disable_canvas_components(jsonified_data_disabled_trans, jsonified_da
     ctx = callback_context
     triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    nb_outputs = 6
+    nb_outputs = 7
     disabled = True
     if (triggered_input == 'store_transaction_disabled') and (jsonified_data_disabled_trans is not None):
         disable_options = (disabled,) * nb_outputs
@@ -368,3 +392,36 @@ def update_transaction_values(click, off_canvas,
         update_msg = 'Transaction mise à jour !'
 
     return update_msg
+
+
+@app.callback(
+    Output("modal_transaction_validation", "is_open"),
+    [Input("btn_delete_transaction", "n_clicks"),
+     Input("button_delete_confirm", "n_clicks"),
+     Input("button_delete_cancel", "n_clicks")],
+    [State("modal_transaction_validation", "is_open"),
+     State("canvas_account_id", "value"),
+     State("canvas_object_id", "value")
+     ],
+)
+def toggle_modal(btn_delete, btn_delete_confirm, btn_delete_cancel, is_open, account_id, object_id):
+
+    # default value
+    new_state_modal = is_open
+
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+
+    if btn_delete or btn_delete_confirm or btn_delete_cancel:
+        new_state_modal = not is_open
+
+    if 'button_delete_confirm' in changed_id:
+
+        # Transaction with new values
+        new_trans_dict = {
+            '_id': object_id,
+            'account_id': account_id,
+        }
+        new_transaction = pd.DataFrame([new_trans_dict])
+        delete_transaction(new_transaction)
+
+    return new_state_modal
