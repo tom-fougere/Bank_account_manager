@@ -92,13 +92,15 @@ def read_and_format_data(full_filename, db_connection):
 
 def create_status_message(connection_transaction, connection_metadata, df, account_info):
 
+    df_new_transactions = df[df['duplicate'] == 'False']
+
     db = TransactionDB(
         name_connection_metadata=connection_metadata,
         name_connection_transaction=connection_transaction,
         account_id=account_info['account_id'],
     )
     diff_nb_transaction, diff_balance = db.check(
-        df_transactions=df,
+        df_transactions=df_new_transactions,
         bank_info=account_info,
     )
 
