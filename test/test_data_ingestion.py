@@ -92,8 +92,7 @@ class TestTransactionDB(unittest.TestCase):
         )
 
         # Exgestion data to get only one transaction
-        con_transaction = MongoDBConnection(CONNECTION_TRANSACTION)
-        data_extractor = TransactionExgest(con_transaction)
+        data_extractor = TransactionExgest(CONNECTION_TRANSACTION)
         data_extractor.set_search_criteria({"account_id": ACCOUNT_ID})
         transactions = data_extractor.exgest()
         transactions = transactions.drop([0, 2])
@@ -123,8 +122,8 @@ class TestTransactionDB(unittest.TestCase):
             }
         )
 
-        self.assertEqual(diff_balance, -60.0)
-        self.assertEqual(diff_nb_trans, -1)
+        self.assertEqual(diff_balance, 2.2+3.3+9.81-72.01)
+        self.assertEqual(diff_nb_trans, 0)
 
     def test_update(self):
 

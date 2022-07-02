@@ -83,11 +83,9 @@ class TestGetLists(unittest.TestCase):
 
     def setUp(self) -> None:
 
-        my_connection = MongoDBConnection(DB_TITLE_CONNECTION)
-        self.metadata_db = MetadataDB(my_connection)
+        self.metadata_db = MetadataDB(DB_TITLE_CONNECTION, account_id=ACCOUNT_ID)
 
-        self.metadata_db.init_db(account_id=ACCOUNT_ID,
-                                 balance_in_db=10.34,
+        self.metadata_db.init_db(balance_in_db=10.34,
                                  balance_in_bank=8.84,
                                  balance_bias=712.70,
                                  date_last_import=datetime.datetime(2022, 4, 13),
