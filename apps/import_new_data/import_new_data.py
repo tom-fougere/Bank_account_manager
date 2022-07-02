@@ -70,7 +70,8 @@ def upload_file(list_of_contents, filename, btn_disabled):
                                                 db_connection=DB_CONN_TRANSACTION)
 
         # Create message
-        msg = 'New transactions = {}'.format(len(df))
+        msg = 'Nombre de transactions dans ce nouveau fichier = {} ({} nouvelles)'.format(
+            len(df), len(df[df['duplicate'] == 'False']))
 
         # Check balances
         warning_msg = create_status_message(

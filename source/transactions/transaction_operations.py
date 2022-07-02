@@ -30,13 +30,11 @@ def check_duplicates_in_df(df1, df2):
                                (df2['description'] == row['description'])].reset_index()
 
             # If transaction exists, replace values of some columns and set 'duplicate' to True
-            if len(df2_same) == 1:
+            if len(df2_same) > 0:
                 column_to_copy = ['category', 'sub_category', 'occasion', 'note', 'check', 'type_transaction']
                 for column in column_to_copy:
                     df1.loc[index, column] = df2_same[column][0]
                 df1.loc[index, 'duplicate'] = True
-            elif len(df2_same) > 1:
-                raise ValueError('WARNING')
 
 
 def format_dataframe_to_datatable(df, show_new_data=False, show_category=False):
@@ -84,10 +82,9 @@ def rename_columns(df):
 
 def get_categories(db_connection, account_id):
 
-    my_connection = MongoDBConnection(db_connection)
-    metadata_db = MetadataDB(my_connection)
+    metadata_db = MetadataDB(db_connection, account_id=account_id)
 
-    categories = metadata_db.get_categories(account_id=account_id)
+    categories = metadata_db.get_categories()
 
     list_categories = []
     for category in categories:
@@ -98,12 +95,11 @@ def get_categories(db_connection, account_id):
 
 def get_sub_categories(db_connection, account_id, categories, add_suffix_cat=True):
 
-    my_connection = MongoDBConnection(db_connection)
-    metadata_db = MetadataDB(my_connection)
+    metadata_db = MetadataDB(db_connection, account_id=account_id)
 
     list_sub_categories = []
     for category in categories:
-        sub_categories = metadata_db.get_sub_categories(account_id=account_id, category=category)
+        sub_categories = metadata_db.get_sub_categories(category=category)
         for sub_category in sub_categories:
             if add_suffix_cat:
                 list_sub_categories.append({'label': f'{category}/{sub_category}',
@@ -117,10 +113,9 @@ def get_sub_categories(db_connection, account_id, categories, add_suffix_cat=Tru
 
 def get_occasion(db_connection, account_id):
 
-    my_connection = MongoDBConnection(db_connection)
-    metadata_db = MetadataDB(my_connection)
+    metadata_db = MetadataDB(db_connection, account_id=account_id)
 
-    occasions = metadata_db.get_occasions(account_id=account_id)
+    occasions = metadata_db.get_occasions()
 
     list_occasions = []
     for occas in occasions:
@@ -131,10 +126,9 @@ def get_occasion(db_connection, account_id):
 
 def get_types_transaction(db_connection, account_id):
 
-    my_connection = MongoDBConnection(db_connection)
-    metadata_db = MetadataDB(my_connection)
+    metadata_db = MetadataDB(db_connection, account_id=account_id)
 
-    types = metadata_db.get_types_transaction(account_id=account_id)
+    types = metadata_db.get_types_transaction()
 
     list_types = []
     for type in types:
