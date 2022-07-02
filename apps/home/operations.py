@@ -30,11 +30,11 @@ def fig_indicators_balances():
     figure.add_trace(go.Indicator(
         mode="number+delta",
         value=metadata["balance_in_db"],
-        number={'suffix': "€", "valueformat": ':,2f'},
+        number={'suffix': "€", "valueformat": '.2f'},
         title={"text": "Total"},
         delta={'reference': metadata["balance_in_bank"],
                'relative': False,
-               'valueformat': 'f'
+               'valueformat': '.2f',
                },
         domain={'row': 0, 'column': 0}))
     figure.add_trace(go.Indicator(
