@@ -1,13 +1,13 @@
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash import Input, Output, State
 import dash_table as dt
 from app import app
 
 from utils.text_operations import get_project_root
-from source.db_connection.db_access import MongoDBConnection
-from source.data_ingestion.ingest import TransactionIngest
-from apps.import_new_data.operations import create_datatable, read_and_format_data, update_db_account, check_balances
+from source.data_ingestion.ingest import TransactionDB
+from apps.import_new_data.operations import create_datatable, read_and_format_data, create_status_message
 from source.definitions import DB_CONN_TRANSACTION, DB_CONN_ACCOUNT, DATA_FOLDER
 
 
@@ -31,8 +31,16 @@ layout = html.Div([
             'borderRadius': '5px',
             'textAlign': 'center'
         }),
-
-    html.Button('Import', id='btn_import_database', n_clicks=0, disabled=True),
+    dbc.Button("Importer",
+               outline=True,
+               color="secondary",
+               className="btn_import_database",
+               id="btn_import_database",
+               disabled=True,
+               n_clicks=0,
+               style={'width': '100%',
+                      'margin-top': 10}
+               ),
     html.Div(id="btn_click"),
     html.Div(id="new_transaction_msg"),
     html.Div(id="warning_msg"),
@@ -62,16 +70,16 @@ def upload_file(list_of_contents, filename, btn_disabled):
                                                 db_connection=DB_CONN_TRANSACTION)
 
         # Create message
-        msg = 'New transactions = {}'.format(len(df))
+        msg = 'Nombre de transactions dans ce nouveau fichier = {} ({} nouvelles)'.format(
+            len(df), len(df[df['duplicate'] == 'False']))
 
         # Check balances
-        is_same_balance, balance_gap = check_balances(
-            account_info=account_info,
-            db_connection=DB_CONN_ACCOUNT,
+        warning_msg = create_status_message(
+            connection_transaction=DB_CONN_TRANSACTION,
+            connection_metadata=DB_CONN_ACCOUNT,
             df=df,
+            account_info=account_info,
         )
-        if not is_same_balance:
-            warning_msg = "WARNING: the balances don't match ! ({:.2f}€)".format(balance_gap)
 
         # Convert to dataTable
         dt_transactions = create_datatable(df)
@@ -95,17 +103,12 @@ def import_transactions_in_database(n_clicks, filename):
         df_new = df[df['duplicate'] == 'False']
         df_new.drop(columns=['duplicate'])
 
-        # Update balance
-        update_db_account(account_info=account_info,
-                          df=df_new,
-                          db_connection=DB_CONN_ACCOUNT)
-
-        # Create connection
-        con_transaction = MongoDBConnection(DB_CONN_TRANSACTION)
-
         # Database ingestion
-        ingestion = TransactionIngest(con_transaction, transactions_df=df_new)
-        ingestion.ingest()
+        db = TransactionDB(
+            name_connection_transaction=DB_CONN_TRANSACTION,
+            name_connection_metadata=DB_CONN_ACCOUNT,
+            account_id=account_info['account_id'])
+        db.ingest(df_new, bank_info=account_info)
 
         return 'The input value was and the button has been clicked {} times'.format(
             n_clicks

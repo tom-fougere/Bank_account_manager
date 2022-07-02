@@ -7,7 +7,7 @@ df = pd.read_csv('https://raw.githubusercontent.com/Coding-with-Adam/Dash-by-Plo
 
 layout = html.Div(
     [
-        html.H1('Kindergarten in Iran',
+        html.H1('Synthèse',
                 style={'textAlign': 'center'}),
         dcc.Graph(id='bargraph',
                   figure=px.bar(df, barmode='group', x='Years',
