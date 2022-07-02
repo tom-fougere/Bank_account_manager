@@ -39,7 +39,6 @@ style_data_conditional = (
 
 
 def search_transactions(connection_name, filters):
-    db_connection = MongoDBConnection(connection_name)
 
     # Init
     searches = dict()
@@ -52,7 +51,7 @@ def search_transactions(connection_name, filters):
             else:
                 searches[filter_name] = condition
 
-    data_extractor = TransactionExgest(db_connection)
+    data_extractor = TransactionExgest(connection_name)
     data_extractor.set_search_criteria(dict_searches=searches)
 
     df_transaction = data_extractor.exgest()

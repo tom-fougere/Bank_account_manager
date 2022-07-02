@@ -1,10 +1,12 @@
 import pandas as pd
 from utils.mixed_utils import expand_columns_of_dataframe
+from source.db_connection.db_access import MongoDBConnection
 
 
 class TransactionExgest:
-    def __init__(self, mongodb_connection):
-        self.connection = mongodb_connection
+    def __init__(self, name_connection):
+
+        self.connection = MongoDBConnection(name_connection)
 
         # Method use for the exgestion: "search" or "pipeline"
         self.exgestion_method = None

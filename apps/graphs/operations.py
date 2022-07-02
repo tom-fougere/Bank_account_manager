@@ -7,8 +7,6 @@ from utils.mixed_utils import expand_columns_of_dataframe
 
 
 def get_data_for_graph(pipeline, date_range=None):
-    # Define DB connection
-    connection = MongoDBConnection(DB_CONN_TRANSACTION)
 
     # Define pipeline
     if date_range:
@@ -20,7 +18,7 @@ def get_data_for_graph(pipeline, date_range=None):
         pipeline = pipeline
 
     # Extract data with defined pipeline
-    transExgest = TransactionExgest(connection)
+    transExgest = TransactionExgest(DB_CONN_TRANSACTION)
     transExgest.set_pipeline(pipeline)
     df = transExgest.exgest()
 
@@ -52,8 +50,7 @@ def add_date_condition_to_pipeline(pipeline, start_date, end_date):
 
 
 def get_list_years(name_db_connection):
-    db_connection = MongoDBConnection(name_db_connection)
-    data_extractor = TransactionExgest(db_connection)
+    data_extractor = TransactionExgest(name_db_connection)
     distinct_years = data_extractor.get_distinct_years()
 
     dropdown_list_years = [
