@@ -197,8 +197,8 @@ def join_cat_and_subcat(categories, sub_categories):
     if sub_categories is not None:
         for sub_cat in sub_categories:
             # Extract category and sub-category
-            cat = sub_cat[:sub_cat.find('/')]
-            sub_cat = sub_cat[sub_cat.find('/')+1:]
+            cat = sub_cat[:sub_cat.find(':')]
+            sub_cat = sub_cat[sub_cat.find(':')+1:]
 
             # Add to the list to search
             list_cat.append((cat, sub_cat))

@@ -102,8 +102,8 @@ def get_sub_categories(db_connection, account_id, categories, add_suffix_cat=Tru
         sub_categories = metadata_db.get_sub_categories(category=category)
         for sub_category in sub_categories:
             if add_suffix_cat:
-                list_sub_categories.append({'label': f'{category}/{sub_category}',
-                                            'value': f'{category}/{sub_category}'})
+                list_sub_categories.append({'label': f'{category}:{sub_category}',
+                                            'value': f'{category}:{sub_category}'})
             else:
                 list_sub_categories.append({'label': f'{sub_category}',
                                             'value': f'{sub_category}'})
