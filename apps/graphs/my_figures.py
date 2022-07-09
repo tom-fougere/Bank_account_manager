@@ -5,11 +5,10 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-from utils.time_operations import get_first_day_several_month_before
 from apps.graphs.operations import get_data_for_graph
-from apps.graphs.pipelines import p_positive_vs_negative_per_date, p_balance_category_per_date,\
+from apps.graphs.pipelines import p_balance_category_per_date,\
     p_balance_occasion_per_date, p_savings_per_date, p_loan_per_date, p_salary_vs_other, p_expenses_category
-from source.definitions import MONTHS
+from source.definitions import MONTHS, OCCASIONS
 
 
 def fig_indicators_revenue_expense_balance(year=datetime.datetime.now().year):
@@ -115,16 +114,27 @@ def fig_expenses_vs_category(year=datetime.datetime.now().year):
     # Drop Revenue
     df = df[df['Categorie'] != 'Travail']
 
-    # Inverse expenses sign
-    df['Balance'] = -df['Balance']
-
     # Rename empty category by 'None'
     df.loc[df['Categorie'].isna(), 'Categorie'] = 'None'
 
     # Rename months
     df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
 
-    figure = px.bar(df, x='Mois', y='Balance', color='Categorie', text="Categorie", title='Dépenses vs catégories')
+    figure = go.Figure()
+    for i_cat in df['Categorie'].unique():
+        figure.add_trace(go.Bar(
+            x=df[df['Categorie'] == i_cat]['Mois'],
+            y=df[df['Categorie'] == i_cat]['Balance'],
+            name=i_cat,
+            text=i_cat,
+            hovertemplate='Catégorie: {}'.format(i_cat) +
+                          '<br>Dépense: %{y:.2f}€' +
+                          '<br>Mois: %{x}<extra></extra>'
+            ))
+
+    figure.update_layout(barmode='relative', title_text='Dépenses vs catégories')
+    figure.update_yaxes(autorange="reversed")
+    figure.update_traces(textposition='inside')
 
     return figure
 
@@ -137,16 +147,27 @@ def fig_expenses_vs_occasion(year=datetime.datetime.now().year):
     # Get data
     df = get_data_for_graph(p_balance_occasion_per_date, date_range=(start_date, end_date))
 
-    # Inverse expenses sign
-    df['Balance'] = -df['Balance']
-
     # Rename empty category by 'None'
     df.loc[df['Occasion'].isna(), 'Occasion'] = 'None'
 
     # Rename months
     df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
 
-    figure = px.bar(df, x='Mois', y='Balance', color='Occasion', text="Occasion", title='Dépenses vs occasions')
+    figure = go.Figure()
+    for i_occ in OCCASIONS:
+        figure.add_trace(go.Bar(
+            x=df[df['Occasion'] == i_occ]['Mois'],
+            y=df[df['Occasion'] == i_occ]['Balance'],
+            name=i_occ,
+            text=i_occ,
+            hovertemplate='Occasion: {}'.format(i_occ) +
+                          '<br>Dépense: %{y:.2f}€' +
+                          '<br>Mois: %{x}<extra></extra>'
+        ))
+
+    figure.update_layout(barmode='relative', title_text='Dépenses vs occasions')
+    figure.update_yaxes(autorange="reversed")
+    figure.update_traces(textposition='inside')
 
     return figure
 
