@@ -10,6 +10,5 @@ layout = html.Div([
             id='title_home_page',
             style={'textAlign': 'center'}),
     dcc.Graph(id='fig_indicator_balance',
-              figure=fig_indicators_balances(),
-              style={'margin-top': 1}),
+              figure=fig_indicators_balances()),
 ])

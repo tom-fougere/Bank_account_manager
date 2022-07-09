@@ -84,37 +84,20 @@ def fig_expenses_vs_revenue(year=datetime.datetime.now().year):
         df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
 
         # Figures
-        figure = make_subplots(rows=2, cols=1, subplot_titles=('Revenus VS Dépenses', 'Gain'))
+        figure = go.Figure()
         figure.add_trace(go.Bar(
             x=MONTHS[:len(df)],
             y=df['Revenues'],
             name='Revenus'
-            ),
-            row=1, col=1)
+            ))
         figure.add_trace(go.Bar(
             x=MONTHS[:len(df)],
             y=df['Expenses'],
             name='Dépenses'
-            ),
-            row=1, col=1)
-        figure.add_trace(go.Bar(
-            x=MONTHS[:len(df)],
-            y=df['Balance'],
-            name='Gain',
-            marker_color=df['Color'],
-            showlegend=False
-            ),
-            row=2, col=1)
-        figure.add_trace(go.Scatter(
-            x=MONTHS[:len(df)],
-            y=np.zeros(df['date'].shape),
-            mode='lines',
-            line=dict(dash='dash', color='black'),
-            showlegend=False
-            ),
-            row=2, col=1)
-        figure.update_layout(xaxis=dict(tickformat="%b \n%Y"))
-        figure.update_layout(xaxis2=dict(tickformat="%b \n%Y"))
+            ))
+        figure.update_layout(
+            xaxis=dict(tickformat="%b \n%Y"),
+            title='Revenus VS Dépenses')
     else:
         figure = {}
 
@@ -201,16 +184,17 @@ def fig_savings(year=datetime.datetime.now().year):
         ),
             secondary_y=True)
 
-        # Set titles
-        figure.update_layout(
-            xaxis=dict(tickformat="%b \n%Y"),
-            yaxis_showgrid=False,
-            title='Epargne'
-        )
         figure.update_yaxes(title_text="Epargne", secondary_y=False)
         figure.update_yaxes(title_text="<b>Cumulative épargne</b>", secondary_y=True)
     else:
-        figure = {}
+        figure = go.Figure()
+
+    # Edit the layout
+    figure.update_layout(
+        title='Epargne',
+        yaxis_showgrid=False,
+        xaxis_title='Mois',
+        yaxis_title='Euros')
 
     return figure
 
@@ -236,7 +220,7 @@ def fig_loan(year=datetime.datetime.now().year):
 
         # Edit the layout
         figure.update_layout(
-            title='Loyer / Prët',
+            title='Loyer / Prêt',
             xaxis_title='Mois',
             yaxis_title='Euros')
     else:

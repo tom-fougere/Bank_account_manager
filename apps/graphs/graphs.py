@@ -34,18 +34,18 @@ layout = html.Div(
                   style={'margin-top': 10}),
         dcc.Graph(id='fig_expenses_vs_revenue',
                   figure=fig_expenses_vs_revenue(now.year)),
+        dcc.Graph(id='fig_cum_balance',
+                  figure=fig_cum_balance(now.year)),
         dcc.Graph(id='fig_expenses_vs_category',
                   figure=fig_expenses_vs_category(now.year)),
         dcc.Graph(id='fig_expenses_vs_occasion',
                   figure=fig_expenses_vs_occasion(now.year)),
-        dcc.Graph(id='fig_saving',
-                  figure=fig_savings(now.year)),
-        dcc.Graph(id='fig_loan',
-                  figure=fig_loan(now.year)),
         dcc.Graph(id='fig_categories',
                   figure=fig_categories(now.year)),
-        dcc.Graph(id='fig_cum_balance',
-                  figure=fig_cum_balance(now.year))
+        dcc.Graph(id='fig_loan',
+                  figure=fig_loan(now.year)),
+        dcc.Graph(id='fig_saving',
+                  figure=fig_savings(now.year)),
     ]
 )
 
