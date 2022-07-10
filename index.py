@@ -10,6 +10,7 @@ from apps.canvas.canvas import canvas
 from apps.search_data import search_data
 from apps.import_new_data import import_new_data
 from apps.graphs import graphs
+from apps.stats import stats
 
 app.layout = html.Div([
     dcc.Location(id='url'),
@@ -30,6 +31,8 @@ def display_page(pathname):
         return search_data.layout
     if pathname == '/stats_one_year':
         return graphs.layout
+    if pathname == '/all_stats':
+        return stats.layout
     else:
         return '404'
 

@@ -25,7 +25,8 @@ sidebar = html.Div(
                 dbc.NavLink("Home", href="/", active="exact"),
                 dbc.NavLink("Importer des données", href="/import_data", active="exact"),
                 dbc.NavLink("Rechercher des données", href="/search_data", active="exact"),
-                dbc.NavLink("Stats de l'année", href="/stats_one_year", active="exact")
+                dbc.NavLink("Graphiques", href="/stats_one_year", active="exact"),
+                dbc.NavLink("Statistiques", href="/all_stats", active="exact"),
             ],
             vertical=True,
             pills=True,
