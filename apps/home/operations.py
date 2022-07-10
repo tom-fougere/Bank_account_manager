@@ -1,7 +1,6 @@
 from source.data_ingestion.metadata import MetadataDB
 from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
 import plotly.graph_objects as go
-import dash_html_components as html
 import datetime
 
 

@@ -1,10 +1,9 @@
 import dash_table as dt
-from dash_table.Format import Format, Symbol, Scheme
+import plotly.graph_objects as go
 
 from source.transactions.transaction_operations import check_duplicates_in_df, format_dataframe_to_datatable
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.data_ingestion.exgest import TransactionExgest
-from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.ingest import TransactionDB
 
 style_cell_conditional = (
@@ -75,8 +74,7 @@ def read_and_format_data(full_filename, db_connection):
     max_date = max(df['date_transaction_dt'])
 
     # Extract from the database the same dates
-    my_connection = MongoDBConnection(db_connection)
-    data_extractor = TransactionExgest(my_connection)
+    data_extractor = TransactionExgest(db_connection)
     data_extractor.set_search_criteria({"account_id": account_id,
                                         "date_transaction": [min_date, max_date]})
     db = data_extractor.exgest()
@@ -90,20 +88,60 @@ def read_and_format_data(full_filename, db_connection):
     return df, data_reader.get_account_info()
 
 
-def create_status_message(connection_transaction, connection_metadata, df, account_info):
+def fig_indicators_new_transactions(connection_transaction, connection_metadata, df, account_info):
 
-    df_new_transactions = df[df['duplicate'] == 'False']
+    if df is not None:
+        nb_transactions_in_file = len(df)
+        df_new_transactions = df[df['duplicate'] == 'False']
 
-    db = TransactionDB(
-        name_connection_metadata=connection_metadata,
-        name_connection_transaction=connection_transaction,
-        account_id=account_info['account_id'],
-    )
-    diff_nb_transaction, diff_balance = db.check(
-        df_transactions=df_new_transactions,
-        bank_info=account_info,
-    )
+        db = TransactionDB(
+            name_connection_metadata=connection_metadata,
+            name_connection_transaction=connection_transaction,
+            account_id=account_info['account_id'],
+        )
+        diff_nb_transaction, diff_balance = db.check(
+            df_transactions=df_new_transactions,
+            bank_info=account_info,
+        )
 
-    status_msg = "STATUS - Nombre de transactions: {}, Balance: {:.2f}€".format(diff_nb_transaction, diff_balance)
+        figure = go.Figure()
+        figure.add_trace(go.Indicator(
+            mode="number+delta",
+            value=nb_transactions_in_file,
+            title={"text": "Nombre de transactions<br>" +
+                   "<span style='font-size:0.8em;color:gray'>(dont nouvelles)</span>"},
+            delta={'reference': nb_transactions_in_file - len(df_new_transactions),
+                   'relative': False,
+                   },
+            domain={'row': 0, 'column': 0}))
+        figure.add_trace(go.Indicator(
+            mode="number",
+            value=diff_nb_transaction,
+            title={"text": "Différence de transactions<br>" +
+                   "<span style='font-size:0.8em;color:gray'>(avec la nombre dans la base de données)</span>"},
+            domain={'row': 0, 'column': 1}))
+        figure.add_trace(go.Indicator(
+            mode="number",
+            value=diff_balance,
+            number={'suffix': "€", "valueformat": '.2f'},
+            title={"text": "Différence de revenu<br>" +
+                   "<span style='font-size:0.8em;color:gray'>(avec la somme à la banque)</span>"},
+            domain={'row': 0, 'column': 2}))
+        figure.update_layout(
+            grid={'rows': 1, 'columns': 3, 'pattern': "independent"},
+            height=250  # px
+        )
 
-    return status_msg
+    else:
+        figure = {
+            "layout": {
+                "xaxis": {
+                    "visible": False
+                },
+                "yaxis": {
+                    "visible": False
+                },
+            }
+        }
+
+    return figure

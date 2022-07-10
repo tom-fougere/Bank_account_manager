@@ -7,7 +7,8 @@ from app import app
 
 from utils.text_operations import get_project_root
 from source.data_ingestion.ingest import TransactionDB
-from apps.import_new_data.operations import create_datatable, read_and_format_data, create_status_message
+from apps.import_new_data.operations import create_datatable, read_and_format_data,\
+    fig_indicators_new_transactions
 from source.definitions import DB_CONN_TRANSACTION, DB_CONN_ACCOUNT, DATA_FOLDER
 
 
@@ -42,15 +43,14 @@ layout = html.Div([
                       'margin-top': 10}
                ),
     html.Div(id="btn_click"),
-    html.Div(id="new_transaction_msg"),
-    html.Div(id="warning_msg"),
+    dcc.Graph(id='fig_indicators_new_transactions',
+              figure=fig_indicators_new_transactions(None, None, None, None)),
     html.Div(id="table_new_import"),
 ])
 
 
 @app.callback(
-    Output("new_transaction_msg", 'children'),
-    Output("warning_msg", 'children'),
+    Output("fig_indicators_new_transactions", 'figure'),
     Output("table_new_import", 'children'),
     Output('btn_import_database', 'disabled'),
     Input('drag_upload_file', 'contents'),
@@ -59,8 +59,7 @@ layout = html.Div([
 def upload_file(list_of_contents, filename, btn_disabled):
 
     # default outputs
-    msg = ''
-    warning_msg = ''
+    fig = fig_indicators_new_transactions(None, None, None, None)
     dt_transactions = dt.DataTable()
     btn_import_state = btn_disabled
 
@@ -69,25 +68,21 @@ def upload_file(list_of_contents, filename, btn_disabled):
         df, account_info = read_and_format_data('/'.join([get_project_root(), DATA_FOLDER, filename]),
                                                 db_connection=DB_CONN_TRANSACTION)
 
-        # Create message
-        msg = 'Nombre de transactions dans ce nouveau fichier = {} ({} nouvelles)'.format(
-            len(df), len(df[df['duplicate'] == 'False']))
-
-        # Check balances
-        warning_msg = create_status_message(
-            connection_transaction=DB_CONN_TRANSACTION,
-            connection_metadata=DB_CONN_ACCOUNT,
-            df=df,
-            account_info=account_info,
-        )
-
         # Convert to dataTable
         dt_transactions = create_datatable(df)
 
         # Enable button
         btn_import_state = False
 
-    return html.Div(msg), html.Div(warning_msg), dt_transactions, btn_import_state
+        # Create indicators
+        fig = fig_indicators_new_transactions(
+            connection_transaction=DB_CONN_TRANSACTION,
+            connection_metadata=DB_CONN_ACCOUNT,
+            df=df,
+            account_info=account_info,
+        )
+
+    return fig, dt_transactions, btn_import_state
 
 
 @app.callback(
