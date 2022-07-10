@@ -85,12 +85,12 @@ def fig_expenses_vs_revenue(year=datetime.datetime.now().year):
         # Figures
         figure = go.Figure()
         figure.add_trace(go.Bar(
-            x=MONTHS[:len(df)],
+            x=[MONTHS[i-1] for i in df['Mois']],
             y=df['Revenues'],
             name='Revenus'
             ))
         figure.add_trace(go.Bar(
-            x=MONTHS[:len(df)],
+            x=[MONTHS[i-1] for i in df['Mois']],
             y=df['Expenses'],
             name='Dépenses'
             ))
@@ -190,14 +190,14 @@ def fig_savings(year=datetime.datetime.now().year):
         # Figures
         figure = make_subplots(specs=[[{"secondary_y": True}]])
         figure.add_trace(go.Bar(
-            x=MONTHS[:len(df)],
+            x=[MONTHS[i-1] for i in df['Mois']],
             y=df['Balance'],
             name='Epargne',
             marker_color=df['Color']
         ),
             secondary_y=False)
         figure.add_trace(go.Scatter(
-            x=MONTHS[:len(df)],
+            x=[MONTHS[i-1] for i in df['Mois']],
             y=df['CumulativeBalance'],
             mode='lines',
             line=dict(dash='dash', color='black'),
@@ -237,7 +237,10 @@ def fig_loan(year=datetime.datetime.now().year):
         # figure = px.line(df, x='date', y='Balance', markers=True)
         figure = go.Figure()
         figure.add_trace(
-            go.Scatter(x=MONTHS[:len(df)], y=df['Balance'], mode='lines+markers'))
+            go.Scatter(
+                x=[MONTHS[i-1] for i in df['Mois']],
+                y=df['Balance'],
+                mode='lines+markers'))
 
         # Edit the layout
         figure.update_layout(
@@ -290,14 +293,14 @@ def fig_cum_balance(year=datetime.datetime.now().year):
     # Figures
     figure = make_subplots(specs=[[{"secondary_y": True}]])
     figure.add_trace(go.Bar(
-        x=MONTHS[:len(df)],
+        x=[MONTHS[i-1] for i in df['Mois']],
         y=df['Balance'],
         name='Gain',
         marker_color=df['Color']
         ),
         secondary_y=False)
     figure.add_trace(go.Scatter(
-        x=MONTHS[:len(df)],
+        x=[MONTHS[i-1] for i in df['Mois']],
         y=df['CumulativeBalance'],
         mode='lines',
         line=dict(dash='dash', color='black'),
