@@ -39,46 +39,6 @@ class TestDuplicate(unittest.TestCase):
         np.testing.assert_array_equal(df_transactions['type_transaction'].values, ['type1', 'ACHAT', 'type2'])
 
 
-class TestSelectedColumns(unittest.TestCase):
-    def test_keep_selected_columns_no_option(self):
-        df = pd.DataFrame({'test1': [1],
-                           'test2': [1],
-                           'date_str': [1],
-                           'test3': [1],
-                           'description': [1],
-                           'amount': [1],
-                           'duplicate': [1],
-                           'category': [1]})
-        new_df = keep_selected_columns(df, show_new_data=False, show_category=False)
-
-        self.assertEqual(len(new_df.keys()), 3)
-        self.assertEqual('date_str' in new_df.keys(), True)
-        self.assertEqual('description' in new_df.keys(), True)
-        self.assertEqual('amount' in new_df.keys(), True)
-
-    def test_keep_selected_columns_option_duplicate(self):
-        df = pd.DataFrame({'test1': [1],
-                           'amount': [1],
-                           'duplicate': [1],
-                           'category': [1]})
-        new_df = keep_selected_columns(df, show_new_data=True, show_category=False)
-
-        self.assertEqual(len(new_df.keys()), 2)
-        self.assertEqual('amount' in new_df.keys(), True)
-        self.assertEqual('duplicate' in new_df.keys(), True)
-
-    def test_keep_selected_columns_option_category(self):
-        df = pd.DataFrame({'test1': [1],
-                           'amount': [1],
-                           'duplicate': [1],
-                           'sub_category': [1]})
-        new_df = keep_selected_columns(df, show_new_data=False, show_category=True)
-
-        self.assertEqual(len(new_df.keys()), 2)
-        self.assertEqual('amount' in new_df.keys(), True)
-        self.assertEqual('sub_category' in new_df.keys(), True)
-
-
 class TestGetLists(unittest.TestCase):
 
     def setUp(self) -> None:

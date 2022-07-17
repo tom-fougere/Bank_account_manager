@@ -1,6 +1,5 @@
 import dash_table as dt
 
-from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.exgest import TransactionExgest
 from source.transactions.transaction_operations import format_dataframe_to_datatable
 
