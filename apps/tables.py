@@ -8,7 +8,7 @@ from source.definitions import InfoName, INFO_RENAMING, InfoDisplay
 # ########### CONDITIONS ############# #
 # #################################### #
 
-COND_WIDTH = [
+COND_COLUMN_WIDTH = [
     {'if': {'column_id': INFO_RENAMING[InfoName.DATE_BANK_STR]},
      'minWidth': '140px', 'width': '140px', 'maxWidth': '140px'},
     {'if': {'column_id': INFO_RENAMING[InfoName.AMOUNT]},
@@ -36,6 +36,41 @@ COND_WIDTH = [
     {'if': {'column_id': INFO_RENAMING[InfoName.DUPLICATE]},
      'minWidth': '100px', 'width': '100px', 'maxWidth': '100px'},
 ]
+
+COND_STYLE_CELL = (
+        [
+            {
+                'if': {'column_id': c},
+                'textAlign': 'left'
+            } for c in [INFO_RENAMING[InfoName.DESCRIPTION]]
+        ] +
+        [
+            {
+                'if': {'column_id': c},
+                'textAlign': 'center'
+            } for c in [INFO_RENAMING[InfoName.DATE_BANK_STR],
+                        INFO_RENAMING[InfoName.DATE_TRANS_STR]]
+        ]
+)
+
+
+COND_STYLE_DATA = (
+    [
+        {
+            'if': {
+                'filter_query': '{{{}}} eq "True"'.format(INFO_RENAMING[InfoName.DUPLICATE])
+            },
+            'backgroundColor': '#DAE8FE'
+        },
+        {
+            'if': {
+                'column_id': INFO_RENAMING[InfoName.AMOUNT],
+                'filter_query': '{{{}}} > 0'.format(INFO_RENAMING[InfoName.AMOUNT])
+            },
+            'backgroundColor': '#B5EEB6'
+        }
+    ]
+)
 
 
 # #################################### #
@@ -92,7 +127,6 @@ def df_to_datatable(df):
         id='cell_search',
         data=df.to_dict('records'),
         columns=columns,
-        column_selectable="single",
         selected_columns=[],
         selected_rows=[],
         style_header={
@@ -100,6 +134,7 @@ def df_to_datatable(df):
             'color': 'black',
             'fontWeight': 'bold',
             'padding-left': '0px',
+            'textAlign': 'center',
         },
         style_cell={
             'overflow': 'hidden',
@@ -109,7 +144,8 @@ def df_to_datatable(df):
         style_table={'overflowX': 'auto'},  # Horizontal scroll
         sort_action="native",
         editable=False,
-        style_cell_conditional=COND_WIDTH,
+        style_cell_conditional=COND_COLUMN_WIDTH + COND_STYLE_CELL,
+        style_data_conditional=COND_STYLE_DATA,
     )
 
     return dt_transactions
