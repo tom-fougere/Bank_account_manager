@@ -82,8 +82,8 @@ class TestGetLists(unittest.TestCase):
 
         expected_categories = []
         for cat in CATEGORIES[selected_category]:
-            expected_categories.append({'label': selected_category + '/' + cat,
-                                        'value': selected_category + '/' + cat})
+            expected_categories.append({'label': selected_category + ':' + cat,
+                                        'value': selected_category + ':' + cat})
 
         self.assertEqual(sub_categories, expected_categories)
 
