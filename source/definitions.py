@@ -86,7 +86,7 @@ MONTHS = [
 # ############# COLUMNS ############## #
 # #################################### #
 
-class ColumnsName:
+class InfoName:
     ID = '_id'
     DATE_BANK_STR = 'date_str'
     DATE_BANK = 'date'
@@ -103,58 +103,58 @@ class ColumnsName:
     DUPLICATE = 'duplicate'
 
 
-class ColumnsDisplay:
+class InfoDisplay:
     ALL = [
-        ColumnsName.DATE_BANK_STR,
-        ColumnsName.AMOUNT,
-        ColumnsName.DESCRIPTION,
-        ColumnsName.CATEGORY,
-        ColumnsName.SUB_CATEGORY,
-        ColumnsName.OCCASION,
-        ColumnsName.CHECK,
-        ColumnsName.NOTE,
-        ColumnsName.TYPE,
-        ColumnsName.DATE_TRANS_STR,
-        ColumnsName.DATE_BANK,
-        ColumnsName.DATE_TRANS,
-        ColumnsName.DUPLICATE,
+        InfoName.DATE_BANK_STR,
+        InfoName.AMOUNT,
+        InfoName.DESCRIPTION,
+        InfoName.CATEGORY,
+        InfoName.SUB_CATEGORY,
+        InfoName.OCCASION,
+        InfoName.CHECK,
+        InfoName.NOTE,
+        InfoName.TYPE,
+        InfoName.DATE_TRANS_STR,
+        InfoName.DATE_BANK,
+        InfoName.DATE_TRANS,
+        InfoName.DUPLICATE,
     ]
     SEARCH = [
-        ColumnsName.DATE_BANK_STR,
-        ColumnsName.AMOUNT,
-        ColumnsName.DESCRIPTION,
-        ColumnsName.CATEGORY,
-        ColumnsName.SUB_CATEGORY,
-        ColumnsName.OCCASION,
-        ColumnsName.CHECK,
-        ColumnsName.NOTE,
-        ColumnsName.TYPE,
-        ColumnsName.DATE_TRANS_STR,
+        InfoName.DATE_BANK_STR,
+        InfoName.AMOUNT,
+        InfoName.DESCRIPTION,
+        InfoName.CATEGORY,
+        InfoName.SUB_CATEGORY,
+        InfoName.OCCASION,
+        InfoName.CHECK,
+        InfoName.NOTE,
+        InfoName.TYPE,
+        InfoName.DATE_TRANS_STR,
     ]
     IMPORT = [
-        ColumnsName.DATE_BANK_STR,
-        ColumnsName.AMOUNT,
-        ColumnsName.DESCRIPTION,
-        ColumnsName.TYPE,
-        ColumnsName.DATE_TRANS_STR,
-        ColumnsName.DUPLICATE,
+        InfoName.DATE_BANK_STR,
+        InfoName.AMOUNT,
+        InfoName.DESCRIPTION,
+        InfoName.TYPE,
+        InfoName.DATE_TRANS_STR,
+        InfoName.DUPLICATE,
     ]
 
 
-COLUMNS_RENAMING = {
-    ColumnsName.DATE_BANK_STR: 'Date (banque)',
-    ColumnsName.AMOUNT: 'Montant (€)',
-    ColumnsName.DESCRIPTION: 'Libelé',
-    ColumnsName.CATEGORY: 'Catégorie',
-    ColumnsName.SUB_CATEGORY: 'Sous-catégorie',
-    ColumnsName.OCCASION: 'Occasion',
-    ColumnsName.CHECK: 'Pointage',
-    ColumnsName.NOTE: 'Note',
-    ColumnsName.TYPE: 'Type',
-    ColumnsName.DATE_TRANS_STR: 'Date',
-    ColumnsName.DATE_BANK: 'Date (banque)',
-    ColumnsName.DATE_TRANS: 'Date',
-    ColumnsName.DUPLICATE: 'Duplicata',
+INFO_RENAMING = {
+    InfoName.DATE_BANK_STR: 'Date (banque)',
+    InfoName.AMOUNT: 'Montant (€)',
+    InfoName.DESCRIPTION: 'Libelé',
+    InfoName.CATEGORY: 'Catégorie',
+    InfoName.SUB_CATEGORY: 'Sous-catégorie',
+    InfoName.OCCASION: 'Occasion',
+    InfoName.CHECK: 'Pointage',
+    InfoName.NOTE: 'Note',
+    InfoName.TYPE: 'Type',
+    InfoName.DATE_TRANS_STR: 'Date',
+    InfoName.DATE_BANK: 'Date (banque)',
+    InfoName.DATE_TRANS: 'Date',
+    InfoName.DUPLICATE: 'Duplicata',
 }
 
 # #################################### #

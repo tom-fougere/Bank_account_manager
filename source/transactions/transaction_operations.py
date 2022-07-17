@@ -6,7 +6,7 @@ from source.data_ingestion.metadata import MetadataDB
 MANDATORY_COLUMNS = ['date_str', 'amount', 'description', 'type_transaction', 'date_transaction_str']
 OPTIONAL_COLUMNS = {'new_data': ['duplicate'],
                     'category': ['category', 'sub_category']}
-COLUMNS_RENAMING = {'date_str': 'Date (banque)',
+INFO_RENAMING = {'date_str': 'Date (banque)',
                     'amount': 'Montant (€)',
                     'description': 'Libelé',
                     'type_transaction': 'Type',
@@ -75,9 +75,9 @@ def keep_selected_columns(df, show_new_data=False, show_category=False):
 def rename_columns(df):
 
     df_keys = df.keys()
-    for key in COLUMNS_RENAMING:
+    for key in INFO_RENAMING:
         if key in df_keys:
-            df.rename(columns={key: COLUMNS_RENAMING[key]}, inplace=True)
+            df.rename(columns={key: INFO_RENAMING[key]}, inplace=True)
 
 
 def get_categories(db_connection, account_id):

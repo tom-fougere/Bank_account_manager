@@ -1,7 +1,7 @@
 import pandas as pd
 import dash_table as dt
 from dash_table.Format import Format, Symbol, Scheme
-from source.definitions import ColumnsName, COLUMNS_RENAMING, ColumnsDisplay
+from source.definitions import InfoName, INFO_RENAMING, InfoDisplay
 
 
 # #################################### #
@@ -9,31 +9,31 @@ from source.definitions import ColumnsName, COLUMNS_RENAMING, ColumnsDisplay
 # #################################### #
 
 COND_WIDTH = [
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.DATE_BANK_STR]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.DATE_BANK_STR]},
      'minWidth': '140px', 'width': '140px', 'maxWidth': '140px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.AMOUNT]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.AMOUNT]},
      'minWidth': '120px', 'width': '120px', 'maxWidth': '120px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.DESCRIPTION]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.DESCRIPTION]},
      'minWidth': '350px', 'width': '350px', 'maxWidth': '350px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.CATEGORY]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.CATEGORY]},
      'minWidth': '140px', 'width': '140px', 'maxWidth': '140px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.SUB_CATEGORY]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.SUB_CATEGORY]},
      'minWidth': '200px', 'width': '200px', 'maxWidth': '200px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.OCCASION]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.OCCASION]},
      'minWidth': '90px', 'width': '90px', 'maxWidth': '90px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.CHECK]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.CHECK]},
      'minWidth': '90px', 'width': '90px', 'maxWidth': '90px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.NOTE]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.NOTE]},
      'minWidth': '250px', 'width': '250px', 'maxWidth': '250px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.TYPE]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.TYPE]},
      'minWidth': '110px', 'width': '110px', 'maxWidth': '110px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.DATE_TRANS_STR]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.DATE_TRANS_STR]},
      'minWidth': '100px', 'width': '100px', 'maxWidth': '100px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.DATE_BANK]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.DATE_BANK]},
      'minWidth': '130px', 'width': '130px', 'maxWidth': '130px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.DATE_TRANS]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.DATE_TRANS]},
      'minWidth': '130px', 'width': '130px', 'maxWidth': '130px'},
-    {'if': {'column_id': COLUMNS_RENAMING[ColumnsName.DUPLICATE]},
+    {'if': {'column_id': INFO_RENAMING[InfoName.DUPLICATE]},
      'minWidth': '100px', 'width': '100px', 'maxWidth': '100px'},
 ]
 
@@ -42,10 +42,10 @@ COND_WIDTH = [
 # ########### FUNCTIONS ############## #
 # #################################### #
 
-def format_dataframe(df, columns=ColumnsDisplay.ALL):
+def format_dataframe(df, columns=InfoDisplay.ALL):
 
     # Drop useless columns
-    new_df = df.drop(columns=[ColumnsName.ID])
+    new_df = df.drop(columns=[InfoName.ID])
 
     # Filter wanted columns
     new_df = filter_columns(new_df, columns_name=columns)
@@ -71,9 +71,9 @@ def filter_columns(df, columns_name):
 def rename_columns(df):
 
     df_keys = df.keys()
-    for key in COLUMNS_RENAMING:
+    for key in INFO_RENAMING:
         if key in df_keys:
-            df.rename(columns={key: COLUMNS_RENAMING[key]}, inplace=True)
+            df.rename(columns={key: INFO_RENAMING[key]}, inplace=True)
 
 
 def df_to_datatable(df):
@@ -83,7 +83,7 @@ def df_to_datatable(df):
 
     # Format the amount field to numeric value
     for idx, column in enumerate(columns):
-        if column['name'] == COLUMNS_RENAMING[ColumnsName.AMOUNT]:
+        if column['name'] == INFO_RENAMING[InfoName.AMOUNT]:
             columns[idx]['type'] = 'numeric'
             columns[idx]['format'] = Format(precision=2, scheme=Scheme.fixed).symbol(Symbol.yes).symbol_suffix('€')
 
