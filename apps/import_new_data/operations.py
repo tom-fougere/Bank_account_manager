@@ -1,62 +1,9 @@
-import dash_table as dt
 import plotly.graph_objects as go
 
-from source.transactions.transaction_operations import check_duplicates_in_df, format_dataframe_to_datatable
+from source.transactions.transaction_operations import check_duplicates_in_df
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.data_ingestion.exgest import TransactionExgest
 from source.data_ingestion.ingest import TransactionDB
-
-style_cell_conditional = (
-        [
-            {
-                'if': {'column_id': c},
-                'textAlign': 'left'
-            } for c in ['Libelé', 'Type']
-        ] +
-        [
-            {
-                'if': {'column_id': c},
-                'textAlign': 'center'
-            } for c in ['Date', 'Date (banque)']
-        ]
-)
-
-style_data_conditional = (
-    [
-        {
-            'if': {
-                'filter_query': '{Duplicata} eq "True"'
-            },
-            'backgroundColor': '#DAE8FE'
-        },
-        {
-            'if': {
-                'column_id': 'Montant (€)',
-                'filter_query': '{Montant (€)} > 0'
-            },
-            'backgroundColor': '#B5EEB6'
-        }
-    ]
-)
-
-
-def create_datatable(df):
-    df_display, columns = format_dataframe_to_datatable(df, show_new_data=True, show_category=False)
-
-    dt_transactions = dt.DataTable(id='cell_new_import',
-                                   data=df_display.to_dict('records'),
-                                   columns=columns,
-                                   column_selectable="single",
-                                   selected_columns=[],
-                                   selected_rows=[],
-                                   style_data_conditional=style_data_conditional,
-                                   style_cell_conditional=style_cell_conditional,
-                                   style_header={
-                                       'backgroundColor': 'rgb(210, 210, 210)',
-                                       'color': 'black',
-                                       'fontWeight': 'bold'
-                                   })
-    return dt_transactions
 
 
 def read_and_format_data(full_filename, db_connection):

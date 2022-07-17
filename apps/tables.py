@@ -58,7 +58,7 @@ COND_STYLE_DATA = (
     [
         {
             'if': {
-                'filter_query': '{{{}}} eq "True"'.format(INFO_RENAMING[InfoName.DUPLICATE])
+                'filter_query': '{{{}}} eq "Oui"'.format(INFO_RENAMING[InfoName.DUPLICATE])
             },
             'backgroundColor': '#DAE8FE'
         },
@@ -87,7 +87,10 @@ COND_STYLE_DATA = (
 def format_dataframe(df, columns=InfoDisplay.ALL):
 
     # Drop useless columns
-    new_df = df.drop(columns=[InfoName.ID])
+    if InfoName.ID in df.keys():
+        new_df = df.drop(columns=[InfoName.ID])
+    else:
+        new_df = df.copy()
 
     # Filter wanted columns
     new_df = filter_columns(new_df, columns_name=columns)
@@ -132,7 +135,7 @@ def format_boolean_information(df):
     return df
 
 
-def df_to_datatable(df):
+def df_to_datatable(df, table_id):
 
     # Create columns for datatable
     columns = [{"name": i, "id": i, } for i in df.columns]
@@ -145,7 +148,7 @@ def df_to_datatable(df):
 
     # Create datatable
     dt_transactions = dt.DataTable(
-        id='cell_search',
+        id=table_id,
         data=df.to_dict('records'),
         columns=columns,
         selected_columns=[],

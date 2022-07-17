@@ -8,7 +8,7 @@ from app import app
 import time
 
 from datetime import date
-from apps.search_data.operations import search_transactions, create_datatable
+from apps.search_data.operations import search_transactions
 from apps.tables import format_dataframe, df_to_datatable, InfoDisplay
 from source.transactions.transaction_operations import get_sub_categories
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID,\
@@ -254,7 +254,7 @@ def display_searched_transactions(n_clicks_search, n_clicks_save_transaction,
         df_transaction = search_transactions(connection_name=DB_CONN_TRANSACTION, filters=filters)
 
         df_display = format_dataframe(df_transaction, InfoDisplay.SEARCH)
-        dt_transactions = df_to_datatable(df_display)
+        dt_transactions = df_to_datatable(df_display, table_id='cell_search')
 
     return dt_transactions
 

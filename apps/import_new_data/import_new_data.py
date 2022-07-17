@@ -7,8 +7,8 @@ from app import app
 
 from utils.text_operations import get_project_root
 from source.data_ingestion.ingest import TransactionDB
-from apps.import_new_data.operations import create_datatable, read_and_format_data,\
-    fig_indicators_new_transactions
+from apps.import_new_data.operations import read_and_format_data, fig_indicators_new_transactions
+from apps.tables import format_dataframe, df_to_datatable, InfoDisplay
 from source.definitions import DB_CONN_TRANSACTION, DB_CONN_ACCOUNT, DATA_FOLDER
 
 
@@ -69,7 +69,8 @@ def upload_file(list_of_contents, filename, btn_disabled):
                                                 db_connection=DB_CONN_TRANSACTION)
 
         # Convert to dataTable
-        dt_transactions = create_datatable(df)
+        df_display = format_dataframe(df, InfoDisplay.IMPORT)
+        dt_transactions = df_to_datatable(df_display, table_id='cell_new_import')
 
         # Enable button
         btn_import_state = False
