@@ -68,7 +68,14 @@ COND_STYLE_DATA = (
                 'filter_query': '{{{}}} > 0'.format(INFO_RENAMING[InfoName.AMOUNT])
             },
             'backgroundColor': '#B5EEB6'
-        }
+        },
+        {
+            'if': {
+                'column_id': INFO_RENAMING[InfoName.CHECK],
+                'filter_query': '{{{}}} eq "Non"'.format(INFO_RENAMING[InfoName.CHECK])
+            },
+            'backgroundColor': '#FFE9E9'
+        },
     ]
 )
 
@@ -84,6 +91,9 @@ def format_dataframe(df, columns=InfoDisplay.ALL):
 
     # Filter wanted columns
     new_df = filter_columns(new_df, columns_name=columns)
+
+    # Change boolean values by string
+    new_df = format_boolean_information(new_df)
 
     # Rename columns
     rename_columns(new_df)
@@ -109,6 +119,17 @@ def rename_columns(df):
     for key in INFO_RENAMING:
         if key in df_keys:
             df.rename(columns={key: INFO_RENAMING[key]}, inplace=True)
+
+
+def format_boolean_information(df):
+
+    if InfoName.DUPLICATE in df.keys():
+        df[InfoName.DUPLICATE] = df[InfoName.DUPLICATE].apply(lambda x: 'Oui' if x else 'Non')
+
+    if InfoName.CHECK in df.keys():
+        df[InfoName.CHECK] = df[InfoName.CHECK].apply(lambda x: 'Oui' if x else 'Non')
+
+    return df
 
 
 def df_to_datatable(df):
