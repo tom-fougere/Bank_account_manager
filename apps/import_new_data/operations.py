@@ -46,7 +46,7 @@ def fig_indicators_new_transactions(connection_transaction, connection_metadata,
             name_connection_transaction=connection_transaction,
             account_id=account_info['account_id'],
         )
-        diff_nb_transaction, diff_balance = db.check(
+        diff_balance = db.check(
             df_transactions=df_new_transactions,
             bank_info=account_info,
         )
@@ -63,19 +63,13 @@ def fig_indicators_new_transactions(connection_transaction, connection_metadata,
             domain={'row': 0, 'column': 0}))
         figure.add_trace(go.Indicator(
             mode="number",
-            value=diff_nb_transaction,
-            title={"text": "Différence de transactions<br>" +
-                   "<span style='font-size:0.8em;color:gray'>(avec la nombre dans la base de données)</span>"},
-            domain={'row': 0, 'column': 1}))
-        figure.add_trace(go.Indicator(
-            mode="number",
             value=diff_balance,
             number={'suffix': "€", "valueformat": '.2f'},
             title={"text": "Différence de revenu<br>" +
                    "<span style='font-size:0.8em;color:gray'>(avec la somme à la banque)</span>"},
-            domain={'row': 0, 'column': 2}))
+            domain={'row': 0, 'column': 1}))
         figure.update_layout(
-            grid={'rows': 1, 'columns': 3, 'pattern': "independent"},
+            grid={'rows': 1, 'columns': 2, 'pattern': "independent"},
             height=250  # px
         )
 

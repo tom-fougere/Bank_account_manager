@@ -2,9 +2,8 @@ import datetime
 import unittest
 import pandas as pd
 
-from source.db_connection.db_access import MongoDBConnection
 from source.data_ingestion.ingest import TransactionDB
-from source.data_ingestion.metadata import MetadataDB
+from source.transactions.metadata import MetadataDB
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.data_ingestion.exgest import TransactionExgest
 from utils.time_operations import modify_date_str_format
@@ -58,7 +57,6 @@ class TestTransactionDB(unittest.TestCase):
         self.assertEqual(self.db.metadata.balance_in_bank, 100)
         self.assertEqual(self.db.metadata.balance_in_db, 2.2)
         self.assertEqual(self.db.metadata.nb_transactions_db, 0)
-        self.assertEqual(self.db.metadata.nb_transactions_bank, 1)
         self.assertEqual(self.db.metadata.date_balance_in_bank['dt'], datetime.datetime(2021, 5, 24))
         self.assertEqual(self.db.metadata.date_last_import['dt'], DATE_NOW)
 
@@ -76,7 +74,6 @@ class TestTransactionDB(unittest.TestCase):
         self.assertEqual(self.db.metadata.balance_in_bank, 300.48)
         self.assertEqual(self.db.metadata.balance_in_db, -34.99)
         self.assertEqual(self.db.metadata.nb_transactions_db, 3)
-        self.assertEqual(self.db.metadata.nb_transactions_bank, 3)
         self.assertEqual(self.db.metadata.date_balance_in_bank['dt'], datetime.datetime(2022, 1, 8))
         self.assertEqual(self.db.metadata.date_last_import['dt'], datetime.datetime(2022, 1, 7))
 
@@ -103,7 +100,6 @@ class TestTransactionDB(unittest.TestCase):
         self.assertEqual(self.db.metadata.balance_in_bank, 300.48)
         self.assertEqual(self.db.metadata.balance_in_db, -34.99+5)
         self.assertEqual(self.db.metadata.nb_transactions_db, 2)
-        self.assertEqual(self.db.metadata.nb_transactions_bank, 3)
         self.assertEqual(self.db.metadata.date_balance_in_bank['dt'], datetime.datetime(2022, 1, 8))
         self.assertEqual(self.db.metadata.date_last_import['dt'], datetime.datetime(2022, 1, 7))
 
@@ -114,7 +110,7 @@ class TestTransactionDB(unittest.TestCase):
         }
         new_transaction = pd.DataFrame([new_trans_dict])
 
-        diff_nb_trans, diff_balance = self.db.check(
+        diff_balance = self.db.check(
             df_transactions=new_transaction,
             bank_info={
                 'account_id': ACCOUNT_ID,
@@ -123,7 +119,6 @@ class TestTransactionDB(unittest.TestCase):
         )
 
         self.assertEqual(diff_balance, 2.2+3.3+9.81-72.01)
-        self.assertEqual(diff_nb_trans, 0)
 
     def test_update(self):
 

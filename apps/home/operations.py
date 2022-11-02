@@ -1,4 +1,4 @@
-from source.data_ingestion.metadata import MetadataDB
+from source.transactions.metadata import MetadataDB
 from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
 import plotly.graph_objects as go
 import datetime
@@ -15,7 +15,6 @@ def get_metadata():
         "balance_bias": db_meta.balance_bias,
         "date_last_import": db_meta.date_last_import,
         "nb_transactions_db": db_meta.nb_transactions_db,
-        "nb_transactions_bank": db_meta.nb_transactions_bank,
     }
 
     return metadata
@@ -37,12 +36,9 @@ def fig_indicators_balances():
                },
         domain={'row': 0, 'column': 0}))
     figure.add_trace(go.Indicator(
-        mode="number+delta",
-        value=metadata["nb_transactions_bank"],
+        mode="number",
+        value=metadata["nb_transactions_db"],
         title={"text": "Nombre de transactions"},
-        delta={'reference': metadata["nb_transactions_bank"],
-               'relative': False,
-               'valueformat': 'f'},
         domain={'row': 0, 'column': 1}))
     figure.add_trace(go.Indicator(
         mode="number",

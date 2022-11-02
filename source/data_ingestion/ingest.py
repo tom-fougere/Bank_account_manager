@@ -1,6 +1,6 @@
 from bson.objectid import ObjectId
 from utils.time_operations import str_to_datetime, modify_date_str_format
-from source.data_ingestion.metadata import MetadataDB
+from source.transactions.metadata import MetadataDB
 from source.db_connection.db_access import MongoDBConnection
 
 
@@ -66,13 +66,11 @@ class TransactionDB:
 
     def check(self, df_transactions, bank_info):
 
-        new_nb_transactions = self.metadata.nb_transactions_bank + len(df_transactions)
         new_balance = self._get_balance_in_db() + self.metadata.balance_bias + df_transactions['amount'].sum()
 
-        diff_nb_transaction = self.metadata.nb_transactions_db + len(df_transactions) - new_nb_transactions
         diff_balance = new_balance - bank_info['balance']
 
-        return diff_nb_transaction, diff_balance
+        return diff_balance
 
     def update(self, df_transactions):
 
@@ -131,13 +129,10 @@ class TransactionDB:
 
     def _update_metadata(self, df, bank_info):
 
-        new_nb_transactions = self.metadata.nb_transactions_bank + len(df)
-
         self.metadata.update_values(
             {
                 # BANK
                 'balance_in_bank': bank_info['balance'],
-                'nb_transactions_bank': new_nb_transactions,
                 'date_balance_in_bank': bank_info['date'],
 
                 # DATABASE

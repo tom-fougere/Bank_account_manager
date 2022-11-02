@@ -13,7 +13,6 @@ class MetadataDB:
         self.categories = None
         self.occasions = None
         self.types_transaction = None
-        self.nb_transactions_bank = 0
         self.nb_transactions_db = 0
         self.date_balance_in_bank = {'dt': None,
                                      'str': None}
@@ -21,8 +20,7 @@ class MetadataDB:
                                  'str': None}
 
     def init_db(self, balance_in_bank, balance_in_db, balance_bias,
-                date_balance_in_bank, date_last_import,
-                nb_trans_bank=0, nb_trans_db=0,
+                date_balance_in_bank, date_last_import, nb_trans_db=0,
                 categories=CATEGORIES, occasions=OCCASIONS, types=TYPE_TRANSACTIONS):
         self.balance_in_bank = balance_in_bank
         self.balance_in_db = balance_in_db
@@ -31,7 +29,6 @@ class MetadataDB:
         self.occasions = occasions
         self.types_transaction = types
         self.nb_transactions_db = nb_trans_db
-        self.nb_transactions_bank = nb_trans_bank
         self.date_balance_in_bank['dt'] = date_balance_in_bank
         self.date_balance_in_bank['str'] = date_balance_in_bank.strftime("%d/%m/%Y")
         self.date_last_import['dt'] = date_last_import
@@ -43,7 +40,6 @@ class MetadataDB:
                           'balance_bias': self.balance_bias,
                           'categories': self.categories,
                           'occasions': self.occasions,
-                          'nb_transactions_bank': self.nb_transactions_bank,
                           'nb_transactions_db': self.nb_transactions_db,
                           'types_transaction': self.types_transaction,
                           'date_balance_in_bank': self.date_balance_in_bank,
@@ -58,7 +54,6 @@ class MetadataDB:
                           'balance_bias': self.balance_bias,
                           'categories': self.categories,
                           'occasions': self.occasions,
-                          'nb_transactions_bank': self.nb_transactions_bank,
                           'nb_transactions_db': self.nb_transactions_db,
                           'types_transaction': self.types_transaction,
                           'date_balance_in_bank': self.date_balance_in_bank,
@@ -79,11 +74,10 @@ class MetadataDB:
         self.balance_in_bank = self.get_balance_in_bank()
         self.balance_in_db = self.get_balance_in_db()
         self.balance_bias = self.get_balance_bias()
-        self.categories = self.get_categories()
+        self.categories = self.get_categories_and_sub()
         self.occasions = self.get_occasions()
         self.types_transaction = self.get_types_transaction()
         self.nb_transactions_db = self.get_nb_transactions_db()
-        self.nb_transactions_bank = self.get_nb_transactions_bank()
 
         date_balance_in_bank = self.get_date_balance_in_bank()
         self.date_balance_in_bank = {'dt': str_to_datetime(date_balance_in_bank, date_format="%d/%m/%Y"),
@@ -120,6 +114,10 @@ class MetadataDB:
         result = self.connection.collection.find_one({'account_id': self.account_id}, ['categories'])
         return list(result['categories'].keys())
 
+    def get_categories_and_sub(self):
+        result = self.connection.collection.find_one({'account_id': self.account_id}, ['categories'])
+        return result['categories']
+
     def get_sub_categories(self, category):
         result = self.connection.collection.find_one({'account_id': self.account_id}, ['categories'])
         return result['categories'][category]
@@ -139,10 +137,6 @@ class MetadataDB:
     def get_date_balance_in_bank(self):
         result = self.connection.collection.find_one({'account_id': self.account_id}, ['date_balance_in_bank.str'])
         return result['date_balance_in_bank']['str']
-
-    def get_nb_transactions_bank(self):
-        result = self.connection.collection.find_one({'account_id': self.account_id}, ['nb_transactions_bank'])
-        return result['nb_transactions_bank']
 
     def get_nb_transactions_db(self):
         result = self.connection.collection.find_one({'account_id': self.account_id}, ['nb_transactions_db'])
@@ -176,10 +170,10 @@ class MetadataDB:
 
     def update_nb_transactions(self, new_nb_trans_bank=0, new_nb_trans_db=0):
 
-        current_bn_trans_bank = self.get_nb_transactions_bank()
         current_bn_trans_db = self.get_nb_transactions_db()
 
         self.connection.collection.update({'account_id': self.account_id},
-                                          {"$set": {'nb_transactions_bank': current_bn_trans_bank + new_nb_trans_bank,
-                                                    'nb_transactions_db': current_bn_trans_db + new_nb_trans_db}},
+                                          {"$set": {
+                                              'nb_transactions_db': current_bn_trans_db + new_nb_trans_db
+                                          }},
                                           upsert=False)

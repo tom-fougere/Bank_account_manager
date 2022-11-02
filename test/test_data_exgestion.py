@@ -3,7 +3,7 @@ import unittest
 from source.data_ingestion.ingest import TransactionDB
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.data_ingestion.exgest import TransactionExgest
-from source.data_ingestion.metadata import MetadataDB
+from source.transactions.metadata import MetadataDB
 from apps.graphs.pipelines import p_salary_vs_other
 
 ACCOUNT_ID = '008'

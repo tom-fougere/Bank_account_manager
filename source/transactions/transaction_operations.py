@@ -1,7 +1,6 @@
 import pandas as pd
 from dash_table.Format import Format, Symbol, Scheme
-from source.db_connection.db_access import MongoDBConnection
-from source.data_ingestion.metadata import MetadataDB
+from source.transactions.metadata import MetadataDB
 
 MANDATORY_COLUMNS = ['date_str', 'amount', 'description', 'type_transaction', 'date_transaction_str']
 OPTIONAL_COLUMNS = {'new_data': ['duplicate'],
