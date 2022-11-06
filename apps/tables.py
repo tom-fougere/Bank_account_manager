@@ -127,10 +127,10 @@ def rename_columns(df):
 def format_boolean_information(df):
 
     if InfoName.DUPLICATE in df.keys():
-        df[InfoName.DUPLICATE] = df[InfoName.DUPLICATE].apply(lambda x: 'Oui' if x else 'Non')
+        df[InfoName.DUPLICATE] = df[InfoName.DUPLICATE].apply(lambda x: 'Oui' if x == 'True' else 'Non')
 
     if InfoName.CHECK in df.keys():
-        df[InfoName.CHECK] = df[InfoName.CHECK].apply(lambda x: 'Oui' if x else 'Non')
+        df[InfoName.CHECK] = df[InfoName.CHECK].apply(lambda x: 'Oui' if x is True else 'Non')
 
     return df
 
