@@ -8,7 +8,7 @@ from app import app
 import time
 
 from datetime import date
-from apps.search_data.operations import search_transactions
+from apps.search_data.sd_operations import search_transactions
 from apps.tables import format_dataframe, df_to_datatable, InfoDisplay
 from source.transactions.transaction_operations import get_sub_categories
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID,\
@@ -65,14 +65,14 @@ layout = html.Div([
             dcc.Input(
                 id='search_amount_min',
                 type="number",
-                step=10,
+                step=5,
                 placeholder="Minimum",
                 style={'width': '50%'}),
             dcc.Input(
                 id='search_amount_max',
                 type="number",
                 debounce=True,
-                step=10,
+                step=5,
                 placeholder="Maximum",
                 style={'width': '50%'}),
             ])

@@ -7,7 +7,7 @@ from app import app
 
 from utils.text_operations import get_project_root
 from source.data_ingestion.ingest import TransactionDB
-from apps.import_new_data.operations import read_and_format_data, fig_indicators_new_transactions
+from apps.import_new_data.ind_operations import read_and_format_data, fig_indicators_new_transactions
 from apps.tables import format_dataframe, df_to_datatable, InfoDisplay
 from source.definitions import DB_CONN_TRANSACTION, DB_CONN_ACCOUNT, DATA_FOLDER
 

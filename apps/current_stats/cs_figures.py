@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-from apps.graphs.operations import get_data_for_graph
-from apps.graphs.pipelines import p_balance_category_per_date,\
+from apps.current_stats.cs_operations import get_data_for_graph
+from apps.current_stats.cs_pipelines import p_balance_category_per_date,\
     p_balance_occasion_per_date, p_savings_per_date, p_loan_per_date, p_salary_vs_other, p_expenses_category
 from source.definitions import MONTHS, OCCASIONS
 

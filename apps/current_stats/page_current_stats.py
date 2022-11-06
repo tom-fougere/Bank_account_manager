@@ -4,11 +4,11 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash import Input, Output, State, callback_context
 from app import app
-from apps.graphs.my_figures import \
+from apps.current_stats.cs_figures import \
     fig_indicators_revenue_expense_balance,\
     fig_expenses_vs_revenue, fig_expenses_vs_category, fig_expenses_vs_occasion, \
     fig_savings, fig_loan, fig_categories, fig_cum_balance
-from apps.graphs.operations import get_list_years
+from apps.current_stats.cs_operations import get_list_years
 from source.definitions import DB_CONN_TRANSACTION
 
 now = datetime.datetime.now()
