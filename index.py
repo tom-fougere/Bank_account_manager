@@ -11,6 +11,7 @@ from apps.search_data import page_search
 from apps.import_new_data import page_import
 from apps.current_stats import page_current_stats
 from apps.annual_stats import page_annual_stats
+from apps.params_category import page_category
 
 app.layout = html.Div([
     dcc.Location(id='url'),
@@ -33,6 +34,8 @@ def display_page(pathname):
         return page_current_stats.layout
     if pathname == '/annual_stats':
         return page_annual_stats.layout
+    if pathname == '/params_category':
+        return page_category.layout
     else:
         return '404'
 

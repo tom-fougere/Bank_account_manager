@@ -27,6 +27,7 @@ sidebar = html.Div(
                 dbc.NavLink("Recherche", href="/search_data", active="exact"),
                 dbc.NavLink("Stats actuelles", href="/current_stats", active="exact"),
                 dbc.NavLink("Stats annuelles", href="/annual_stats", active="exact"),
+                dbc.NavLink("Catégorie", href="/params_category", active="exact"),
             ],
             vertical=True,
             pills=True,
