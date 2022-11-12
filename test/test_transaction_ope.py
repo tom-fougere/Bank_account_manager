@@ -87,6 +87,14 @@ class TestGetLists(unittest.TestCase):
 
         self.assertEqual(sub_categories, expected_categories)
 
+    def test_get_all_categories(self):
+        all_cat = get_categories_and_subcat(
+            db_connection=DB_TITLE_CONNECTION,
+            account_id=ACCOUNT_ID,
+        )
+
+        self.assertEqual(all_cat, CATEGORIES)
+
     def test_get_occasions(self):
         occasions = get_occasion(DB_TITLE_CONNECTION, ACCOUNT_ID)
 

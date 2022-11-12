@@ -92,6 +92,13 @@ def get_categories(db_connection, account_id):
     return list_categories
 
 
+def get_categories_and_subcat(db_connection, account_id):
+
+    metadata_db = MetadataDB(db_connection, account_id=account_id)
+
+    return metadata_db.get_categories_and_sub()
+
+
 def get_sub_categories(db_connection, account_id, categories, add_suffix_cat=True):
 
     metadata_db = MetadataDB(db_connection, account_id=account_id)
