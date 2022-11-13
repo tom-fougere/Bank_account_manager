@@ -5,7 +5,6 @@ import dash_daq as daq
 
 from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID, OCCASIONS
 from source.transactions.metadata import MetadataDB
-from source.transactions.transaction_operations import get_categories_and_subcat
 
 
 def get_categories_name():
@@ -15,6 +14,195 @@ def get_categories_name():
     categories = metadata_db.get_categories()
 
     return categories
+
+
+def get_all_sub_categories(delimiter=':'):
+    metadata_db = MetadataDB(
+        name_connection=DB_CONN_ACCOUNT,
+        account_id=ACCOUNT_ID)
+    categories = metadata_db.get_categories()
+
+    list_sub_cat = []
+    for cat in categories:
+        list_sub_cat.append([cat + delimiter + sub_cat.replace('.', '') for sub_cat in metadata_db.get_sub_categories(cat)])
+
+    list_sub_cat = sum(list_sub_cat, [])
+
+    return list_sub_cat
+
+# #################################### #
+# ####### SWITCH CATEGORY ############ #
+# #################################### #
+
+
+def get_switch_cat_content():
+    content = html.Div([
+        html.Br(),
+        dbc.Card(
+            create_switch_cat_content(),
+            body=True,
+        ),
+        html.Br()
+    ])
+
+    return content
+
+
+def create_switch_cat_content():
+    content = html.Div([
+        dbc.Row([
+            dbc.Col(
+                dcc.Dropdown(
+                    id='',
+                    options=[{'label': cat, 'value': cat} for cat in get_all_sub_categories(delimiter=' - ')],
+                    value=[],
+                    style={'align-items': 'center'}
+                ),
+                width={"size": 3, "order": 1},
+            ),
+            dbc.Col(
+                html.Div('=>'),
+                width={"size": 1, "order": 2},
+                style={'align': 'center'}
+            ),
+            dbc.Col(
+                dcc.Dropdown(
+                    id='',
+                    options=[{'label': cat, 'value': cat} for cat in get_categories_name()],
+                    value=[],
+                    style={'align-items': 'center'}
+                ),
+                width={"size": 3, "order": 3},
+            ),
+            dbc.Col(
+                dbc.Button(
+                    "Save",
+                    color="primary",
+                    id='',
+                ),
+                width={"size": 1, "order": "last", 'offset': 4},
+            ),
+        ])
+    ])
+
+    return content
+
+# #################################### #
+# ######## NEW CATEGORY ############## #
+# #################################### #
+
+
+def get_new_cat_content():
+    content = html.Div([
+        html.Br(),
+        dbc.Card(
+            create_new_cat_content(),
+            body=True,
+        ),
+        html.Br()
+    ])
+
+    return content
+
+
+def create_new_cat_content():
+
+    content = html.Div([
+        dbc.Row([
+            dbc.Col([
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            html.Div("Nom:"),
+                            align="center",
+                            width={"size": 4},
+                        ),
+                        dbc.Col(
+                            dbc.Input(
+                                id='id_input_new_cat',
+                                type="text",
+                                placeholder=''
+                            ),
+                            width={"size": 4},
+                        ),
+                        dbc.Col(
+                            'test',
+                            id='id_text_new_cat',
+                            width={"size": 2},
+                            align="center",
+                        )
+                    ],
+                ),
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            html.Div("Occasion par défault:"),
+                            align="center",
+                            width={"size": 4},
+                        ),
+                        dbc.Col(
+                            dcc.Dropdown(
+                                id='id_dropdown_new_cat_occasion',
+                                options=[{'label': occ, 'value': occ} for occ in OCCASIONS],
+                                value=[],
+                                style={'align-items': 'center'}
+                            ),
+                            width={"size": 4},
+                            style={'align-items': 'center'}
+                        ),
+                    ],
+                ),
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            html.Div(
+                                [
+                                    html.Div('Sous-catégorie ?'),
+                                    daq.BooleanSwitch(
+                                        id='id_switch_new_cat',
+                                        on=False,
+                                        style={"margin-left": 10}),
+                                ],
+                                style={'margin-top': 10,
+                                       "display": 'flex'}
+                            ),
+                            width={"size": 4},
+                        ),
+                        dbc.Col(
+                            dcc.Dropdown(
+                                id='id_dropdown_new_cat',
+                                options=[{'label': cat, 'value': cat} for cat in get_categories_name()],
+                                value=[],
+                                disabled=True,
+                                style={'align-items': 'center'}
+                            ),
+                            width={"size": 4},
+                            style={'align-items': 'center'}
+                        ),
+                    ]
+                )
+            ]),
+            dbc.Col([
+                html.Div([
+                    dbc.Button(
+                        "Save",
+                        color="primary",
+                        style={"height": 38 * 3},
+                        id='id_button_new_cat',
+                    ),
+                ],
+                )
+            ],
+                width=1,
+            )
+        ]),
+    ])
+
+    return content
+
+# #################################### #
+# ########## TABULATION ############## #
+# #################################### #
 
 
 def get_tab_content(tab_id):
@@ -30,114 +218,146 @@ def get_tab_content(tab_id):
 
     # Create accordion
     accordion = create_accordion(
-        name=category,
-        accordion_names=sub_categories,
+        cat=category,
+        sub_cats=sub_categories,
     )
 
-    # tab_content = dbc.Card(
-    #     dbc.CardBody(
-    #         [
-    #             html.P('')
-    #         ]
-    #     )
-    # )
-    return accordion
+    first_component = dbc.Card(
+        dbc.CardBody([
+            html.H5(category, className="card-title"),
+            create_tab_content(
+                cat=category,
+                sub_cat='',
+                default_occas=None,
+                default_rename=category,
+            ),
+        ]),
+        body=True,
+    )
 
-
-def create_content(name):
     content = html.Div([
-        html.Div([
-            dbc.Row([
-                dbc.Col([
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                html.Div("Occasion par défault:"),
-                                align="center",
-                                width={"size": 4},
-                            ),
-                            dbc.Col(
-                                dcc.Dropdown(
-                                    id='id_dropdown_occasion_' + name,
-                                    options=[{'label': occ, 'value': occ} for occ in OCCASIONS],
-                                    value=[],
-                                    style={'align-items': 'center'}
-                                ),
-                                width={"size": 4},
-                            ),
-                        ],
-                    ),
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                html.Div(
-                                    [
-                                        html.Div('Renommer:'),
-                                        daq.BooleanSwitch(
-                                            id='id_bool_switch_rename',
-                                            on=False,
-                                            style={"margin-left": 10}),
-                                    ],
-                                    style={'margin-top': 10,
-                                           "display": 'flex'}
-                                ),
-                                width={"size": 4},
-                            ),
-                            dbc.Col(
-                                dbc.Input(
-                                    id='id_input_rename',
-                                    type="text",
-                                    placeholder="",
-                                    disabled=True
-                                ),
-                                width={"size": 4},
-                                style={'align-items': 'center'}
-                            ),
-                            dbc.Col(
-                                html.Div('text', id='id_text_renamed'),
-                                width={"size": 1},
-                                align="center",
-                            )
-                        ]
-                    )
-                ]),
-                dbc.Col([
-                    html.Div([
-                        dbc.Button(
-                            "Save",
-                            color="primary",
-                            style={"height": 38*2},
-                        ),
-                    ],
-                    # className="d-grid gap-2",
-                    )
-
-                ],
-                    width=1,
-                )
-            ]),
-        ]
-        ),
+        html.Br(),
+        first_component,
+        html.Br(),
+        accordion
     ])
 
     return content
 
 
-def create_accordion(name, accordion_names, list_contents=None):
-    accordion_items = []
-    if list_contents is None:
-        list_contents = [None] * len(accordion_names)
+def create_tab_content(cat, sub_cat, default_occas=None, default_rename=None):
+    name = cat + ':' + sub_cat
 
-    for cat, content in zip(accordion_names, list_contents):
+    content = html.Div([
+        dbc.Row([
+            dbc.Col([
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            html.Div("Occasion par défault:"),
+                            align="center",
+                            width={"size": 4},
+                        ),
+                        dbc.Col(
+                            dcc.Dropdown(
+                                # id='id_dropdown_default_occasion_' + name,
+                                id={
+                                    'type': 'id_dropdown_default_occasion',
+                                    'name': name
+                                },
+                                # id='id_dropdown_occasion',
+                                options=[{'label': occ, 'value': occ} for occ in OCCASIONS],
+                                value=default_occas if default_occas is not None else [],
+                                style={'align-items': 'center'}
+                            ),
+                            width={"size": 4},
+                        ),
+                    ],
+                ),
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            html.Div(
+                                [
+                                    html.Div('Renommer:'),
+                                    daq.BooleanSwitch(
+                                        id={
+                                            'type': 'id_switch_rename',
+                                            'name': name
+                                        },
+                                        # id='id_switch_rename_' + name,
+                                        # id='bool_rename',
+                                        on=False,
+                                        style={"margin-left": 10}),
+                                ],
+                                style={'margin-top': 10,
+                                       "display": 'flex'}
+                            ),
+                            width={"size": 4},
+                        ),
+                        dbc.Col(
+                            dbc.Input(
+                                id={
+                                    'type': 'id_input_rename',
+                                    'name': name
+                                },
+                                # id='id_input_rename_' + name,
+                                type="text",
+                                placeholder=default_rename,
+                                disabled=True
+                            ),
+                            width={"size": 4},
+                            style={'align-items': 'center'}
+                        ),
+                        dbc.Col(
+                            html.Div('text', id='id_text_renamed_' + name),
+                            width={"size": 1},
+                            align="center",
+                        )
+                    ]
+                )
+            ]),
+            dbc.Col([
+                html.Div([
+                    dbc.Button(
+                        "Save",
+                        color="primary",
+                        style={"height": 38*2},
+                        id='id_button_save_param_' + name,
+                    ),
+                ],
+                )
+            ],
+                width=1,
+            )
+        ]),
+    ])
+
+    return content
+
+# #################################### #
+# ########### ACCORDION ############## #
+# #################################### #
+
+
+def create_accordion(cat, sub_cats):
+    accordion_items = []
+
+    for sub_cat in sub_cats:
+        sub_cat = sub_cat.replace('.', '')
+
         accordion_items.append(
             create_single_accordion_item(
-                name=cat,
-                content=content)
+                cat=cat,
+                sub_cat=sub_cat,
+                default_occas=None,
+                default_rename=sub_cat)
         )
 
     accordion = dbc.Accordion(
         accordion_items,
-        id="id_" + name,
+        # id="id_" + name,
+        id='accordion',
         start_collapsed=True,
         flush=True,
         # always_open=True,
@@ -148,12 +368,17 @@ def create_accordion(name, accordion_names, list_contents=None):
     return accordion
 
 
-def create_single_accordion_item(name):
+def create_single_accordion_item(cat, sub_cat, default_occas=None, default_rename=None):
 
     accordion_item = dbc.AccordionItem(
-        create_content(name),
-        title=name,
-        item_id='item_' + name
+        create_tab_content(
+            cat=cat,
+            sub_cat=sub_cat,
+            default_occas=default_occas,
+            default_rename=default_rename
+        ),
+        title=sub_cat,
+        item_id='accordion_item_' + cat + ':' + sub_cat
     )
 
     return accordion_item
