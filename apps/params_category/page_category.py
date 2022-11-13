@@ -93,3 +93,28 @@ def check_new_cat_exist(new_cat_name, is_subcat, occasion, mother_cat):
             message = 'Déjà existant !'
 
     return message, button_disable
+
+
+@app.callback(
+    Output('id_button_switch_cat', 'disabled'),
+    [Input('id_dropdown_switch_cat_from', 'value'),
+     Input('id_dropdown_switch_cat_to', 'value')]
+
+)
+def check_switch_cat(previous_cat, new_cat):
+
+    disabled = True
+    if previous_cat is not None and new_cat is not None and len(previous_cat) > 0 and len(new_cat) > 0:
+        disabled = False
+
+    return disabled
+
+
+@app.callback(
+    Output({'type': 'id_text_rename', 'name': ALL}, 'children'),
+    Input({'type': 'id_input_rename', 'name': ALL}, 'value'),
+)
+def check_renaming(values):
+
+    print(values)
+    return values

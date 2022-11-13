@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_daq as daq
 
-from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID, OCCASIONS
+from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID, OCCASIONS, DEFAULT_OCCASION_FOR_CAT
 from source.transactions.metadata import MetadataDB
 
 
@@ -24,7 +24,7 @@ def get_all_sub_categories(delimiter=':'):
 
     list_sub_cat = []
     for cat in categories:
-        list_sub_cat.append([cat + delimiter + sub_cat.replace('.', '') for sub_cat in metadata_db.get_sub_categories(cat)])
+        list_sub_cat.append([cat + delimiter + sub_cat for sub_cat in metadata_db.get_sub_categories(cat)])
 
     list_sub_cat = sum(list_sub_cat, [])
 
@@ -53,7 +53,7 @@ def create_switch_cat_content():
         dbc.Row([
             dbc.Col(
                 dcc.Dropdown(
-                    id='',
+                    id='id_dropdown_switch_cat_from',
                     options=[{'label': cat, 'value': cat} for cat in get_all_sub_categories(delimiter=' - ')],
                     value=[],
                     style={'align-items': 'center'}
@@ -67,7 +67,7 @@ def create_switch_cat_content():
             ),
             dbc.Col(
                 dcc.Dropdown(
-                    id='',
+                    id='id_dropdown_switch_cat_to',
                     options=[{'label': cat, 'value': cat} for cat in get_categories_name()],
                     value=[],
                     style={'align-items': 'center'}
@@ -78,7 +78,7 @@ def create_switch_cat_content():
                 dbc.Button(
                     "Save",
                     color="primary",
-                    id='',
+                    id='id_button_switch_cat',
                 ),
                 width={"size": 1, "order": "last", 'offset': 4},
             ),
@@ -228,8 +228,9 @@ def get_tab_content(tab_id):
             create_tab_content(
                 cat=category,
                 sub_cat='',
-                default_occas=None,
+                default_occas=DEFAULT_OCCASION_FOR_CAT[category] if len(sub_categories) == 0 else None,
                 default_rename=category,
+                disabled_occasion=len(sub_categories) > 0,
             ),
         ]),
         body=True,
@@ -245,7 +246,7 @@ def get_tab_content(tab_id):
     return content
 
 
-def create_tab_content(cat, sub_cat, default_occas=None, default_rename=None):
+def create_tab_content(cat, sub_cat, default_occas=None, default_rename=None, disabled_occasion=False):
     name = cat + ':' + sub_cat
 
     content = html.Div([
@@ -260,12 +261,11 @@ def create_tab_content(cat, sub_cat, default_occas=None, default_rename=None):
                         ),
                         dbc.Col(
                             dcc.Dropdown(
-                                # id='id_dropdown_default_occasion_' + name,
                                 id={
                                     'type': 'id_dropdown_default_occasion',
                                     'name': name
                                 },
-                                # id='id_dropdown_occasion',
+                                disabled=disabled_occasion,
                                 options=[{'label': occ, 'value': occ} for occ in OCCASIONS],
                                 value=default_occas if default_occas is not None else [],
                                 style={'align-items': 'center'}
@@ -285,8 +285,6 @@ def create_tab_content(cat, sub_cat, default_occas=None, default_rename=None):
                                             'type': 'id_switch_rename',
                                             'name': name
                                         },
-                                        # id='id_switch_rename_' + name,
-                                        # id='bool_rename',
                                         on=False,
                                         style={"margin-left": 10}),
                                 ],
@@ -301,16 +299,21 @@ def create_tab_content(cat, sub_cat, default_occas=None, default_rename=None):
                                     'type': 'id_input_rename',
                                     'name': name
                                 },
-                                # id='id_input_rename_' + name,
+                                # id='id_test',
                                 type="text",
                                 placeholder=default_rename,
-                                disabled=True
+                                disabled=False
                             ),
                             width={"size": 4},
                             style={'align-items': 'center'}
                         ),
                         dbc.Col(
-                            html.Div('text', id='id_text_renamed_' + name),
+                            html.Div(
+                                'text',
+                                id={
+                                    'type': 'id_text_rename',
+                                    'name': name,
+                                }),
                             width={"size": 1},
                             align="center",
                         )
@@ -344,13 +347,12 @@ def create_accordion(cat, sub_cats):
     accordion_items = []
 
     for sub_cat in sub_cats:
-        sub_cat = sub_cat.replace('.', '')
 
         accordion_items.append(
             create_single_accordion_item(
                 cat=cat,
                 sub_cat=sub_cat,
-                default_occas=None,
+                default_occas=DEFAULT_OCCASION_FOR_CAT[cat][sub_cat],
                 default_rename=sub_cat)
         )
 
