@@ -56,18 +56,20 @@ class TestGetLists(unittest.TestCase):
         self.metadata_db.connection.collection.remove({"account_id": ACCOUNT_ID})
 
     def test_get_categories(self):
-        categories = get_categories(DB_TITLE_CONNECTION, ACCOUNT_ID)
+        categories = get_categories_for_dropdown_menu(DB_TITLE_CONNECTION, ACCOUNT_ID)
 
-        expected_categories = []
-        for cat in CATEGORIES:
-            expected_categories.append({'label': cat, 'value': cat})
+        self.assertEqual(len(categories), len(CATEGORIES))
 
-        self.assertEqual(categories, expected_categories)
+        for cat in categories:
+            self.assertEqual(cat['label'], cat['value'])
 
     def test_get_sub_categories_without_suffix(self):
         selected_category = 'Travail'
-        sub_categories = get_sub_categories(DB_TITLE_CONNECTION, ACCOUNT_ID, categories=[selected_category],
-                                            add_suffix_cat=False)
+        sub_categories = get_sub_categories_for_dropdown_menu(
+            DB_TITLE_CONNECTION,
+            ACCOUNT_ID,
+            categories=[selected_category],
+            add_suffix_cat=False)
 
         expected_categories = []
         for cat in CATEGORIES[selected_category]:
@@ -77,8 +79,11 @@ class TestGetLists(unittest.TestCase):
 
     def test_get_sub_categories_with_suffix(self):
         selected_category = 'Travail'
-        sub_categories = get_sub_categories(DB_TITLE_CONNECTION, ACCOUNT_ID, categories=[selected_category],
-                                            add_suffix_cat=True)
+        sub_categories = get_sub_categories_for_dropdown_menu(
+            DB_TITLE_CONNECTION,
+            ACCOUNT_ID,
+            categories=[selected_category],
+            add_suffix_cat=True)
 
         expected_categories = []
         for cat in CATEGORIES[selected_category]:

@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_daq as daq
 
-from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID, OCCASIONS, DEFAULT_OCCASION_FOR_CAT
+from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID, OCCASIONS
 from source.transactions.metadata import MetadataDB
 
 
@@ -24,7 +24,7 @@ def get_all_sub_categories(delimiter=':'):
 
     list_sub_cat = []
     for cat in categories:
-        list_sub_cat.append([cat + delimiter + sub_cat for sub_cat in metadata_db.get_sub_categories(cat)])
+        list_sub_cat.append([cat + delimiter + sub_cat for sub_cat in list(metadata_db.get_sub_categories(cat).keys())])
 
     list_sub_cat = sum(list_sub_cat, [])
 
@@ -216,6 +216,11 @@ def get_tab_content(tab_id):
         category=category
     )
 
+    # Get information of the current category
+    category_info = metadata_db.get_category_info(
+        category=category,
+    )
+
     # Create accordion
     accordion = create_accordion(
         cat=category,
@@ -228,7 +233,7 @@ def get_tab_content(tab_id):
             create_tab_content(
                 cat=category,
                 sub_cat='',
-                default_occas=DEFAULT_OCCASION_FOR_CAT[category] if len(sub_categories) == 0 else None,
+                default_occas=category_info['Default_occasion'],
                 default_rename=category,
                 disabled_occasion=len(sub_categories) > 0,
             ),
@@ -346,13 +351,13 @@ def create_tab_content(cat, sub_cat, default_occas=None, default_rename=None, di
 def create_accordion(cat, sub_cats):
     accordion_items = []
 
-    for sub_cat in sub_cats:
+    for sub_cat, info in sub_cats.items():
 
         accordion_items.append(
             create_single_accordion_item(
                 cat=cat,
                 sub_cat=sub_cat,
-                default_occas=DEFAULT_OCCASION_FOR_CAT[cat][sub_cat],
+                default_occas=info['Default_occasion'],
                 default_rename=sub_cat)
         )
 

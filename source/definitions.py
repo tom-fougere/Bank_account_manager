@@ -62,6 +62,225 @@ DEFAULT_OCCASION_FOR_CAT = {
               'Autre': 'Ponctuel'}
 }
 
+ALL_CATEGORIES = {
+    'Travail': {
+        "Sub-categories": {
+            "Salaire": {
+                "Default_occasion": 'Régulier',
+                "Order": 1,
+            },
+            "Prime": {
+                "Default_occasion": 'Ponctuel',
+                "Order": 2,
+            },
+            "Autre": {
+                "Default_occasion": 'Ponctuel',
+                "Order": 3,
+            },
+        },
+        "Default_occasion": None,
+        "Order": 1,
+    },
+    'Impots': {
+       "Sub-categories": {
+           "Taxe habitation": {
+               "Default_occasion": 'Régulier',
+               "Order": 1,
+           },
+           "Taxe Foncière": {
+               "Default_occasion": 'Régulier',
+               "Order": 2,
+           },
+           "Autre": {
+               "Default_occasion": 'Ponctuel',
+               "Order": 3,
+           },
+       },
+       "Default_occasion": None,
+       "Order": 1,
+    },
+    'Logement': {
+       "Sub-categories": {
+           "Loyer/Prêt": {
+               "Default_occasion": 'Régulier',
+               "Order": 1,
+           },
+           "Eau/Gaz/Elec": {
+               "Default_occasion": 'Régulier',
+               "Order": 2,
+           },
+           "Assurance": {
+               "Default_occasion": 'Régulier',
+               "Order": 3,
+           },
+           "Deco/Meuble": {
+               "Default_occasion": 'Ponctuel',
+               "Order": 4,
+           },
+           "Copro.": {
+               "Default_occasion": 'Régulier',
+               "Order": 5,
+           },
+           "Autre": {
+               "Default_occasion": 'Ponctuel',
+               "Order": 6,
+           },
+       },
+       "Default_occasion": None,
+       "Order": 1,
+    },
+    'Transport': {
+       "Sub-categories": {
+           "Carburant": {
+               "Default_occasion": 'Régulier',
+               "Order": 1,
+           },
+           "Entretien": {
+               "Default_occasion": 'Ponctuel',
+               "Order": 2,
+           },
+           "Assurance": {
+               "Default_occasion": 'Régulier',
+               "Order": 3,
+           },
+           "Transport en commun": {
+               "Default_occasion": 'Régulier',
+               "Order": 4,
+           },
+           "Autre": {
+               "Default_occasion": 'Ponctuel',
+               "Order": 5,
+           },
+       },
+       "Default_occasion": None,
+       "Order": 1,
+    },
+    'Alimentation': {
+       "Sub-categories": {
+           "Supermarché/Drive": {
+               "Default_occasion": 'Régulier',
+               "Order": 1,
+           },
+           "Repas Travail": {
+               "Default_occasion": 'Régulier',
+               "Order": 2,
+           },
+           "Resto": {
+               "Default_occasion": 'Loisir',
+               "Order": 3,
+           },
+           "Autre": {
+               "Default_occasion": 'Ponctuel',
+               "Order": 4,
+           },
+       },
+       "Default_occasion": None,
+       "Order": 1,
+    },
+    'Sortie/Voyage': {
+        "Sub-categories": {
+            "Culture": {
+                "Default_occasion": 'Loisir',
+                "Order": 1,
+            },
+            "Détente": {
+                "Default_occasion": 'Loisir',
+                "Order": 2,
+            },
+            "Voyage": {
+                "Default_occasion": 'Loisir',
+                "Order": 3,
+            },
+            "Soirée/Wkd": {
+                "Default_occasion": 'Loisir',
+                "Order": 4,
+            },
+            "Autre": {
+                "Default_occasion": 'Loisir',
+                "Order": 5,
+            },
+        },
+        "Default_occasion": None,
+        "Order": 1,
+    },
+    'Tech/Sport': {
+        "Sub-categories": {
+            "Internet/TV/Tel": {
+                "Default_occasion": 'Régulier',
+                "Order": 1,
+            },
+            "Abonnement": {
+                "Default_occasion": 'Régulier',
+                "Order": 2,
+            },
+            "Sport": {
+                "Default_occasion": 'Régulier',
+                "Order": 3,
+            },
+            "Electronique": {
+                "Default_occasion": 'Ponctuel',
+                "Order": 4,
+            },
+            "Autre": {
+                "Default_occasion": 'Ponctuel',
+                "Order": 5,
+            },
+        },
+        "Default_occasion": None,
+        "Order": 1,
+    },
+    'Perso': {
+        "Sub-categories": {
+            "Tom": {
+                "Default_occasion": 'Loisir',
+                "Order": 1,
+            },
+            "Elise": {
+                "Default_occasion": 'Loisir',
+                "Order": 2,
+            },
+        },
+        "Default_occasion": None,
+        "Order": 1,
+    },
+    'Fêtes': {
+        "Sub-categories": {
+            "Anniversaire": {
+                "Default_occasion": 'Ponctuel',
+                "Order": 1,
+            },
+            "Fêtes": {
+                "Default_occasion": 'Ponctuel',
+                "Order": 2,
+            },
+            "Autre": {
+                "Default_occasion": 'Ponctuel',
+                "Order": 3,
+            },
+        },
+        "Default_occasion": None,
+        "Order": 1,
+    },
+    'Santé': {
+        "Sub-categories": {
+        },
+        "Default_occasion": "Ponctuel",
+        "Order": 1,
+    },
+    'Autre': {
+        "Sub-categories": {
+        },
+        "Default_occasion": "Ponctuel",
+        "Order": 1,
+    },
+    'Epargne': {
+        "Sub-categories": {
+        },
+        "Default_occasion": "Ponctuel",
+        "Order": 1,
+    },
+}
+
 # #################################### #
 # ############### DATE ############### #
 # #################################### #

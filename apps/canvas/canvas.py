@@ -7,7 +7,8 @@ import pandas as pd
 import json
 from apps.canvas.canvas_transaction_details import get_transaction_values,\
     get_sub_categories_dropdown, update_transaction, delete_transaction
-from source.transactions.transaction_operations import get_occasion, get_categories, get_types_transaction
+from source.transactions.transaction_operations import get_occasion,\
+    get_categories_for_dropdown_menu, get_types_transaction
 from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID, DEFAULT_OCCASION_FOR_CAT
 
 from app import app
@@ -69,9 +70,9 @@ transaction_details_layout = html.Div([
         'Catégorie:',
         dcc.Dropdown(
             id='canvas_category',
-            options=get_categories(db_connection=DB_CONN_ACCOUNT,
-                                   account_id=ACCOUNT_ID),
-            # value=df.category,
+            options=get_categories_for_dropdown_menu(
+                db_connection=DB_CONN_ACCOUNT,
+                account_id=ACCOUNT_ID),
             multi=False,
             style={'width': '100%'},
             disabled=True),

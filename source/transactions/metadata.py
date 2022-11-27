@@ -1,4 +1,4 @@
-from source.definitions import CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
+from source.definitions import ALL_CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
 from utils.time_operations import str_to_datetime
 from source.db_connection.db_access import MongoDBConnection
 
@@ -21,7 +21,7 @@ class MetadataDB:
 
     def init_db(self, balance_in_bank, balance_in_db, balance_bias,
                 date_balance_in_bank, date_last_import, nb_trans_db=0,
-                categories=CATEGORIES, occasions=OCCASIONS, types=TYPE_TRANSACTIONS):
+                categories=ALL_CATEGORIES, occasions=OCCASIONS, types=TYPE_TRANSACTIONS):
         self.balance_in_bank = balance_in_bank
         self.balance_in_db = balance_in_db
         self.balance_bias = balance_bias
@@ -75,7 +75,7 @@ class MetadataDB:
         self.balance_in_db = self.get_balance_in_db()
         self.balance_bias = self.get_balance_bias()
         self.categories = self.get_categories_and_sub()
-        self.occasions = self.get_occasions()
+        self.occasions = self.get_list_occasions()
         self.types_transaction = self.get_types_transaction()
         self.nb_transactions_db = self.get_nb_transactions_db()
 
@@ -114,17 +114,36 @@ class MetadataDB:
         result = self.connection.collection.find_one({'account_id': self.account_id}, ['categories'])
         return list(result['categories'].keys())
 
-    def get_categories_and_sub(self):
-        result = self.connection.collection.find_one({'account_id': self.account_id}, ['categories'])
-        return result['categories']
-
-    def get_sub_categories(self, category):
+    def get_category_info(self, category):
         result = self.connection.collection.find_one({'account_id': self.account_id}, ['categories'])
         return result['categories'][category]
 
-    def get_occasions(self):
+    def get_categories_and_sub(self):
+        result = self.connection.collection.find_one({'account_id': self.account_id}, ['categories'])
+
+        cat_and_sub_cat = dict()
+        for cat, value in result['categories'].items():
+            cat_and_sub_cat[cat] = list(value['Sub-categories'].keys())
+
+        return cat_and_sub_cat
+
+    def get_sub_categories(self, category):
+        result = self.connection.collection.find_one({'account_id': self.account_id}, ['categories'])
+        return result['categories'][category]['Sub-categories']
+
+    def get_list_occasions(self):
         result = self.connection.collection.find_one({'account_id': self.account_id}, ['occasions'])
         return result['occasions']
+
+    def get_default_occasion(self, category, sub_category=None):
+        result = self.connection.collection.find_one({'account_id': self.account_id}, ['categories'])
+
+        category_info = result['categories'][category]
+        default_occasion = category_info['Default_occasion']
+        if sub_category is not None and sub_category in list(category_info['Sub-categories'].keys()):
+            default_occasion = category_info['Sub-categories'][sub_category]['Default_occasion']
+
+        return default_occasion
 
     def get_types_transaction(self):
         result = self.connection.collection.find_one({'account_id': self.account_id}, ['types_transaction'])

@@ -5,7 +5,8 @@ from datetime import date
 
 from utils.time_operations import str_to_datetime
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
-from source.transactions.transaction_operations import get_categories, get_sub_categories, get_occasion
+from source.transactions.transaction_operations import get_categories_for_dropdown_menu,\
+    get_sub_categories_for_dropdown_menu, get_occasion
 from source.data_ingestion.ingest import TransactionDB
 
 
@@ -13,7 +14,7 @@ def create_canvas_content_with_transaction_details(df, disabled=True):
     date_transaction = str_to_datetime(df.date_transaction_str, date_format='%d/%m/%Y')
     date_bank = str_to_datetime(df.date_str, date_format='%d/%m/%Y')
     if df.category is not None:
-        sub_categories = get_sub_categories(
+        sub_categories = get_sub_categories_for_dropdown_menu(
                         db_connection=DB_CONN_ACCOUNT,
                         account_id=df.account_id,
                         categories=[df.category],
@@ -168,7 +169,7 @@ def get_sub_categories_dropdown(account_id, category):
 
     # get sub-category if category exists
     if category is not None and len(category) > 0:
-        sub_categories = get_sub_categories(
+        sub_categories = get_sub_categories_for_dropdown_menu(
             db_connection=DB_CONN_ACCOUNT,
             account_id=account_id,
             categories=[category],

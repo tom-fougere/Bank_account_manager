@@ -10,7 +10,7 @@ import time
 from datetime import date
 from apps.search_data.sd_operations import search_transactions
 from apps.tables import format_dataframe, df_to_datatable, InfoDisplay
-from source.transactions.transaction_operations import get_sub_categories
+from source.transactions.transaction_operations import get_sub_categories_for_dropdown_menu
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID,\
     CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
 from utils.time_operations import str_to_datetime
@@ -268,9 +268,10 @@ def update_sub_category(value):
     options = []
 
     if len(value) > 0:
-        options = get_sub_categories(db_connection=DB_CONN_ACCOUNT,
-                                     account_id=ACCOUNT_ID,
-                                     categories=value)
+        options = get_sub_categories_for_dropdown_menu(
+            db_connection=DB_CONN_ACCOUNT,
+            account_id=ACCOUNT_ID,
+            categories=value)
 
     return options
 
