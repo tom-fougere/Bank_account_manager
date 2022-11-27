@@ -120,7 +120,7 @@ def create_new_cat_content():
                         dbc.Col(
                             dbc.Input(
                                 id='id_input_new_cat',
-                                type="text",
+                                type="",
                                 placeholder=''
                             ),
                             width={"size": 4},
@@ -305,7 +305,7 @@ def create_tab_content(cat, sub_cat, default_occas=None, default_rename=None, di
                                     'name': name
                                 },
                                 # id='id_test',
-                                type="text",
+                                type="",
                                 placeholder=default_rename,
                                 disabled=False
                             ),
@@ -314,7 +314,7 @@ def create_tab_content(cat, sub_cat, default_occas=None, default_rename=None, di
                         ),
                         dbc.Col(
                             html.Div(
-                                'text',
+                                '',
                                 id={
                                     'type': 'id_text_rename',
                                     'name': name,
