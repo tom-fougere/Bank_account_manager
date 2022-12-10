@@ -74,7 +74,7 @@ class MetadataDB:
         self.balance_in_bank = self.get_balance_in_bank()
         self.balance_in_db = self.get_balance_in_db()
         self.balance_bias = self.get_balance_bias()
-        self.categories = self.get_categories_and_sub()
+        self.categories = self.get_categories()
         self.occasions = self.get_list_occasions()
         self.types_transaction = self.get_types_transaction()
         self.nb_transactions_db = self.get_nb_transactions_db()

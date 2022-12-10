@@ -79,8 +79,9 @@ def create_canvas_content_with_transaction_details(df, disabled=True):
             'Catégorie:',
             dcc.Dropdown(
                 id='canvas_category',
-                options=get_categories(db_connection=DB_CONN_ACCOUNT,
-                                       account_id=df.account_id),
+                options=get_categories_for_dropdown_menu(
+                    db_connection=DB_CONN_ACCOUNT,
+                    account_id=df.account_id),
                 # value=df.category,
                 multi=False,
                 style={'width': '100%'},
