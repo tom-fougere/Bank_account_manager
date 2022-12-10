@@ -7,7 +7,7 @@ from utils.time_operations import str_to_datetime
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
 from source.transactions.transaction_operations import get_categories_for_dropdown_menu,\
     get_sub_categories_for_dropdown_menu, get_occasion
-from source.data_ingestion.ingest import TransactionDB
+from source.transactions.transactions_db import TransactionDB
 
 
 def create_canvas_content_with_transaction_details(df, disabled=True):

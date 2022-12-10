@@ -1,6 +1,6 @@
 import dash_table as dt
 
-from source.data_ingestion.exgest import TransactionExgest
+from source.transactions.exgest import TransactionExgest
 from source.transactions.transaction_operations import format_dataframe_to_datatable
 
 style_cell_conditional = (

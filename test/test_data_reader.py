@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 from utils.time_operations import str_to_datetime
-from source.data_reader.bank_file_reader import BankTSVReader, create_list_transactions_from_file
+from source.data_reader.bank_file_reader import BankTSVReader
 
 
 class TestBankCSVReader(unittest.TestCase):
@@ -142,34 +142,6 @@ class TestBankCSVReader(unittest.TestCase):
         self.assertEqual(info, {'account_id': '008',
                                 'balance': 300.48,
                                 'date': str_to_datetime('08/01/2022', date_format='%d/%m/%Y')})
-
-
-class TestFunctions(unittest.TestCase):
-    def test_create_list_transactions_from_file(self):
-
-        class FakeFileReader:
-            def __init__(self):
-                self.account_id = 10
-                self.data = pd.DataFrame({'date_str': [1, 2],
-                                          'date_transaction_str': [3, 4],
-                                          'description': ['des1', 'des2'],
-                                          'amount_e': [98.1, -0.2],
-                                          'type_transaction': ['1', '2']})
-        fake_file_reader = FakeFileReader()
-
-        with patch('source.data_reader.bank_file_reader.BankTSVReader') as service_mock:
-            service_mock.return_value = fake_file_reader
-            list_trans = create_list_transactions_from_file('')
-
-        self.assertEqual(len(list_trans), 2)
-        for i in range(len(list_trans)):
-            self.assertEqual(list_trans[i].account_id, fake_file_reader.account_id)
-            self.assertEqual(list_trans[i].date_bank, fake_file_reader.data.loc[i, 'date_str'])
-            self.assertEqual(list_trans[i].date, fake_file_reader.data.loc[i, 'date_transaction_str'])
-            self.assertEqual(list_trans[i].description, fake_file_reader.data.loc[i, 'description'])
-            self.assertEqual(list_trans[i].amount, fake_file_reader.data.loc[i, 'amount_e'])
-            self.assertEqual(list_trans[i].type, fake_file_reader.data.loc[i, 'type_transaction'])
-            self.assertEqual(list_trans[i].category, None)
 
 
 if __name__ == '__main__':

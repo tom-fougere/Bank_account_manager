@@ -2,10 +2,10 @@ import datetime
 import unittest
 import pandas as pd
 
-from source.data_ingestion.ingest import TransactionDB
+from source.transactions.transactions_db import TransactionDB
 from source.transactions.metadata import MetadataDB
 from source.data_reader.bank_file_reader import BankTSVReader
-from source.data_ingestion.exgest import TransactionExgest
+from source.transactions.exgest import TransactionExgest
 from utils.time_operations import modify_date_str_format
 
 ACCOUNT_ID = '008'

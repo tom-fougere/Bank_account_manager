@@ -1,7 +1,7 @@
 import datetime
 
 from source.definitions import DB_CONN_TRANSACTION
-from source.data_ingestion.exgest import TransactionExgest
+from source.transactions.exgest import TransactionExgest
 from utils.mixed_utils import expand_columns_of_dataframe
 
 

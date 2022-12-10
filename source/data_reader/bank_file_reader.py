@@ -3,7 +3,6 @@ import datetime
 import pandas as pd
 from utils.time_operations import get_date_in_string, remove_date_in_string
 from utils.text_operations import find_substring_with_dict, remove_substring_with_list
-from source.transactions.transactions import Transaction
 
 names_account_id = ['numero compte', 'numéro compte']
 names_balance = ['solde (euros)']
@@ -174,25 +173,3 @@ class BankTSVReader:
                 'balance': self.balance}
 
         return info
-
-
-def create_list_transactions_from_file(file):
-    # Read file
-    file_reader = BankTSVReader(file_path=file)
-
-    # Loop over the dataframe to build a list of Transactions
-    list_transactions = []
-    for idx, row in pd.DataFrame.iterrows(file_reader.data):
-        trans = Transaction(account_id=file_reader.account_id,
-                            date_bank=row['date_str'],
-                            date=row['date_transaction_str'],
-                            description=row['description'],
-                            amount=row['amount_e'],
-                            type=row['type_transaction'])
-        list_transactions.append(trans)
-
-    return list_transactions
-
-
-
-

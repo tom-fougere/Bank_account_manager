@@ -1,8 +1,8 @@
 import datetime
 import unittest
-from source.data_ingestion.ingest import TransactionDB
+from source.transactions.transactions_db import TransactionDB
 from source.data_reader.bank_file_reader import BankTSVReader
-from source.data_ingestion.exgest import TransactionExgest
+from source.transactions.exgest import TransactionExgest
 from source.transactions.metadata import MetadataDB
 from apps.current_stats.cs_pipelines import p_salary_vs_other
 

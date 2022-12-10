@@ -2,8 +2,8 @@ import plotly.graph_objects as go
 
 from source.transactions.transaction_operations import check_duplicates_in_df
 from source.data_reader.bank_file_reader import BankTSVReader
-from source.data_ingestion.exgest import TransactionExgest
-from source.data_ingestion.ingest import TransactionDB
+from source.transactions.exgest import TransactionExgest
+from source.transactions.transactions_db import TransactionDB
 
 
 def read_and_format_data(full_filename, db_connection):
