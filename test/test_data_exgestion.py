@@ -23,7 +23,7 @@ class TestTransactionExgest(unittest.TestCase):
             name_connection=CONNECTION_METADATA,
             account_id=ACCOUNT_ID,
         )
-        metadata.init_db(
+        metadata.set(
             balance_in_bank=1.1,
             balance_in_db=2.2,
             balance_bias=3.3,
@@ -33,24 +33,18 @@ class TestTransactionExgest(unittest.TestCase):
 
         # Ingest
         cls.db = TransactionDB(
-            name_connection_transaction=CONNECTION_TRANSACTION,
-            name_connection_metadata=CONNECTION_METADATA,
+            name_connection=CONNECTION_TRANSACTION,
             account_id=ACCOUNT_ID
         )
 
-        cls.db.ingest(df_transactions,
-                      bank_info=
-                      {
-                          'account_id': ACCOUNT_ID,
-                          'balance': None,
-                          'date': datetime.datetime.now()
-                      })
+        cls.db.ingest(
+            df_transactions,
+        )
 
     @classmethod
     def tearDownClass(cls) -> None:
         # Remove all transactions in the collection
-        cls.db.connection_transaction.collection.remove({"account_id": ACCOUNT_ID})
-        cls.db.metadata.connection.collection.remove({"account_id": ACCOUNT_ID})
+        cls.db.connection.collection.remove({"account_id": ACCOUNT_ID})
 
     def test_exgest_all(self):
         data_extractor = TransactionExgest(CONNECTION_TRANSACTION)
