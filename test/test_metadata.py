@@ -2,7 +2,12 @@ import unittest
 import datetime
 
 from source.transactions.metadata import MetadataDB, LIST_ATTRIBUTES_METADATA
-from source.categories import CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS, ALL_CATEGORIES
+from source.categories import (
+    OCCASIONS, TYPE_TRANSACTIONS, ALL_CATEGORIES,
+    get_list_categories,
+    get_sub_categories,
+    get_list_categories_and_sub,
+)
 
 METADATA_CONNECTION_NAME = 'db_metadata_ut'
 BALANCE_IN_DB = -101.98
@@ -76,14 +81,20 @@ class TestMetadataDB(unittest.TestCase):
     def test_get_list_categories(self):
         categories = self.metadata_db.get_list_categories()
 
-        self.assertEqual(len(categories), len(CATEGORIES))
+        self.assertEqual(len(categories), len(get_list_categories()))
         for cat in categories:
-            self.assertTrue(cat in list(CATEGORIES.keys()))
+            self.assertTrue(cat in get_list_categories())
 
     def test_get_list_categories_and_sub(self):
         categories = self.metadata_db.get_list_categories_and_sub()
         self.assertEqual(type(categories), dict)
-        self.assertDictEqual(categories, CATEGORIES)
+        self.assertDictEqual(categories, get_list_categories_and_sub())
+
+    def test_get_list_subcategories(self):
+
+        for cat in get_list_categories():
+            sub_categories = self.metadata_db.get_list_subcategories(cat)
+            self.assertEqual(sub_categories, get_sub_categories(cat))
 
     def test_get_default_occasion(self):
 

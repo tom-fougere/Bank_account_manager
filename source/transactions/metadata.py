@@ -112,6 +112,10 @@ class MetadataDB:
 
         return default_occasion
 
+    def get_list_subcategories(self, category):
+        category_info = self.categories[category]
+        return list(category_info['Sub-categories'].keys())
+
     def update_date_balance_in_bank(self, date):
 
         date_dt = date

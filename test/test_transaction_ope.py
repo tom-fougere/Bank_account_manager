@@ -4,7 +4,12 @@ import numpy as np
 from source.data_reader.bank_file_reader import BankTSVReader
 
 from source.transactions.transaction_operations import *
-from source.definitions import CATEGORIES, OCCASIONS
+from source.categories import (
+    OCCASIONS,
+    get_list_categories,
+    get_list_categories_and_sub,
+    get_sub_categories,
+)
 
 ACCOUNT_ID = '008'
 DB_TITLE_CONNECTION = 'db_metadata_ut'
@@ -45,11 +50,12 @@ class TestGetLists(unittest.TestCase):
 
         self.metadata_db = MetadataDB(DB_TITLE_CONNECTION, account_id=ACCOUNT_ID)
 
-        self.metadata_db.init_db(balance_in_db=10.34,
-                                 balance_in_bank=8.84,
-                                 balance_bias=712.70,
-                                 date_last_import=datetime.datetime(2022, 4, 13),
-                                 date_balance_in_bank=datetime.datetime(2021, 12, 28))
+        self.metadata_db.set(balance_in_db=10.34,
+                             balance_in_bank=8.84,
+                             balance_bias=712.70,
+                             date_last_import=datetime.datetime(2022, 4, 13),
+                             date_balance_in_bank=datetime.datetime(2021, 12, 28))
+        self.metadata_db.update_db()
 
     def tearDown(self) -> None:
         # Remove all in the collection
@@ -58,7 +64,7 @@ class TestGetLists(unittest.TestCase):
     def test_get_categories(self):
         categories = get_categories_for_dropdown_menu(DB_TITLE_CONNECTION, ACCOUNT_ID)
 
-        self.assertEqual(len(categories), len(CATEGORIES))
+        self.assertEqual(len(categories), len(get_list_categories()))
 
         for cat in categories:
             self.assertEqual(cat['label'], cat['value'])
@@ -72,7 +78,7 @@ class TestGetLists(unittest.TestCase):
             add_suffix_cat=False)
 
         expected_categories = []
-        for cat in CATEGORIES[selected_category]:
+        for cat in get_sub_categories(selected_category):
             expected_categories.append({'label': cat, 'value': cat})
 
         self.assertEqual(sub_categories, expected_categories)
@@ -86,7 +92,7 @@ class TestGetLists(unittest.TestCase):
             add_suffix_cat=True)
 
         expected_categories = []
-        for cat in CATEGORIES[selected_category]:
+        for cat in get_sub_categories(selected_category):
             expected_categories.append({'label': selected_category + ':' + cat,
                                         'value': selected_category + ':' + cat})
 
@@ -98,10 +104,10 @@ class TestGetLists(unittest.TestCase):
             account_id=ACCOUNT_ID,
         )
 
-        self.assertEqual(all_cat, CATEGORIES)
+        self.assertEqual(all_cat, get_list_categories_and_sub())
 
     def test_get_occasions(self):
-        occasions = get_occasion(DB_TITLE_CONNECTION, ACCOUNT_ID)
+        occasions = get_occasions_for_dropdown_menu(DB_TITLE_CONNECTION, ACCOUNT_ID)
 
         expected_occasions = []
         for occ in OCCASIONS:
