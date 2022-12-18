@@ -217,12 +217,10 @@ def get_tab_content(tab_id):
         name_connection=DB_CONN_ACCOUNT,
         account_id=ACCOUNT_ID)
     metadata_db.set_from_db()
-    sub_categories = metadata_db.categories[category]['Sub-categories']
 
     # Get information of the current category
-    category_info = metadata_db.get_list_subcategories(
-        category=category,
-    )
+    category_info = metadata_db.categories[category]
+    sub_categories = category_info['Sub-categories']
 
     # Create accordion
     accordion = create_accordion(
