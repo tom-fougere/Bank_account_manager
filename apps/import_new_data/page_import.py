@@ -6,7 +6,7 @@ import dash_table as dt
 from app import app
 
 from utils.text_operations import get_project_root
-from source.transactions.transactions_db import TransactionDB
+from source.transactions.account_manager_db import AccountManagerDB
 from apps.import_new_data.ind_operations import read_and_format_data, fig_indicators_new_transactions
 from apps.tables import format_dataframe, df_to_datatable, InfoDisplay
 from source.definitions import DB_CONN_TRANSACTION, DB_CONN_ACCOUNT, DATA_FOLDER
@@ -100,7 +100,7 @@ def import_transactions_in_database(n_clicks, filename):
         df_new.drop(columns=['duplicate'])
 
         # Database ingestion
-        db = TransactionDB(
+        db = AccountManagerDB(
             name_connection_transaction=DB_CONN_TRANSACTION,
             name_connection_metadata=DB_CONN_ACCOUNT,
             account_id=account_info['account_id'])

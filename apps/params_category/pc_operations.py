@@ -3,32 +3,23 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_daq as daq
 
-from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID, OCCASIONS
+from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
 from source.transactions.metadata import MetadataDB
+from apps.components import (
+    get_categories_and_sub_for_dropdown_menu,
+    get_occasions_for_dropdown_menu,
+    get_categories_for_dropdown_menu,
+)
 
 
 def get_categories_name():
     metadata_db = MetadataDB(
         name_connection=DB_CONN_ACCOUNT,
         account_id=ACCOUNT_ID)
-    categories = metadata_db.get_categories()
+    metadata_db.set_from_db()
+    categories = metadata_db.get_list_categories()
 
     return categories
-
-
-def get_all_sub_categories(delimiter=':'):
-    metadata_db = MetadataDB(
-        name_connection=DB_CONN_ACCOUNT,
-        account_id=ACCOUNT_ID)
-    categories = metadata_db.get_categories()
-
-    list_sub_cat = []
-    for cat in categories:
-        list_sub_cat.append([cat + delimiter + sub_cat for sub_cat in list(metadata_db.get_sub_categories(cat).keys())])
-
-    list_sub_cat = sum(list_sub_cat, [])
-
-    return list_sub_cat
 
 # #################################### #
 # ####### SWITCH CATEGORY ############ #
@@ -54,7 +45,11 @@ def create_switch_cat_content():
             dbc.Col(
                 dcc.Dropdown(
                     id='id_dropdown_switch_cat_from',
-                    options=[{'label': cat, 'value': cat} for cat in get_all_sub_categories(delimiter=' - ')],
+                    options=get_categories_and_sub_for_dropdown_menu(
+                        db_connection=DB_CONN_ACCOUNT,
+                        account_id=ACCOUNT_ID,
+                        delimiter=' - ',
+                    ),
                     value=[],
                     style={'align-items': 'center'}
                 ),
@@ -68,7 +63,10 @@ def create_switch_cat_content():
             dbc.Col(
                 dcc.Dropdown(
                     id='id_dropdown_switch_cat_to',
-                    options=[{'label': cat, 'value': cat} for cat in get_categories_name()],
+                    options=get_categories_for_dropdown_menu(
+                        db_connection=DB_CONN_ACCOUNT,
+                        account_id=ACCOUNT_ID
+                    ),
                     value=[],
                     style={'align-items': 'center'}
                 ),
@@ -143,7 +141,10 @@ def create_new_cat_content():
                         dbc.Col(
                             dcc.Dropdown(
                                 id='id_dropdown_new_cat_occasion',
-                                options=[{'label': occ, 'value': occ} for occ in OCCASIONS],
+                                options=get_occasions_for_dropdown_menu(
+                                    db_connection=DB_CONN_ACCOUNT,
+                                    account_id=ACCOUNT_ID,
+                                ),
                                 value=[],
                                 style={'align-items': 'center'}
                             ),
@@ -171,7 +172,10 @@ def create_new_cat_content():
                         dbc.Col(
                             dcc.Dropdown(
                                 id='id_dropdown_new_cat',
-                                options=[{'label': cat, 'value': cat} for cat in get_categories_name()],
+                                options=get_categories_for_dropdown_menu(
+                                    db_connection=DB_CONN_ACCOUNT,
+                                    account_id=ACCOUNT_ID
+                                ),
                                 value=[],
                                 disabled=True,
                                 style={'align-items': 'center'}
@@ -212,12 +216,11 @@ def get_tab_content(tab_id):
     metadata_db = MetadataDB(
         name_connection=DB_CONN_ACCOUNT,
         account_id=ACCOUNT_ID)
-    sub_categories = metadata_db.get_sub_categories(
-        category=category
-    )
+    metadata_db.set_from_db()
+    sub_categories = metadata_db.categories[category]['Sub-categories']
 
     # Get information of the current category
-    category_info = metadata_db.get_category_info(
+    category_info = metadata_db.get_list_subcategories(
         category=category,
     )
 
@@ -271,7 +274,10 @@ def create_tab_content(cat, sub_cat, default_occas=None, default_rename=None, di
                                     'name': name
                                 },
                                 disabled=disabled_occasion,
-                                options=[{'label': occ, 'value': occ} for occ in OCCASIONS],
+                                options=get_occasions_for_dropdown_menu(
+                                    db_connection=DB_CONN_ACCOUNT,
+                                    account_id=ACCOUNT_ID,
+                                ),
                                 value=default_occas if default_occas is not None else [],
                                 style={'align-items': 'center'}
                             ),

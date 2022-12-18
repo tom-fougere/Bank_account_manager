@@ -1,5 +1,4 @@
 from source.categories import ALL_CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
-from utils.time_operations import str_to_datetime
 from source.db_connection.db_access import MongoDBConnection
 
 LIST_ATTRIBUTES_METADATA = [

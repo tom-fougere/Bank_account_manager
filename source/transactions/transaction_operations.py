@@ -1,18 +1,17 @@
 import pandas as pd
 from dash_table.Format import Format, Symbol, Scheme
-from source.transactions.metadata import MetadataDB
 
 MANDATORY_COLUMNS = ['date_str', 'amount', 'description', 'type_transaction', 'date_transaction_str']
 OPTIONAL_COLUMNS = {'new_data': ['duplicate'],
                     'category': ['category', 'sub_category']}
 INFO_RENAMING = {'date_str': 'Date (banque)',
-                    'amount': 'Montant (€)',
-                    'description': 'Libelé',
-                    'type_transaction': 'Type',
-                    'date_transaction_str': 'Date',
-                    'duplicate': 'Duplicata',
-                    'category': 'Catégorie',
-                    'sub_category': 'Sous-catégorie'}
+                 'amount': 'Montant (€)',
+                 'description': 'Libelé',
+                 'type_transaction': 'Type',
+                 'date_transaction_str': 'Date',
+                 'duplicate': 'Duplicata',
+                 'category': 'Catégorie',
+                 'sub_category': 'Sous-catégorie'}
 
 
 def check_duplicates_in_df(df1, df2):
@@ -77,67 +76,3 @@ def rename_columns(df):
     for key in INFO_RENAMING:
         if key in df_keys:
             df.rename(columns={key: INFO_RENAMING[key]}, inplace=True)
-
-
-def get_categories_for_dropdown_menu(db_connection, account_id):
-
-    metadata_db = MetadataDB(db_connection, account_id=account_id)
-
-    categories = metadata_db.get_categories()
-
-    list_categories = []
-    for category in categories:
-        list_categories.append({'label': category, 'value': category})
-
-    return list_categories
-
-
-def get_categories_and_subcat(db_connection, account_id):
-
-    metadata_db = MetadataDB(db_connection, account_id=account_id)
-
-    return metadata_db.get_categories_and_sub()
-
-
-def get_sub_categories_for_dropdown_menu(db_connection, account_id, categories, add_suffix_cat=True):
-
-    metadata_db = MetadataDB(db_connection, account_id=account_id)
-
-    list_sub_categories = []
-    for category in categories:
-        sub_categories = metadata_db.get_sub_categories(category=category)
-        for sub_category in list(sub_categories.keys()):
-            if add_suffix_cat:
-                list_sub_categories.append({'label': f'{category}:{sub_category}',
-                                            'value': f'{category}:{sub_category}'})
-            else:
-                list_sub_categories.append({'label': f'{sub_category}',
-                                            'value': f'{sub_category}'})
-
-    return list_sub_categories
-
-
-def get_occasion(db_connection, account_id):
-
-    metadata_db = MetadataDB(db_connection, account_id=account_id)
-
-    occasions = metadata_db.get_list_occasions()
-
-    list_occasions = []
-    for occas in occasions:
-        list_occasions.append({'label': occas, 'value': occas})
-
-    return list_occasions
-
-
-def get_types_transaction(db_connection, account_id):
-
-    metadata_db = MetadataDB(db_connection, account_id=account_id)
-
-    types = metadata_db.get_types_transaction()
-
-    list_types = []
-    for type in types:
-        list_types.append({'label': type, 'value': type})
-
-    return list_types

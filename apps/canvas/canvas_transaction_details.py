@@ -5,9 +5,12 @@ from datetime import date
 
 from utils.time_operations import str_to_datetime
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
-from source.transactions.transaction_operations import get_categories_for_dropdown_menu,\
-    get_sub_categories_for_dropdown_menu, get_occasion
-from source.transactions.transactions_db import TransactionDB
+from apps.components import (
+    get_occasions_for_dropdown_menu,
+    get_categories_for_dropdown_menu,
+    get_sub_categories_for_dropdown_menu,
+)
+from source.transactions.account_manager_db import AccountManagerDB
 
 
 def create_canvas_content_with_transaction_details(df, disabled=True):
@@ -89,19 +92,18 @@ def create_canvas_content_with_transaction_details(df, disabled=True):
             dcc.Dropdown(
                 id='canvas_sub_category',
                 options=sub_categories,
-                # value=df.sub_category,
                 multi=False,
                 style={'width': '100%'},
                 disabled=disabled),
-            # sub_cat_layout,
             ],
             style={'margin-top': 10}),
         html.Div([
             'Occasion:',
             dcc.Dropdown(
                 id='canvas_occasion',
-                options=get_occasion(db_connection=DB_CONN_ACCOUNT,
-                                     account_id=df.account_id),
+                options=get_occasions_for_dropdown_menu(
+                    db_connection=DB_CONN_ACCOUNT,
+                    account_id=df.account_id),
                 value=df.occasion,
                 multi=False,
                 style={'width': '100%'},
@@ -183,7 +185,7 @@ def get_sub_categories_dropdown(account_id, category):
 def update_transaction(df):
 
     # Instantiate the ingestion class
-    db = TransactionDB(
+    db = AccountManagerDB(
         name_connection_metadata=DB_CONN_ACCOUNT,
         name_connection_transaction=DB_CONN_TRANSACTION,
         account_id=ACCOUNT_ID,
@@ -196,7 +198,7 @@ def update_transaction(df):
 def delete_transaction(df):
 
     # Instantiate the ingestion class
-    db = TransactionDB(
+    db = AccountManagerDB(
         name_connection_metadata=DB_CONN_ACCOUNT,
         name_connection_transaction=DB_CONN_TRANSACTION,
         account_id=ACCOUNT_ID,
