@@ -17,6 +17,7 @@ from apps.components import (
     get_sub_categories_for_dropdown_menu,
 )
 from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
+from source.categories import get_default_occasion
 
 from app import app
 
@@ -323,12 +324,11 @@ def update_occasion(canvas_category, canvas_sub_category, jsonified_data_disable
         parsed = json.loads(jsonified_data_enabled_trans)
         df = pd.Series(parsed)
         value_occasion = df['occasion']
-    elif triggered_input == 'canvas_category':
-        if not isinstance(DEFAULT_OCCASION_FOR_CAT[canvas_category], dict):
-            value_occasion = DEFAULT_OCCASION_FOR_CAT[canvas_category]
-    elif triggered_input == 'canvas_sub_category':
-        if isinstance(DEFAULT_OCCASION_FOR_CAT[canvas_category], dict):
-            value_occasion = DEFAULT_OCCASION_FOR_CAT[canvas_category][canvas_sub_category]
+    elif (triggered_input == 'canvas_category') or (triggered_input == 'canvas_sub_category'):
+        value_occasion = get_default_occasion(
+            category=canvas_category,
+            sub_category=canvas_sub_category,
+        )
 
     return value_occasion
 
