@@ -94,8 +94,6 @@ class TransactionExgest:
                     self.pipeline.append({
                         "$match": {
                             att: {cond: value for cond, value in zip(['$gte', '$lte'], att_value) if value is not None}
-                            # att: {"$gte": min(att_value[0], att_value[1]),
-                            #       "$lte": max(att_value[0], att_value[1])}
                         }
                     })
 

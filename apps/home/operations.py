@@ -6,8 +6,7 @@ import datetime
 
 def get_metadata():
     db_meta = MetadataDB(DB_CONN_ACCOUNT, ACCOUNT_ID)
-
-    db_meta.get_all_values()
+    db_meta.set_from_db()
 
     metadata = {
         "balance_in_bank": db_meta.balance_in_bank,

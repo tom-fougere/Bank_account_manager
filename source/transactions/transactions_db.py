@@ -1,21 +1,16 @@
 from bson.objectid import ObjectId
 from utils.time_operations import str_to_datetime, modify_date_str_format
-from source.transactions.metadata import MetadataDB
 from source.db_connection.db_access import MongoDBConnection
 
 
 class TransactionDB:
-    def __init__(self, name_connection_metadata, name_connection_transaction, account_id):
+    def __init__(self, name_connection, account_id):
 
-        self.connection_transaction = MongoDBConnection(name_connection_transaction)
+        self.connection = MongoDBConnection(name_connection)
         self.account_id = account_id
 
-        self.metadata = MetadataDB(name_connection=name_connection_metadata,
-                                   account_id=self.account_id)
-        self.metadata.get_all_values()
-
     @staticmethod
-    def _format_transactions_dataframe(df_transactions):
+    def format_transactions_dataframe(df_transactions):
 
         df_transactions_formatted = df_transactions.copy()
 
@@ -35,16 +30,13 @@ class TransactionDB:
 
         return df_transactions_formatted
 
-    def ingest(self, df_transactions, bank_info):
+    def ingest(self, df_transactions):
 
         # Format dataframe (removing useless columns and format dates)
-        df_transactions_2 = self._format_transactions_dataframe(df_transactions)
+        df_transactions_formatted = self.format_transactions_dataframe(df_transactions)
 
         # Insert transactions
-        self.connection_transaction.collection.insert_many(df_transactions_2.to_dict('records'))
-
-        # Update metadata info
-        self._update_metadata(df_transactions_2, bank_info)
+        self.connection.collection.insert_many(df_transactions_formatted.to_dict('records'))
 
     def delete(self, df_transactions):
 
@@ -52,25 +44,10 @@ class TransactionDB:
 
         # Remove transactions in the transaction DB
         for idx, row in df_transactions.iterrows():
-            self.connection_transaction.collection.delete_one({"_id": ObjectId(row['_id'])})
+            self.connection.collection.delete_one({"_id": ObjectId(row['_id'])})
 
-        # Update metadata DB
-        self._update_metadata(
-            df=[],
-            bank_info={
-                'balance': self.metadata.balance_in_bank,
-                'date': self.metadata.date_balance_in_bank['dt'],
-                'account_id': self.account_id,
-            }
-        )
-
-    def check(self, df_transactions, bank_info):
-
-        new_balance = self._get_balance_in_db() + self.metadata.balance_bias + df_transactions['amount'].sum()
-
-        diff_balance = new_balance - bank_info['balance']
-
-        return diff_balance
+    def delete_all(self):
+        self.connection.collection.delete_many({"account_id": self.account_id})
 
     def update(self, df_transactions):
 
@@ -121,53 +98,14 @@ class TransactionDB:
         new_values = {"$set": transaction_dict}
 
         # Update the document
-        current_doc = self.connection_transaction.collection.find_one(doc_filter)
+        current_doc = self.connection.collection.find_one(doc_filter)
         if current_doc is not None:
-            self.connection_transaction.collection.update_one(doc_filter, new_values, upsert=False)
+            self.connection.collection.update_one(doc_filter, new_values, upsert=False)
         else:
             raise ValueError("Impossible to update the doc because the object ID doesn't exist.")
 
-    def _update_metadata(self, df, bank_info):
-
-        self.metadata.update_values(
-            {
-                # BANK
-                'balance_in_bank': bank_info['balance'],
-                'date_balance_in_bank': bank_info['date'],
-
-                # DATABASE
-                'balance_in_db': self._get_balance_in_db(),
-                'nb_transactions_db': self.connection_transaction.collection.count(
-                    {'account_id': self.account_id}),
-                'date_last_import': self._get_lastest_date(),
-            }
-        )
-        self.metadata.write_values_in_db()
-
-    def _get_balance_in_db(self):
-        balance_in_db = self.connection_transaction.collection.aggregate(
-            pipeline=[
-                {
-                    "$match": {
-                        "account_id": self.account_id
-                    }
-                },
-                {
-                    "$group": {
-                        "_id": None,
-                        "Somme": {
-                            '$sum': "$amount"}
-                    }
-                }
-            ]
-        )
-        balance_in_db = list(balance_in_db)
-        balance_in_db = balance_in_db[0]['Somme'] if len(balance_in_db) > 0 else self.metadata.balance_in_db
-
-        return balance_in_db
-
-    def _get_lastest_date(self):
-        date_latest = self.connection_transaction.collection.aggregate(
+    def get_latest_date(self):
+        date_latest = self.connection.collection.aggregate(
             pipeline=[
                 {
                     "$match": {
@@ -185,13 +123,35 @@ class TransactionDB:
             ]
         )
         date_latest = list(date_latest)
-        date_latest = date_latest[0]['date_transaction']['dt']\
-            if len(date_latest) > 0 else self.metadata.date_last_import['dt']
+        date_latest = date_latest[0]['date_transaction']['dt'] if len(date_latest) > 0 else None
         return date_latest
 
-    def _count_nb_transactions(self):
+    def get_nb_transactions(self):
 
-        self.connection_transaction.collection.count()
+        return self.connection.collection.count()
+
+    def get_balance(self):
+
+        balance_in_db = self.connection.collection.aggregate(
+            pipeline=[
+                {
+                    "$match": {
+                        "account_id": self.account_id
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": None,
+                        "Somme": {
+                            '$sum': "$amount"}
+                    }
+                }
+            ]
+        )
+        balance_in_db = list(balance_in_db)
+        balance_in_db = balance_in_db[0]['Somme'] if len(balance_in_db) > 0 else None
+
+        return balance_in_db
 
 
 

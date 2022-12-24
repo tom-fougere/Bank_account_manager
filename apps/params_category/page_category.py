@@ -29,12 +29,12 @@ layout = html.Div([
     html.Br(),
     html.Hr(),
     html.H4('Ajouter une nouvelle catégorie',
-            id='title_page_category',
+            id='title_new_category',
             style={'textAlign': 'left'}),
     html.Div(get_new_cat_content()),
 
     html.H4('Déplacer une catégorie',
-            id='title_page_category',
+            id='title_move_category',
             style={'textAlign': 'left'}),
     html.Div(get_switch_cat_content()),
 

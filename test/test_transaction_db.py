@@ -3,7 +3,6 @@ import unittest
 import pandas as pd
 
 from source.transactions.transactions_db import TransactionDB
-from source.transactions.metadata import MetadataDB
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.transactions.exgest import TransactionExgest
 from utils.time_operations import modify_date_str_format
@@ -18,74 +17,39 @@ class TestTransactionDB(unittest.TestCase):
 
     def setUp(self) -> None:
 
-        # Init databases with data
-        self.metadata = MetadataDB(
-            name_connection=CONNECTION_METADATA,
-            account_id=ACCOUNT_ID,
-        )
-        self.metadata.init_db(
-            balance_in_bank=1.1,
-            balance_in_db=2.2,
-            balance_bias=3.3,
-            date_balance_in_bank=DATE_NOW,
-            date_last_import=DATE_NOW,
-        )
-
         # Create database for UT
         self.db = TransactionDB(
-            name_connection_transaction=CONNECTION_TRANSACTION,
-            name_connection_metadata=CONNECTION_METADATA,
+            name_connection=CONNECTION_TRANSACTION,
             account_id=ACCOUNT_ID,
         )
 
     def tearDown(self) -> None:
         # Remove all in the collection
-        self.db.connection_transaction.collection.remove({"account_id": ACCOUNT_ID})
-        self.db.metadata.connection.collection.remove({"account_id": ACCOUNT_ID})
+        self.db.connection.collection.remove({"account_id": ACCOUNT_ID})
 
-    def test_update_metadata(self):
-
-        self.db._update_metadata(
-            df=[1],
-            bank_info={
-                'balance': 100,
-                'date': datetime.datetime(2021, 5, 24),
-                'account_id': ACCOUNT_ID,
-            }
-        )
-
-        self.assertEqual(self.db.metadata.balance_in_bank, 100)
-        self.assertEqual(self.db.metadata.balance_in_db, 2.2)
-        self.assertEqual(self.db.metadata.nb_transactions_db, 0)
-        self.assertEqual(self.db.metadata.date_balance_in_bank['dt'], datetime.datetime(2021, 5, 24))
-        self.assertEqual(self.db.metadata.date_last_import['dt'], DATE_NOW)
-
-    def test_ingest(self):
+    def test_ingest_and_delete(self):
         # create list of transactions
         data_reader = BankTSVReader('test/fake_data.tsv')
         df_transactions = data_reader.get_dataframe()
-        bank_info = data_reader.get_account_info()
 
         self.db.ingest(
             df_transactions=df_transactions,
-            bank_info=bank_info
         )
 
-        self.assertEqual(self.db.metadata.balance_in_bank, 300.48)
-        self.assertEqual(self.db.metadata.balance_in_db, -34.99)
-        self.assertEqual(self.db.metadata.nb_transactions_db, 3)
-        self.assertEqual(self.db.metadata.date_balance_in_bank['dt'], datetime.datetime(2022, 1, 8))
-        self.assertEqual(self.db.metadata.date_last_import['dt'], datetime.datetime(2022, 1, 7))
+        self.assertEqual(self.db.connection.collection.count(), len(df_transactions))
+
+        self.db.delete_all()
+        self.assertEqual(self.db.connection.collection.count(), 0)
 
     def test_delete(self):
 
         # Ingestion data
         data_reader = BankTSVReader('test/fake_data.tsv')
         df_transactions = data_reader.get_dataframe()
-        bank_info = data_reader.get_account_info()
+
+        # Ingest data
         self.db.ingest(
             df_transactions=df_transactions,
-            bank_info=bank_info
         )
 
         # Exgestion data to get only one transaction
@@ -97,42 +61,20 @@ class TestTransactionDB(unittest.TestCase):
         # Delete selected transaction
         self.db.delete(df_transactions=transactions)
 
-        self.assertEqual(self.db.metadata.balance_in_bank, 300.48)
-        self.assertEqual(self.db.metadata.balance_in_db, -34.99+5)
-        self.assertEqual(self.db.metadata.nb_transactions_db, 2)
-        self.assertEqual(self.db.metadata.date_balance_in_bank['dt'], datetime.datetime(2022, 1, 8))
-        self.assertEqual(self.db.metadata.date_last_import['dt'], datetime.datetime(2022, 1, 7))
-
-    def test_check(self):
-
-        new_trans_dict = {
-            'amount': 9.81,
-        }
-        new_transaction = pd.DataFrame([new_trans_dict])
-
-        diff_balance = self.db.check(
-            df_transactions=new_transaction,
-            bank_info={
-                'account_id': ACCOUNT_ID,
-                'balance': 72.01,
-            }
-        )
-
-        self.assertEqual(diff_balance, 2.2+3.3+9.81-72.01)
+        self.assertTrue(self.db.connection.collection.count(), len(df_transactions) - 1)
 
     def test_update(self):
 
         # Ingest test transactions
         data_reader = BankTSVReader('test/fake_data.tsv')
         df_transactions = data_reader.get_dataframe()
-        bank_info = data_reader.get_account_info()
+
         self.db.ingest(
             df_transactions=df_transactions,
-            bank_info=bank_info
         )
 
         # Find transaction to update
-        original_transaction = self.db.connection_transaction.collection.find_one(
+        original_transaction = self.db.connection.collection.find_one(
             {'account_id': ACCOUNT_ID,
              'description': 'TEST'})
         object_id = str(original_transaction['_id'])
@@ -158,13 +100,13 @@ class TestTransactionDB(unittest.TestCase):
         self.db.update(new_transaction)
 
         # Previous transaction must be impossible to find
-        impossible_transaction = self.db.connection_transaction.collection.find_one(
+        impossible_transaction = self.db.connection.collection.find_one(
             {'account_id': ACCOUNT_ID,
              'description': 'TEST'})
         self.assertEqual(impossible_transaction, None)
 
         # Find updated transaction
-        updated_transaction = self.db.connection_transaction.collection.find_one(
+        updated_transaction = self.db.connection.collection.find_one(
             {'account_id': ACCOUNT_ID,
              'description': 'NEW'})
 
@@ -185,10 +127,9 @@ class TestTransactionDB(unittest.TestCase):
         # Ingest test transactions
         data_reader = BankTSVReader('test/fake_data.tsv')
         df_transactions = data_reader.get_dataframe()
-        bank_info = data_reader.get_account_info()
+
         self.db.ingest(
             df_transactions=df_transactions,
-            bank_info=bank_info
         )
 
         object_id = '000000000000000000000000'
@@ -213,6 +154,42 @@ class TestTransactionDB(unittest.TestCase):
         # Assert error during update
         with self.assertRaises(ValueError):
             self.db.update(new_transaction)
+
+    def test_get_latest_date(self):
+        # create list of transactions
+        data_reader = BankTSVReader('test/fake_data.tsv')
+        df_transactions = data_reader.get_dataframe()
+
+        self.db.ingest(
+            df_transactions=df_transactions,
+        )
+
+        latest_date = self.db.get_latest_date()
+        self.assertEqual(latest_date, max(df_transactions['date_transaction_dt']))
+
+    def test_get_nb_transactions(self):
+        # create list of transactions
+        data_reader = BankTSVReader('test/fake_data.tsv')
+        df_transactions = data_reader.get_dataframe()
+
+        self.db.ingest(
+            df_transactions=df_transactions,
+        )
+
+        nb_transactions = self.db.get_nb_transactions()
+        self.assertEqual(nb_transactions, len(df_transactions))
+
+    def test_get_balance(self):
+        # create list of transactions
+        data_reader = BankTSVReader('test/fake_data.tsv')
+        df_transactions = data_reader.get_dataframe()
+
+        self.db.ingest(
+            df_transactions=df_transactions,
+        )
+
+        balance = self.db.get_balance()
+        self.assertEqual(balance, sum(df_transactions['amount']))
 
 
 if __name__ == '__main__':

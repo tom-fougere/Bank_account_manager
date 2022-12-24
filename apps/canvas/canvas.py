@@ -5,11 +5,19 @@ from dash import Input, Output, State, callback_context
 import dash_daq as daq
 import pandas as pd
 import json
-from apps.canvas.canvas_transaction_details import get_transaction_values,\
-    get_sub_categories_dropdown, update_transaction, delete_transaction
-from source.transactions.transaction_operations import get_occasion,\
-    get_categories_for_dropdown_menu, get_types_transaction
-from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID, DEFAULT_OCCASION_FOR_CAT
+from apps.canvas.canvas_transaction_details import (
+    get_transaction_values,
+    update_transaction,
+    delete_transaction,
+)
+from apps.components import (
+    get_occasions_for_dropdown_menu,
+    get_categories_for_dropdown_menu,
+    get_types_transaction_for_dropdown_menu,
+    get_sub_categories_for_dropdown_menu,
+)
+from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
+from source.categories import get_default_occasion
 
 from app import app
 
@@ -88,8 +96,9 @@ transaction_details_layout = html.Div([
         'Occasion:',
         dcc.Dropdown(
             id='canvas_occasion',
-            options=get_occasion(db_connection=DB_CONN_ACCOUNT,
-                                 account_id=ACCOUNT_ID),
+            options=get_occasions_for_dropdown_menu(
+                db_connection=DB_CONN_ACCOUNT,
+                account_id=ACCOUNT_ID),
             multi=False,
             style={'width': '100%'},
             disabled=True),
@@ -99,8 +108,9 @@ transaction_details_layout = html.Div([
         html.Div('Type:'),
         dcc.Dropdown(
             id='canvas_type',
-            options=get_types_transaction(db_connection=DB_CONN_ACCOUNT,
-                                          account_id=ACCOUNT_ID),
+            options=get_types_transaction_for_dropdown_menu(
+                db_connection=DB_CONN_ACCOUNT,
+                account_id=ACCOUNT_ID),
             multi=False,
             style={'width': '100%'},
             disabled=True),
@@ -269,9 +279,12 @@ def update_sub_category(canvas_category, jsonified_data_disabled_trans, jsonifie
 
     # get sub-categories
     if canvas_category is not None:
-        dropdown_sub_category = get_sub_categories_dropdown(
+        dropdown_sub_category = get_sub_categories_for_dropdown_menu(
+            db_connection=DB_CONN_ACCOUNT,
             account_id=ACCOUNT_ID,
-            category=canvas_category)
+            categories=[canvas_category],
+            add_suffix_cat=False
+        )
 
     # Set sub-category
     if (triggered_input == 'store_transaction_disabled') and (jsonified_data_disabled_trans is not None):
@@ -311,12 +324,11 @@ def update_occasion(canvas_category, canvas_sub_category, jsonified_data_disable
         parsed = json.loads(jsonified_data_enabled_trans)
         df = pd.Series(parsed)
         value_occasion = df['occasion']
-    elif triggered_input == 'canvas_category':
-        if not isinstance(DEFAULT_OCCASION_FOR_CAT[canvas_category], dict):
-            value_occasion = DEFAULT_OCCASION_FOR_CAT[canvas_category]
-    elif triggered_input == 'canvas_sub_category':
-        if isinstance(DEFAULT_OCCASION_FOR_CAT[canvas_category], dict):
-            value_occasion = DEFAULT_OCCASION_FOR_CAT[canvas_category][canvas_sub_category]
+    elif (triggered_input == 'canvas_category') or (triggered_input == 'canvas_sub_category'):
+        value_occasion = get_default_occasion(
+            category=canvas_category,
+            sub_category=canvas_sub_category,
+        )
 
     return value_occasion
 

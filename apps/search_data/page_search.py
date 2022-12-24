@@ -10,9 +10,13 @@ import time
 from datetime import date
 from apps.search_data.sd_operations import search_transactions
 from apps.tables import format_dataframe, df_to_datatable, InfoDisplay
-from source.transactions.transaction_operations import get_sub_categories_for_dropdown_menu
-from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID,\
-    CATEGORIES, OCCASIONS, TYPE_TRANSACTIONS
+from apps.components import get_sub_categories_for_dropdown_menu
+from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
+from source.categories import OCCASIONS, TYPE_TRANSACTIONS, get_list_categories
+from apps.components import (
+    get_occasions_for_dropdown_menu,
+    get_types_transaction_for_dropdown_menu,
+)
 from utils.time_operations import str_to_datetime
 
 layout = html.Div([
@@ -91,7 +95,7 @@ layout = html.Div([
         html.Div([
             dcc.Dropdown(
                 id='search_category',
-                options=[{'label': cat, 'value': cat} for cat in CATEGORIES.keys()],
+                options=[{'label': cat, 'value': cat} for cat in get_list_categories()],
                 # options=get_categories(db_connection=DB_CONN_ACCOUNT,
                 #                        account_id=ACCOUNT_ID),
                 value=[],
@@ -120,9 +124,9 @@ layout = html.Div([
                 style={"display": 'flex'}),
             dcc.Dropdown(
                 id='search_occasion',
-                options=[{'label': occ, 'value': occ} for occ in OCCASIONS],
-                # options=get_occasion(db_connection=DB_CONN_ACCOUNT,
-                #                      account_id=ACCOUNT_ID),
+                options=get_occasions_for_dropdown_menu(
+                    db_connection=DB_CONN_ACCOUNT,
+                    account_id=ACCOUNT_ID),
                 value=[],
                 multi=True,
                 style={'margin-top': 10}
@@ -139,7 +143,10 @@ layout = html.Div([
                 style={"display": 'flex'}),
             dcc.Dropdown(
                 id='search_type',
-                options=[{'label': tt, 'value': tt} for tt in TYPE_TRANSACTIONS],
+                options=get_types_transaction_for_dropdown_menu(
+                    db_connection=DB_CONN_ACCOUNT,
+                    account_id=ACCOUNT_ID,
+                ),
                 value=[],
                 multi=True,
                 style={'margin-top': 10}

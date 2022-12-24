@@ -5,7 +5,7 @@ from plotly.subplots import make_subplots
 from apps.annual_stats.as_operations import get_data_for_graph
 from apps.annual_stats.as_pipelines import p_balance_category_per_date,\
     p_balance_occasion_per_date, p_savings_per_date, p_loan_per_date, p_salary_vs_other, p_expenses_category
-from source.definitions import OCCASIONS
+from source.categories import OCCASIONS
 
 
 def fig_indicators_revenue_expense_balance():

@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from source.transactions.transaction_operations import check_duplicates_in_df
 from source.data_reader.bank_file_reader import BankTSVReader
 from source.transactions.exgest import TransactionExgest
-from source.transactions.transactions_db import TransactionDB
+from source.transactions.account_manager_db import AccountManagerDB
 
 
 def read_and_format_data(full_filename, db_connection):
@@ -41,12 +41,12 @@ def fig_indicators_new_transactions(connection_transaction, connection_metadata,
         nb_transactions_in_file = len(df)
         df_new_transactions = df[df['duplicate'] == 'False']
 
-        db = TransactionDB(
+        db = AccountManagerDB(
             name_connection_metadata=connection_metadata,
             name_connection_transaction=connection_transaction,
             account_id=account_info['account_id'],
         )
-        diff_balance = db.check(
+        data_comparison = db.check_with_new_transactions(
             df_transactions=df_new_transactions,
             bank_info=account_info,
         )
@@ -63,7 +63,7 @@ def fig_indicators_new_transactions(connection_transaction, connection_metadata,
             domain={'row': 0, 'column': 0}))
         figure.add_trace(go.Indicator(
             mode="number",
-            value=diff_balance,
+            value=data_comparison['difference'],
             number={'suffix': "€", "valueformat": '.2f'},
             title={"text": "Différence de revenu<br>" +
                    "<span style='font-size:0.8em;color:gray'>(avec la somme à la banque)</span>"},
