@@ -7,7 +7,8 @@ from dash import Input, Output, State, callback_context
 from app import app
 import time
 
-from datetime import date
+import datetime
+from calendar import monthrange
 from apps.search_data.sd_operations import search_transactions
 from apps.tables import format_dataframe, df_to_datatable, InfoDisplay
 from apps.components import get_sub_categories_for_dropdown_menu
@@ -21,33 +22,26 @@ from utils.time_operations import str_to_datetime
 
 layout_date = html.Div(
     [
-        # html.Div([
-        #     html.Div("Date de transaction:"),
-        #     dcc.DatePickerRange(
-        #         id='search_date',
-        #         clearable=True,
-        #         display_format='DD/MM/YYYY',
-        #         end_date=date.today())
-        #     ], style={'width': '50%'}),
         html.H4("Date"),
         html.Div(
             [
                 dbc.RadioItems(
-                    id="radios",
+                    id="sd_radios",
                     className="btn-group",
                     inputClassName="btn-check",
                     labelClassName="btn btn-outline-secondary",
                     labelCheckedClassName="active",
                     options=[
-                        {"label": "Mois actuel", "value": 1},
-                        {"label": "Mois précédent", "value": 2},
-                        {"label": "30 derniers jours", "value": 3},
-                        {"label": "Personnalisée", "value": 4},
+                        {"label": "Mois actuel", "value": 'actual_month'},
+                        {"label": "Mois précédent", "value": 'previous_month'},
+                        {"label": "30 derniers jours", "value": 'last_30_days'},
+                        {"label": "Personnalisée", "value": 'custom_date'},
                     ],
-                    value=1,
+                    value='actual_month',
                 ),
                 html.Div(style={'width': '20px'}),
                 dcc.Dropdown(
+                    id='sd_date_day_dropdown',
                     options=[{'label': date, 'value': date} for date in range(1, 32)],
                     style={'width': '80px'},
                     placeholder="Jour",
@@ -55,6 +49,7 @@ layout_date = html.Div(
                     value=None
                 ),
                 dcc.Dropdown(
+                    id='sd_date_month_dropdown',
                     options=[{'label': month, 'value': month} for month in MONTHS],
                     style={'width': '150px'},
                     placeholder="Mois",
@@ -62,6 +57,7 @@ layout_date = html.Div(
                     value='Janvier',
                 ),
                 dcc.Dropdown(
+                    id='sd_date_year_dropdown',
                     options=[
                         {'label': 2021, 'value': 2021},
                         {'label': 2022, 'value': 2022},
@@ -347,8 +343,10 @@ layout = html.Div([
      Output('sd_accordion', 'active_item')],
     [Input('btn_search', 'n_clicks'),
      Input('btn_update_transaction', 'n_clicks')],
-    [State('search_date', 'start_date'),
-     State('search_date', 'end_date'),
+    [State('sd_radios', 'value'),
+     State('sd_date_day_dropdown', 'value'),
+     State('sd_date_month_dropdown', 'value'),
+     State('sd_date_year_dropdown', 'value'),
      State('search_description', 'value'),
      State('search_amount_min', 'value'),
      State('search_amount_max', 'value'),
@@ -368,7 +366,8 @@ layout = html.Div([
      ]
 )
 def display_searched_transactions(n_clicks_search, n_clicks_save_transaction,
-                                  start_date, end_date, description, amount_min, amount_max,
+                                  radio_value_date, date_day, date_month, date_year,
+                                  description, amount_min, amount_max,
                                   type, category, sub_category, occasion, note, check,
                                   bool_description, bool_amount, bool_type, bool_category,
                                   bool_occasion, bool_note, bool_check):
@@ -380,11 +379,17 @@ def display_searched_transactions(n_clicks_search, n_clicks_save_transaction,
     if ('btn_search' in changed_id) or ('btn_update_transaction' in changed_id):
         time.sleep(0.5)
 
+        # Get start date and end date with selection
+        start_date, end_date = get_start_end_date(
+            radio_value=radio_value_date,
+            day=date_day,
+            month=date_month,
+            year=date_year
+        )
+
         filters = {
             'account_id': (True, ACCOUNT_ID),
-            'date_transaction': (True, [
-                str_to_datetime(start_date, date_format='%Y-%m-%d') if start_date else start_date,
-                str_to_datetime(end_date, date_format='%Y-%m-%d') if end_date else end_date]),
+            'date_transaction': (True, [start_date, end_date]),
             'description': (bool_description, description),
             'amount': (bool_amount, [amount_min, amount_max]),
             'type_transaction': (bool_type, type),
@@ -424,8 +429,10 @@ def update_sub_category(value):
 @app.callback(
     Output('store_transaction_enabled', 'data'),
     [Input('cell_search', 'active_cell')],
-    [State('search_date', 'start_date'),
-     State('search_date', 'end_date'),
+    [State('sd_radios', 'value'),
+     State('sd_date_day_dropdown', 'value'),
+     State('sd_date_month_dropdown', 'value'),
+     State('sd_date_year_dropdown', 'value'),
      State('search_description', 'value'),
      State('search_amount_min', 'value'),
      State('search_amount_max', 'value'),
@@ -443,17 +450,24 @@ def update_sub_category(value):
      State('bool_note', 'on'),
      State('bool_check', 'on')])
 def store_enabled_transaction(cell_search,
-                              start_date, end_date, description, amount_min, amount_max,
+                              radio_value_date, date_day, date_month, date_year,
+                              description, amount_min, amount_max,
                               type, category, sub_category, occasion, note, check,
                               bool_description, bool_amount, bool_type, bool_category,
                               bool_occasion, bool_note, bool_check):
     if cell_search is not None:
 
+        # Get start date and end date with selection
+        start_date, end_date = get_start_end_date(
+            radio_value=radio_value_date,
+            day=date_day,
+            month=date_month,
+            year=date_year
+        )
+
         filters = {
             'account_id': (True, ACCOUNT_ID),
-            'date_transaction': (True, [
-                str_to_datetime(start_date, date_format='%Y-%m-%d') if start_date else start_date,
-                str_to_datetime(end_date, date_format='%Y-%m-%d') if end_date else end_date]),
+            'date_transaction': (True, [start_date, end_date]),
             'description': (bool_description, description),
             'amount': (bool_amount, [amount_min, amount_max]),
             'type_transaction': (bool_type, type),
@@ -468,7 +482,7 @@ def store_enabled_transaction(cell_search,
         selected_df = df.iloc[cell_search['row']]
 
         # Convert objectID into string
-        replace_object_id(selected_df)
+        selected_df['_id'] = str(selected_df['_id'])
 
         data = selected_df.to_json(date_format='iso')
     else:
@@ -507,5 +521,67 @@ def disable_enable_search_components(bool_amount, bool_category, bool_type, bool
     return list_enabled_components
 
 
-def replace_object_id(df):
-    df['_id'] = str(df['_id'])
+@app.callback(
+    [Output('sd_date_day_dropdown', 'disabled'),
+     Output('sd_date_month_dropdown', 'disabled'),
+     Output('sd_date_year_dropdown', 'disabled')],
+    [Input("sd_radios", "value")])
+def disable_enable_custom_date(value):
+
+    disabled = True
+
+    if value == 'custom_date':  # Personnalisée
+        disabled = False
+
+    return (disabled, ) * 3
+
+
+def get_start_end_date(radio_value, day, month, year):
+
+    current_date = datetime.datetime.now()
+
+    if radio_value == 'actual_month':
+        start_date = datetime.datetime(current_date.year, current_date.month, 1)
+        end_date = datetime.datetime(current_date.year, current_date.month, 31)
+    elif radio_value == 'previous_month':
+        previous_month = (current_date.month - 2) % 12 + 1
+        previous_year = current_date.year - 1 if previous_month == 12 else current_date.year
+
+        start_date = datetime.datetime(previous_year, previous_month, 1)
+        end_date = datetime.datetime(previous_year, previous_month, 31)
+    elif radio_value == 'last_30_days':
+        start_date = current_date - datetime.timedelta(days=30)
+        end_date = current_date
+    elif radio_value == 'custom_date':
+
+        # YEAR
+        if year is None:
+            start_year = 2022
+            end_year = current_date.year
+        else:
+            start_year = year
+            end_year = year
+
+        # MONTH
+        if month is None:
+            start_month = 1
+            end_month = 12
+        else:
+            start_month = MONTHS.index(month) + 1
+            end_month = MONTHS.index(month) + 1
+
+        # DAY
+        if day is None:
+            start_day = 1
+            end_day = monthrange(year, start_month)[1]
+        else:
+            start_day = day
+            end_day = day
+        start_date = datetime.datetime(start_year, start_month, start_day)
+        end_date = datetime.datetime(end_year, end_month, end_day)
+    else:
+        print('page_search.py func: get_start_end_date: Error of date')
+        start_date = current_date
+        end_date = current_date
+
+    return start_date, end_date
