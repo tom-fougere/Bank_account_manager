@@ -3,11 +3,16 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash import Input, Output
 from app import app
-from apps.annual_stats.as_figures import \
-    fig_indicators_revenue_expense_balance, \
-    fig_expenses_vs_revenue, fig_cum_balance, \
-    fig_expenses_vs_category, fig_expenses_vs_occasion, \
-    fig_savings, fig_loan
+from apps.annual_stats.as_figures import (
+    fig_indicators_revenue_expense_balance,
+    fig_expenses_vs_revenue,
+    fig_cum_balance,
+    fig_expenses_vs_category,
+    fig_expenses_vs_occasion,
+    fig_savings,
+    fig_loan,
+    fig_nb_transactions_vs_category
+)
 
 
 layout = html.Div(
@@ -33,6 +38,8 @@ layout = html.Div(
                   figure=fig_expenses_vs_category()),
         dcc.Graph(id='fig_yg_expenses_vs_occasion',
                   figure=fig_expenses_vs_occasion()),
+        dcc.Graph(id='fig_nb_transactions',
+                  figure=fig_nb_transactions_vs_category()),
         dcc.Graph(id='fig_yg_loan',
                   figure=fig_loan()),
         dcc.Graph(id='fig_yg_saving',

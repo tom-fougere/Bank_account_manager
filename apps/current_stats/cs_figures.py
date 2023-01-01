@@ -6,8 +6,14 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 
 from apps.current_stats.cs_operations import get_data_for_graph
-from apps.current_stats.cs_pipelines import p_balance_category_per_date,\
-    p_balance_occasion_per_date, p_savings_per_date, p_loan_per_date, p_salary_vs_other, p_expenses_category
+from apps.current_stats.cs_pipelines import (
+    p_balance_category_per_date,
+    p_balance_occasion_per_date,
+    p_savings_per_date,
+    p_loan_per_date,
+    p_salary_vs_other,
+    p_expenses_category,
+    p_nb_transactions_per_category)
 from source.definitions import MONTHS
 from source.categories import OCCASIONS
 
@@ -333,6 +339,44 @@ def fig_cum_balance(year=datetime.datetime.now().year):
 
     return figure
 
+
+def fig_nb_transactions_vs_category(year=datetime.datetime.now().year):
+
+    end_date = datetime.datetime(year=year, month=12, day=31)
+    start_date = datetime.datetime(year=year, month=1, day=1)
+
+    # Get data
+    df = get_data_for_graph(p_nb_transactions_per_category, date_range=(start_date, end_date))
+
+    if len(df) > 0:
+
+        # Rename empty category by 'None'
+        df.loc[df['Categorie'].isna(), 'Categorie'] = 'None'
+
+        # Sort by month
+        df = df.sort_values(by=['Mois'])
+
+        # Rename months
+        df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
+
+        figure = go.Figure()
+        for i_cat in df['Categorie'].unique():
+            figure.add_trace(go.Bar(
+                x=df[df['Categorie'] == i_cat]['Mois'],
+                y=df[df['Categorie'] == i_cat]['nb_transactions'],
+                name=i_cat,
+                text=i_cat,
+                hovertemplate='Catégorie: {}'.format(i_cat) +
+                              '<br>Nombre: %{y}' +
+                              '<br>Mois: %{x}<extra></extra>'
+                ))
+
+        figure.update_layout(barmode='relative', title_text='Nombre de transactions')
+        figure.update_traces(textposition='inside')
+    else:
+        figure = {}
+
+    return figure
 
 if __name__ == '__main__':
     fig_expenses_vs_category()

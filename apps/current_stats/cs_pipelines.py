@@ -113,7 +113,6 @@ p_balance_occasion_per_date = [
     }
 ]
 
-
 p_savings_per_date = [
     {
         '$match': {
@@ -134,7 +133,6 @@ p_savings_per_date = [
     }
 ]
 
-
 p_loan_per_date = [
     {
         '$match': {
@@ -152,6 +150,21 @@ p_loan_per_date = [
             },
             'Balance': {
                 '$sum': "$amount"}
+        }
+    }
+]
+
+p_nb_transactions_per_category = [
+    {
+        '$group': {
+            '_id': {
+                'Categorie': '$category',
+                # 'Sous-catégorie': '$sub_category',
+                'Mois': {
+                    '$month': "$date.dt"},
+            },
+            'nb_transactions': {
+                '$sum': 1}
         }
     }
 ]

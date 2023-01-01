@@ -3,8 +3,14 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from apps.annual_stats.as_operations import get_data_for_graph
-from apps.annual_stats.as_pipelines import p_balance_category_per_date,\
-    p_balance_occasion_per_date, p_savings_per_date, p_loan_per_date, p_salary_vs_other, p_expenses_category
+from apps.annual_stats.as_pipelines import (
+    p_balance_category_per_date,
+    p_balance_occasion_per_date,
+    p_savings_per_date,
+    p_loan_per_date,
+    p_salary_vs_other,
+    p_nb_transactions_per_category,
+)
 from source.categories import OCCASIONS
 
 
@@ -241,6 +247,31 @@ def fig_cum_balance():
     )
     figure.update_yaxes(title_text="Balance", secondary_y=False)
     figure.update_yaxes(title_text="<b>Cumulative balance</b>", secondary_y=True)
+
+    return figure
+
+
+def fig_nb_transactions_vs_category():
+
+    # Get data
+    df = get_data_for_graph(p_nb_transactions_per_category)
+
+    # Rename empty category by 'None'
+    df.loc[df['Categorie'].isna(), 'Categorie'] = 'None'
+
+    figure = go.Figure()
+    for i_cat in df['Categorie'].unique():
+        figure.add_trace(go.Bar(
+            x=df[df['Categorie'] == i_cat]['Année'],
+            y=df[df['Categorie'] == i_cat]['nb_transactions'],
+            name=i_cat,
+            text=i_cat,
+            hovertemplate='Catégorie: {}'.format(i_cat) +
+                          '<br>Nombre: %{y}<extra></extra>'
+            ))
+
+    figure.update_layout(barmode='relative', title_text='Nombre de transactions')
+    figure.update_traces(textposition='inside')
 
     return figure
 

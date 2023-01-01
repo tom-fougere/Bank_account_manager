@@ -4,10 +4,16 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash import Input, Output, State, callback_context
 from app import app
-from apps.current_stats.cs_figures import \
-    fig_indicators_revenue_expense_balance,\
-    fig_expenses_vs_revenue, fig_expenses_vs_category, fig_expenses_vs_occasion, \
-    fig_savings, fig_loan, fig_categories, fig_cum_balance
+from apps.current_stats.cs_figures import (
+    fig_indicators_revenue_expense_balance,
+    fig_expenses_vs_revenue,
+    fig_expenses_vs_category,
+    fig_expenses_vs_occasion,
+    fig_savings,
+    fig_loan,
+    fig_categories,
+    fig_cum_balance,
+    fig_nb_transactions_vs_category)
 from apps.current_stats.cs_operations import get_list_years
 from source.definitions import DB_CONN_TRANSACTION
 
@@ -42,6 +48,8 @@ layout = html.Div(
                   figure=fig_expenses_vs_occasion(now.year)),
         dcc.Graph(id='fig_categories',
                   figure=fig_categories(now.year)),
+        dcc.Graph(id='fig_nb_transactions',
+                  figure=fig_nb_transactions_vs_category(now.year)),
         dcc.Graph(id='fig_loan',
                   figure=fig_loan(now.year)),
         dcc.Graph(id='fig_saving',
