@@ -112,30 +112,33 @@ def fig_expenses_vs_category(year=datetime.datetime.now().year):
     # Get data
     df = get_data_for_graph(p_balance_category_per_date, date_range=(start_date, end_date))
 
-    # Drop Revenue
-    df = df[df['Categorie'] != 'Travail']
+    if len(df) > 0:
+        # Drop Revenue
+        df = df[df['Categorie'] != 'Travail']
 
-    # Rename empty category by 'None'
-    df.loc[df['Categorie'].isna(), 'Categorie'] = 'None'
+        # Rename empty category by 'None'
+        df.loc[df['Categorie'].isna(), 'Categorie'] = 'None'
 
-    # Rename months
-    df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
+        # Rename months
+        df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
 
-    figure = go.Figure()
-    for i_cat in df['Categorie'].unique():
-        figure.add_trace(go.Bar(
-            x=df[df['Categorie'] == i_cat]['Mois'],
-            y=df[df['Categorie'] == i_cat]['Balance'],
-            name=i_cat,
-            text=i_cat,
-            hovertemplate='Catégorie: {}'.format(i_cat) +
-                          '<br>Dépense: %{y:.2f}€' +
-                          '<br>Mois: %{x}<extra></extra>'
-            ))
+        figure = go.Figure()
+        for i_cat in df['Categorie'].unique():
+            figure.add_trace(go.Bar(
+                x=df[df['Categorie'] == i_cat]['Mois'],
+                y=df[df['Categorie'] == i_cat]['Balance'],
+                name=i_cat,
+                text=i_cat,
+                hovertemplate='Catégorie: {}'.format(i_cat) +
+                              '<br>Dépense: %{y:.2f}€' +
+                              '<br>Mois: %{x}<extra></extra>'
+                ))
 
-    figure.update_layout(barmode='relative', title_text='Dépenses vs catégories')
-    figure.update_yaxes(autorange="reversed")
-    figure.update_traces(textposition='inside')
+        figure.update_layout(barmode='relative', title_text='Dépenses vs catégories')
+        figure.update_yaxes(autorange="reversed")
+        figure.update_traces(textposition='inside')
+    else:
+        figure = {}
 
     return figure
 
@@ -148,27 +151,30 @@ def fig_expenses_vs_occasion(year=datetime.datetime.now().year):
     # Get data
     df = get_data_for_graph(p_balance_occasion_per_date, date_range=(start_date, end_date))
 
-    # Rename empty category by 'None'
-    df.loc[df['Occasion'].isna(), 'Occasion'] = 'None'
+    if len(df) > 0:
+        # Rename empty category by 'None'
+        df.loc[df['Occasion'].isna(), 'Occasion'] = 'None'
 
-    # Rename months
-    df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
+        # Rename months
+        df['Mois'] = [MONTHS[i-1] for i in df['Mois']]
 
-    figure = go.Figure()
-    for i_occ in OCCASIONS:
-        figure.add_trace(go.Bar(
-            x=df[df['Occasion'] == i_occ]['Mois'],
-            y=df[df['Occasion'] == i_occ]['Balance'],
-            name=i_occ,
-            text=i_occ,
-            hovertemplate='Occasion: {}'.format(i_occ) +
-                          '<br>Dépense: %{y:.2f}€' +
-                          '<br>Mois: %{x}<extra></extra>'
-        ))
+        figure = go.Figure()
+        for i_occ in OCCASIONS:
+            figure.add_trace(go.Bar(
+                x=df[df['Occasion'] == i_occ]['Mois'],
+                y=df[df['Occasion'] == i_occ]['Balance'],
+                name=i_occ,
+                text=i_occ,
+                hovertemplate='Occasion: {}'.format(i_occ) +
+                              '<br>Dépense: %{y:.2f}€' +
+                              '<br>Mois: %{x}<extra></extra>'
+            ))
 
-    figure.update_layout(barmode='relative', title_text='Dépenses vs occasions')
-    figure.update_yaxes(autorange="reversed")
-    figure.update_traces(textposition='inside')
+        figure.update_layout(barmode='relative', title_text='Dépenses vs occasions')
+        figure.update_yaxes(autorange="reversed")
+        figure.update_traces(textposition='inside')
+    else:
+        figure = {}
 
     return figure
 
@@ -262,19 +268,22 @@ def fig_categories(year=datetime.datetime.now().year):
     # Get data
     df = get_data_for_graph(p_expenses_category, date_range=(start_date, end_date))
 
-    # Adjust the data for the sunburst figure
-    df.loc[df['Catégorie'].isna(), ['Catégorie', 'Sous-catégorie']] = 'None'
-    df['Somme'] = -df['Somme']
-    df['Somme'] = df['Somme'].round(1)
+    if len(df) > 0:
+        # Adjust the data for the sunburst figure
+        df.loc[df['Catégorie'].isna(), ['Catégorie', 'Sous-catégorie']] = 'None'
+        df['Somme'] = -df['Somme']
+        df['Somme'] = df['Somme'].round(1)
 
-    # Filter positive amount and remove Salary to get only expenses
-    df_filter = df.copy()
-    df_filter = df_filter[(df_filter['Somme'] >= 0) & (df_filter['Catégorie'] != 'Salaire')]
+        # Filter positive amount and remove Salary to get only expenses
+        df_filter = df.copy()
+        df_filter = df_filter[(df_filter['Somme'] >= 0) & (df_filter['Catégorie'] != 'Salaire')]
 
-    figure = px.sunburst(df_filter,
-                         path=['Catégorie', 'Sous-catégorie'],
-                         values='Somme',
-                         title='Catégories')
+        figure = px.sunburst(df_filter,
+                             path=['Catégorie', 'Sous-catégorie'],
+                             values='Somme',
+                             title='Catégories')
+    else:
+        figure = {}
 
     return figure
 
@@ -287,36 +296,40 @@ def fig_cum_balance(year=datetime.datetime.now().year):
     # Get data
     df = get_data_for_graph(p_salary_vs_other, date_range=(start_date, end_date))
 
-    # Transform df
-    df['CumulativeBalance'] = df['Balance'].cumsum()
-    df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
+    if len(df) > 0:
+        # Transform df
+        df['CumulativeBalance'] = df['Balance'].cumsum()
+        df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
 
-    # Figures
-    figure = make_subplots(specs=[[{"secondary_y": True}]])
-    figure.add_trace(go.Bar(
-        x=[MONTHS[i-1] for i in df['Mois']],
-        y=df['Balance'],
-        name='Gain',
-        marker_color=df['Color']
-        ),
-        secondary_y=False)
-    figure.add_trace(go.Scatter(
-        x=[MONTHS[i-1] for i in df['Mois']],
-        y=df['CumulativeBalance'],
-        mode='lines',
-        line=dict(dash='dash', color='black'),
-        name='Cumulative gain'
-        ),
-        secondary_y=True)
+        # Figures
+        figure = make_subplots(specs=[[{"secondary_y": True}]])
+        figure.add_trace(go.Bar(
+            x=[MONTHS[i-1] for i in df['Mois']],
+            y=df['Balance'],
+            name='Gain',
+            marker_color=df['Color']
+            ),
+            secondary_y=False)
+        figure.add_trace(go.Scatter(
+            x=[MONTHS[i-1] for i in df['Mois']],
+            y=df['CumulativeBalance'],
+            mode='lines',
+            line=dict(dash='dash', color='black'),
+            name='Cumulative gain'
+            ),
+            secondary_y=True)
 
-    # Set titles
-    figure.update_layout(
-        xaxis=dict(tickformat="%b \n%Y"),
-        yaxis_showgrid=False,
-        title='Balance cumulée'
-    )
-    figure.update_yaxes(title_text="Balance", secondary_y=False)
-    figure.update_yaxes(title_text="<b>Cumulative balance</b>", secondary_y=True)
+        # Set titles
+        figure.update_layout(
+            xaxis=dict(tickformat="%b \n%Y"),
+            yaxis_showgrid=False,
+            title='Balance cumulée'
+        )
+        figure.update_yaxes(title_text="Balance", secondary_y=False)
+        figure.update_yaxes(title_text="<b>Cumulative balance</b>", secondary_y=True)
+
+    else:
+        figure = {}
 
     return figure
 

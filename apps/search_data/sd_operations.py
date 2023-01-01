@@ -45,7 +45,7 @@ def search_transactions(connection_name, filters):
     for filter_name in filters.keys():
         filter_enable, condition = filters[filter_name]
         if filter_enable:
-            if isinstance(condition, list) and (len(condition) == 0 or (not any(condition))):
+            if isinstance(condition, list) and (len(condition) == 0 or (condition.count(None) == len(condition))):
                 searches[filter_name] = None
             else:
                 searches[filter_name] = condition
