@@ -56,7 +56,7 @@ class InfoDisplay:
         InfoName.DUPLICATE,
     ]
     SEARCH = [
-        InfoName.DATE_BANK_STR,
+        InfoName.DATE_TRANS_STR,
         InfoName.AMOUNT,
         InfoName.DESCRIPTION,
         InfoName.CATEGORY,
@@ -65,7 +65,7 @@ class InfoDisplay:
         InfoName.CHECK,
         InfoName.NOTE,
         InfoName.TYPE,
-        InfoName.DATE_TRANS_STR,
+        InfoName.DATE_BANK_STR,
     ]
     IMPORT = [
         InfoName.DATE_BANK_STR,
