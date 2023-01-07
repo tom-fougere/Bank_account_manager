@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-from apps.current_stats.cs_operations import get_data_for_graph
+from apps.current_stats.cs_operations import get_data_for_graph, format_df_saving
 from apps.current_stats.cs_pipelines import (
     p_balance_category_per_date,
     p_balance_occasion_per_date,
@@ -196,25 +196,29 @@ def fig_savings(year=datetime.datetime.now().year):
     # Figures
     if len(df) > 0:
 
+        # Format dataframe, rename month and sort by month
+        df = format_df_saving(df)
+
         # Transform df
+        df['Balance'] = -df['Balance']
         df['CumulativeBalance'] = df['Balance'].cumsum()
         df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
         
         # Figures
         figure = make_subplots(specs=[[{"secondary_y": True}]])
         figure.add_trace(go.Bar(
-            x=[MONTHS[i-1] for i in df['Mois']],
+            x=df['Mois'],
             y=df['Balance'],
             name='Epargne',
             marker_color=df['Color']
         ),
             secondary_y=False)
         figure.add_trace(go.Scatter(
-            x=[MONTHS[i-1] for i in df['Mois']],
+            x=df['Mois'],
             y=df['CumulativeBalance'],
             mode='lines',
             line=dict(dash='dash', color='black'),
-            name='Cumulative épargne'
+            name='Cumul.'
         ),
             secondary_y=True)
 
@@ -321,7 +325,7 @@ def fig_cum_balance(year=datetime.datetime.now().year):
             y=df['CumulativeBalance'],
             mode='lines',
             line=dict(dash='dash', color='black'),
-            name='Cumulative gain'
+            name='Cumul.'
             ),
             secondary_y=True)
 
@@ -377,6 +381,7 @@ def fig_nb_transactions_vs_category(year=datetime.datetime.now().year):
         figure = {}
 
     return figure
+
 
 if __name__ == '__main__':
     fig_expenses_vs_category()

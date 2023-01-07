@@ -38,7 +38,7 @@ layout = html.Div(
                   figure=fig_expenses_vs_category()),
         dcc.Graph(id='fig_yg_expenses_vs_occasion',
                   figure=fig_expenses_vs_occasion()),
-        dcc.Graph(id='fig_nb_transactions',
+        dcc.Graph(id='fig_yg_nb_transactions',
                   figure=fig_nb_transactions_vs_category()),
         dcc.Graph(id='fig_yg_loan',
                   figure=fig_loan()),
@@ -55,6 +55,7 @@ layout = html.Div(
      Output('fig_yg_expenses_vs_occasion', 'figure'),
      Output('fig_yg_saving', 'figure'),
      Output('fig_yg_loan', 'figure'),
+     Output('fig_yg_nb_transactions', 'figure'),
      Output('fig_yg_cum_balance', 'figure')],
     Input('btn_refresh', 'n_clicks'))
 def refresh_page(n_click):
@@ -64,7 +65,8 @@ def refresh_page(n_click):
         fig_expenses_vs_category(),\
         fig_expenses_vs_occasion(),\
         fig_savings(),\
-        fig_loan(),\
+        fig_loan(), \
+        fig_nb_transactions_vs_category(), \
         fig_cum_balance(),\
 
     return outputs

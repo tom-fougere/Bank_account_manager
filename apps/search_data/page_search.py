@@ -17,6 +17,7 @@ from source.categories import get_list_categories
 from apps.components import (
     get_occasions_for_dropdown_menu,
     get_types_transaction_for_dropdown_menu,
+    get_list_years_for_dropdown_menu,
 )
 from utils.time_operations import str_to_datetime
 
@@ -54,19 +55,15 @@ layout_date = html.Div(
                     style={'width': '150px'},
                     placeholder="Mois",
                     disabled=True,
-                    value='Janvier',
+                    value=MONTHS[datetime.datetime.now().month-1],
                 ),
                 dcc.Dropdown(
                     id='sd_date_year_dropdown',
-                    options=[
-                        {'label': 2021, 'value': 2021},
-                        {'label': 2022, 'value': 2022},
-                        {'label': 2023, 'value': 2023},
-                    ],
+                    options=get_list_years_for_dropdown_menu(DB_CONN_TRANSACTION),
                     style={'width': '100px'},
                     placeholder="Année",
                     disabled=True,
-                    value=2022,
+                    value=datetime.datetime.now().year,
                 ),
             ],
             className="radio-group",

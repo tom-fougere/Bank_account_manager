@@ -1,4 +1,5 @@
 from source.transactions.metadata import MetadataDB
+from source.transactions.exgest import TransactionExgest
 
 
 # ##################################### #
@@ -77,3 +78,15 @@ def get_types_transaction_for_dropdown_menu(db_connection, account_id):
         list_types.append({'label': trans_type, 'value': trans_type})
 
     return list_types
+
+
+def get_list_years_for_dropdown_menu(name_db_connection):
+    data_extractor = TransactionExgest(name_db_connection)
+    distinct_years = data_extractor.get_distinct_years()
+
+    dropdown_list_years = [
+        {'label': str(year), 'value': year}
+        for year in distinct_years
+    ]
+
+    return dropdown_list_years
