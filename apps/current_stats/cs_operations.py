@@ -1,6 +1,7 @@
 import datetime
+from pandas import Categorical
 
-from source.definitions import DB_CONN_TRANSACTION
+from source.definitions import DB_CONN_TRANSACTION, MONTHS
 from source.transactions.exgest import TransactionExgest
 from utils.mixed_utils import expand_columns_of_dataframe
 
@@ -48,13 +49,62 @@ def add_date_condition_to_pipeline(pipeline, start_date, end_date):
     return pip
 
 
-def get_list_years(name_db_connection):
-    data_extractor = TransactionExgest(name_db_connection)
-    distinct_years = data_extractor.get_distinct_years()
+def format_df_saving(df):
 
-    dropdown_list_years = [
-        {'label': str(year), 'value': year}
-        for year in distinct_years
-    ]
+    # Change month index by its name
+    df['Mois'] = df['Mois'].apply(lambda x: MONTHS[x - 1])
 
-    return dropdown_list_years
+    # Add all others months to dataframe
+    for mois in MONTHS:
+        if mois not in df['Mois'].tolist():
+            new_row = {
+                'Balance': 0,
+                'Mois': mois,
+                'Année': None,
+                'date': None,
+            }
+            df = df.append(new_row, ignore_index=True)
+
+    # Sort dataframe by month
+    df['Month_cat'] = Categorical(
+        df['Mois'],
+        categories=MONTHS,
+        ordered=True
+    )
+    df.sort_values('Month_cat', inplace=True)
+    df.drop(['Month_cat'], axis=1, inplace=True)
+
+    return df
+
+
+def get_revenue_expences_savings_year(
+        df_current_year, df_previous_year, df_savings_current_year, df_savings_previous_year):
+
+    # CURRENT YEAR
+    if len(df_current_year) > 0:
+        revenues_current_year = df_current_year['Revenues'].sum()
+        expenses_current_year = -df_current_year['Expenses'].sum()
+    else:
+        revenues_current_year = 0
+        expenses_current_year = 0
+
+    if len(df_savings_current_year) > 0:
+        savings_current_year = -df_savings_current_year['Balance'].sum()
+    else:
+        savings_current_year = 0
+
+    # PREVIOUS YEAR
+    if len(df_previous_year) > 0:
+        revenues_previous_year = df_previous_year['Revenues'].sum()
+        expenses_previous_year = -df_previous_year['Expenses'].sum()
+    else:
+        revenues_previous_year = 0
+        expenses_previous_year = 0
+
+    if len(df_savings_previous_year) > 0:
+        savings_previous_year = -df_savings_previous_year['Balance'].sum()
+    else:
+        savings_previous_year = 0
+
+    return (revenues_current_year, expenses_current_year, savings_current_year,
+            revenues_previous_year, expenses_previous_year, savings_previous_year)

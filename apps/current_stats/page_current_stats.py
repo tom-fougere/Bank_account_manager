@@ -14,7 +14,7 @@ from apps.current_stats.cs_figures import (
     fig_categories,
     fig_cum_balance,
     fig_nb_transactions_vs_category)
-from apps.current_stats.cs_operations import get_list_years
+from apps.components import get_list_years_for_dropdown_menu
 from source.definitions import DB_CONN_TRANSACTION
 
 now = datetime.datetime.now()
@@ -27,7 +27,7 @@ layout = html.Div(
         html.Div([
             dbc.Button("Refresh", outline=True, color="secondary", className="btn_refresh", id="btn_refresh"),
             dcc.Dropdown(id='dropdown_year_stat',
-                         options=get_list_years(DB_CONN_TRANSACTION),
+                         options=get_list_years_for_dropdown_menu(DB_CONN_TRANSACTION),
                          value=now.year,
                          style={'width': '100%',
                                 'height': 40,
@@ -68,6 +68,7 @@ layout = html.Div(
      Output('fig_loan', 'figure'),
      Output('fig_categories', 'figure'),
      Output('fig_cum_balance', 'figure'),
+     Output('fig_nb_transactions', 'figure'),
      Output('dropdown_year_stat', 'options')],
     [Input('btn_refresh', 'n_clicks'),
      Input('dropdown_year_stat', 'value')])
@@ -79,11 +80,12 @@ def refresh_page(n_click, selected_year):
         fig_expenses_vs_category(selected_year),\
         fig_expenses_vs_occasion(selected_year),\
         fig_savings(selected_year),\
-        fig_loan(selected_year),\
+        fig_loan(selected_year), \
         fig_categories(selected_year),\
         fig_cum_balance(selected_year),\
+        fig_nb_transactions_vs_category(selected_year), \
 
-    outputs = outputs + (get_list_years(DB_CONN_TRANSACTION),)
+    outputs = outputs + (get_list_years_for_dropdown_menu(DB_CONN_TRANSACTION),)
 
     return outputs
 

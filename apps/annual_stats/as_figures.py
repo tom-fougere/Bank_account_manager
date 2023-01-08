@@ -165,7 +165,7 @@ def fig_savings():
             y=df['CumulativeBalance'],
             mode='lines',
             line=dict(dash='dash', color='black'),
-            name='Cumulative épargne'
+            name='Cumul.'
         ),
             secondary_y=True)
 
@@ -180,6 +180,8 @@ def fig_savings():
         yaxis_showgrid=False,
         xaxis_title='Année',
         yaxis_title='Euros')
+
+    figure.update_yaxes(autorange="reversed")
 
     return figure
 
@@ -218,6 +220,9 @@ def fig_cum_balance():
     # Get data
     df = get_data_for_graph(p_salary_vs_other)
 
+    # Sort by year
+    df.sort_values(by='Année', inplace=True)
+
     # Transform df
     df['CumulativeBalance'] = df['Balance'].cumsum()
     df["Color"] = np.where(df["Balance"] < 0, '#EF553B', '#636EFA')  # Change color following sign
@@ -236,7 +241,7 @@ def fig_cum_balance():
         y=df['CumulativeBalance'],
         mode='lines',
         line=dict(dash='dash', color='black'),
-        name='Cumulative gain'
+        name='Cumul.'
         ),
         secondary_y=True)
 
