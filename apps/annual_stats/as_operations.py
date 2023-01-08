@@ -14,6 +14,13 @@ def get_data_for_graph(pipeline):
     if len(df) > 0:
         df = expand_columns_of_dataframe(df, column='_id')  # Expand ID to get date
 
+        if 'Année' in df.keys():
+            df.sort_values(by='Année', inplace=True)
+
+    # Reset index and remove index column
+    df.reset_index(inplace=True)
+    df.drop(columns=['index'], axis=1, inplace=True)
+
     return df
 
 

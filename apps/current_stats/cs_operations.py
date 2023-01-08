@@ -30,6 +30,10 @@ def get_data_for_graph(pipeline, date_range=None):
             df['date'] = [datetime.datetime(int(row['Année']), int(row['Mois']), 1) for _, row in df.iterrows()]  # convert in datetime
             df.sort_values(by='date', inplace=True)
 
+    # Reset index and remove index column
+    df.reset_index(inplace=True)
+    df.drop(columns=['index'], axis=1, inplace=True)
+
     return df
 
 
@@ -82,7 +86,7 @@ def get_revenue_expences_savings_year(
 
     # CURRENT YEAR
     if len(df_current_year) > 0:
-        revenues_current_year = df_current_year['Revenues'].sum()
+        revenues_current_year = df_current_year['Salaries'].sum()
         expenses_current_year = -df_current_year['Expenses'].sum()
     else:
         revenues_current_year = 0
@@ -95,7 +99,7 @@ def get_revenue_expences_savings_year(
 
     # PREVIOUS YEAR
     if len(df_previous_year) > 0:
-        revenues_previous_year = df_previous_year['Revenues'].sum()
+        revenues_previous_year = df_previous_year['Salaries'].sum()
         expenses_previous_year = -df_previous_year['Expenses'].sum()
     else:
         revenues_previous_year = 0

@@ -1,6 +1,6 @@
 import numpy as np
+import pandas as pd
 import datetime
-from dateutil.relativedelta import relativedelta
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
@@ -103,6 +103,18 @@ def fig_expenses_vs_revenue(year=datetime.datetime.now().year):
 
     # Get data
     df = get_data_for_graph(p_salary_vs_other, date_range=(start_date, end_date))
+    df_savings = get_data_for_graph(p_savings_per_date, date_range=(start_date, end_date))
+
+    # Remove savings transaction in the expenses and update balance
+    if len(df_savings) > 0:
+        df_merged = pd.merge(
+            left=df,
+            right=df_savings[['Balance', 'Mois']],
+            how='outer',
+            on="Mois",
+            suffixes=('', '_savings')).fillna(0.0)
+        df['Expenses'] = df_merged['Expenses'] - df_merged['Balance_savings']
+        df['Balance'] = df_merged['Balance'] - df_merged['Balance_savings']
 
     if len(df) > 0:
         # Transform df
@@ -113,8 +125,8 @@ def fig_expenses_vs_revenue(year=datetime.datetime.now().year):
         figure = go.Figure()
         figure.add_trace(go.Bar(
             x=[MONTHS[i-1] for i in df['Mois']],
-            y=df['Revenues'],
-            name='Revenus'
+            y=df['Salaries'],
+            name='Salaires'
             ))
         figure.add_trace(go.Bar(
             x=[MONTHS[i-1] for i in df['Mois']],
@@ -123,7 +135,7 @@ def fig_expenses_vs_revenue(year=datetime.datetime.now().year):
             ))
         figure.update_layout(
             xaxis=dict(tickformat="%b \n%Y"),
-            title='Revenus VS Dépenses')
+            title='Salaires VS Dépenses')
     else:
         figure = {}
 
@@ -331,6 +343,18 @@ def fig_cum_balance(year=datetime.datetime.now().year):
 
     # Get data
     df = get_data_for_graph(p_salary_vs_other, date_range=(start_date, end_date))
+    df_savings = get_data_for_graph(p_savings_per_date, date_range=(start_date, end_date))
+
+    # Remove savings transaction in the expenses and update balance
+    if len(df_savings) > 0:
+        df_merged = pd.merge(
+            left=df,
+            right=df_savings[['Balance', 'Mois']],
+            how='outer',
+            on="Mois",
+            suffixes=('', '_savings')).fillna(0.0)
+        df['Expenses'] = df_merged['Expenses'] - df_merged['Balance_savings']
+        df['Balance'] = df_merged['Balance'] - df_merged['Balance_savings']
 
     if len(df) > 0:
         # Transform df

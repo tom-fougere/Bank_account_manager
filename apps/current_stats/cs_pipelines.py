@@ -7,7 +7,7 @@ p_salary_vs_other = [
                 'Année': {
                     '$year': "$date.dt"},
             },
-            'Revenues': {
+            'Salaries': {
                 '$sum': {
                     '$cond': [
                         {
