@@ -18,6 +18,7 @@ def fig_indicators_revenue_expense_balance():
 
     # Get data
     df_current_year = get_data_for_graph(p_salary_vs_other)
+    df_savings_cy = get_data_for_graph(p_savings_per_date)
 
     if len(df_current_year) > 0:
         revenues = df_current_year['Revenues'].sum()
@@ -25,6 +26,10 @@ def fig_indicators_revenue_expense_balance():
     else:
         revenues = 0
         expenses = 0
+    if len(df_savings_cy) > 0:
+        savings = -df_savings_cy['Balance'].sum()
+    else:
+        savings = 0
 
     figure = go.Figure()
     figure.add_trace(go.Indicator(
@@ -45,9 +50,15 @@ def fig_indicators_revenue_expense_balance():
         title={
             "text": "Gain"},
         domain={'row': 0, 'column': 2}))
+    figure.add_trace(go.Indicator(
+        mode="number",
+        value=savings,
+        title={
+            "text": "Epargne"},
+        domain={'row': 0, 'column': 3}))
 
     figure.update_layout(
-        grid={'rows': 1, 'columns': 3, 'pattern': "independent"},
+        grid={'rows': 1, 'columns': 4, 'pattern': "independent"},
         height=250  # px
     )
 
