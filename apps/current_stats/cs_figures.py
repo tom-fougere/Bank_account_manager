@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-from apps.current_stats.cs_operations import get_data_for_graph, format_df_saving
+from apps.current_stats.cs_operations import get_data_for_graph, format_df_saving, get_revenue_expences_savings_year
 from apps.current_stats.cs_pipelines import (
     p_balance_category_per_date,
     p_balance_occasion_per_date,
@@ -19,57 +19,77 @@ from source.categories import OCCASIONS
 
 
 def fig_indicators_revenue_expense_balance(year=datetime.datetime.now().year):
-    now = datetime.datetime.now()
-    end_date = datetime.datetime(year=year, month=12, day=31)
+
+    # ##############
+    # CURRENT YEAR
+    # ##############
     start_date = datetime.datetime(year=year, month=1, day=1)
+    end_date = datetime.datetime(year=year, month=12, day=31)
 
     # Get data from this year
-    df_current_year = get_data_for_graph(p_salary_vs_other,
-                                         date_range=(start_date, end_date))
-
-    if len(df_current_year) > 0:
-        revenues_current_year = df_current_year['Revenues'].sum()
-        expenses_current_year = -df_current_year['Expenses'].sum()
-    else:
-        revenues_current_year = 0
-        expenses_current_year = 0
+    df_cy = get_data_for_graph(p_salary_vs_other,
+                               date_range=(start_date, end_date))
+    df_savings_cy = get_data_for_graph(p_savings_per_date,
+                                       date_range=(start_date, end_date))
 
     # Get data from last year
-    df_previous_year = get_data_for_graph(p_salary_vs_other,
-                                          date_range=(start_date - relativedelta(years=1),
-                                                      now - relativedelta(years=1)))
-    if len(df_previous_year) > 0:
-        revenues_previous_year = df_previous_year['Revenues'].sum()
-        expenses_previous_year = -df_previous_year['Expenses'].sum()
-    else:
-        revenues_previous_year = 0
-        expenses_previous_year = 0
 
+    # ##############
+    # PREVIOUS YEAR
+    # ##############
+    now = datetime.datetime.now()
+    start_date_py = datetime.datetime(year=year-1, month=1, day=1)
+    end_date_py = datetime.datetime(year=year-1, month=12, day=31)
+    if year == now.year:
+        end_date_py = datetime.datetime(year=year-1, month=now.month, day=now.day)
+
+    df_py = get_data_for_graph(p_salary_vs_other,
+                               date_range=(start_date_py, end_date_py))
+    df_savings_py = get_data_for_graph(p_savings_per_date,
+                                       date_range=(start_date_py, end_date_py))
+
+    # Extract relevant data
+    tmp_data = get_revenue_expences_savings_year(df_cy, df_py, df_savings_cy, df_savings_py)
+    revenues_cy, expenses_cy, savings_cy, revenues_py, expenses_py, savings_py = tmp_data
+
+    # ##############
+    # INDICATORS
+    # ##############
     figure = go.Figure()
     figure.add_trace(go.Indicator(
         mode="number+delta",
-        value=revenues_current_year,
+        value=revenues_cy,
         title={
             "text": "Revenus"},
-        delta={'reference': revenues_previous_year, 'relative': True},
+        delta={'reference': revenues_py},
         domain={'row': 0, 'column': 0}))
     figure.add_trace(go.Indicator(
         mode="number+delta",
-        value=expenses_current_year,
+        value=expenses_cy,
         title={
             "text": "Dépenses"},
-        delta={'reference': expenses_previous_year, 'relative': True},
+        delta={'reference': expenses_py,
+               "decreasing": {'color': 'green'},
+               "increasing": {'color': 'red'}
+               },
         domain={'row': 0, 'column': 1}))
     figure.add_trace(go.Indicator(
         mode="number+delta",
-        value=revenues_current_year - expenses_current_year,
+        value=revenues_cy - expenses_cy,
         title={
             "text": "Gain"},
-        delta={'reference': revenues_previous_year - expenses_previous_year, 'relative': True},
+        delta={'reference': revenues_py - expenses_py},
         domain={'row': 0, 'column': 2}))
+    figure.add_trace(go.Indicator(
+        mode="number+delta",
+        value=savings_cy,
+        title={
+            "text": "Epargne"},
+        delta={'reference': savings_py},
+        domain={'row': 0, 'column': 3}))
 
     figure.update_layout(
-        grid={'rows': 1, 'columns': 3, 'pattern': "independent"},
+        grid={'rows': 1, 'columns': 4, 'pattern': "independent"},
         height=250  # px
     )
 
@@ -280,18 +300,24 @@ def fig_categories(year=datetime.datetime.now().year):
 
     if len(df) > 0:
         # Adjust the data for the sunburst figure
-        df.loc[df['Catégorie'].isna(), ['Catégorie', 'Sous-catégorie']] = 'None'
         df['Somme'] = -df['Somme']
         df['Somme'] = df['Somme'].round(1)
 
         # Filter positive amount and remove Salary to get only expenses
         df_filter = df.copy()
         df_filter = df_filter[(df_filter['Somme'] >= 0) & (df_filter['Catégorie'] != 'Salaire')]
+        # df_filter.loc[df['Sous-catégorie'] == "Internet/TV/Tel", ['Sous-catégorie']] = 'test'
 
         figure = px.sunburst(df_filter,
                              path=['Catégorie', 'Sous-catégorie'],
                              values='Somme',
                              title='Catégories')
+        figure.update_traces(textinfo="label+percent entry",
+                             hovertemplate="Labels=%{label}"
+                                           "<br>Somme=%{value:.1}€"
+                                           "<br>Parent=%{parent}"
+                                           "<br>Percent=%{percentRoot:.0%}"
+                             )
     else:
         figure = {}
 

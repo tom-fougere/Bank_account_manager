@@ -75,3 +75,36 @@ def format_df_saving(df):
     df.drop(['Month_cat'], axis=1, inplace=True)
 
     return df
+
+
+def get_revenue_expences_savings_year(
+        df_current_year, df_previous_year, df_savings_current_year, df_savings_previous_year):
+
+    # CURRENT YEAR
+    if len(df_current_year) > 0:
+        revenues_current_year = df_current_year['Revenues'].sum()
+        expenses_current_year = -df_current_year['Expenses'].sum()
+    else:
+        revenues_current_year = 0
+        expenses_current_year = 0
+
+    if len(df_savings_current_year) > 0:
+        savings_current_year = -df_savings_current_year['Balance'].sum()
+    else:
+        savings_current_year = 0
+
+    # PREVIOUS YEAR
+    if len(df_previous_year) > 0:
+        revenues_previous_year = df_previous_year['Revenues'].sum()
+        expenses_previous_year = -df_previous_year['Expenses'].sum()
+    else:
+        revenues_previous_year = 0
+        expenses_previous_year = 0
+
+    if len(df_savings_previous_year) > 0:
+        savings_previous_year = -df_savings_previous_year['Balance'].sum()
+    else:
+        savings_previous_year = 0
+
+    return (revenues_current_year, expenses_current_year, savings_current_year,
+            revenues_previous_year, expenses_previous_year, savings_previous_year)
