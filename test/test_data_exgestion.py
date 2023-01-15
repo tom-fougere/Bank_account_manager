@@ -2,7 +2,7 @@ import datetime
 import unittest
 from source.transactions.transactions_db import TransactionDB
 from source.data_reader.bank_file_reader import BankTSVReader
-from source.transactions.exgest import TransactionExgest
+from source.transactions.exgest import TransactionExgest, exgest_with_pipeline
 from source.transactions.metadata import MetadataDB
 from apps.current_stats.cs_pipelines import p_salary_vs_other
 
@@ -130,6 +130,50 @@ class TestTransactionExgest(unittest.TestCase):
 
         self.assertEqual(len(list_years), 1)
         self.assertEqual(list_years[0], 2022)
+
+
+class TestFunctions(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+
+        # Ingest
+        cls.db = TransactionDB(
+            name_connection=CONNECTION_TRANSACTION,
+            account_id=ACCOUNT_ID
+        )
+
+        cls.db.ingest(
+            df_transactions,
+        )
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        # Remove all transactions in the collection
+        cls.db.connection.collection.remove({"account_id": ACCOUNT_ID})
+
+    def test_exgest_with_pipeline(self):
+
+        pipeline = [
+            {
+                '$group': {
+                    '_id': {
+                        'Année': {
+                            '$year': "$date.dt"},
+                    },
+                    'Sum': {
+                        '$sum': "$amount"}
+                }
+            }
+        ]
+
+        df = exgest_with_pipeline(
+            db_connection=CONNECTION_TRANSACTION,
+            pipeline=pipeline,
+        )
+
+        self.assertEqual(len(df), 1)
+        self.assertEqual(list(df.keys()), ['Sum', 'Année'])
+        self.assertEqual(df['Sum'][0], df_transactions['amount'].sum())
 
 
 if __name__ == '__main__':
