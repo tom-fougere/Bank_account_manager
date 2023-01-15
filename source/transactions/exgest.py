@@ -216,5 +216,18 @@ def join_cat_and_subcat(categories, sub_categories):
     return list_cat
 
 
+def exgest_with_pipeline(db_connection, pipeline):
+
+    # Extract data with defined pipeline
+    transaction_exgest = TransactionExgest(db_connection)
+    transaction_exgest.set_pipeline(pipeline)
+    df = transaction_exgest.exgest()
+
+    # Transform df
+    if len(df) > 0:
+        df = expand_columns_of_dataframe(df, column='_id')  # Expand ID to get date
+
+    return df
+
 
 
