@@ -2,8 +2,7 @@ import datetime
 from pandas import Categorical
 
 from source.definitions import DB_CONN_TRANSACTION, MONTHS
-from source.transactions.exgest import TransactionExgest
-from utils.mixed_utils import expand_columns_of_dataframe
+from source.transactions.exgest import exgest_with_pipeline
 
 
 def get_data_for_graph(pipeline, date_range=None):
@@ -18,14 +17,13 @@ def get_data_for_graph(pipeline, date_range=None):
         pipeline = pipeline
 
     # Extract data with defined pipeline
-    transExgest = TransactionExgest(DB_CONN_TRANSACTION)
-    transExgest.set_pipeline(pipeline)
-    df = transExgest.exgest()
+    df = exgest_with_pipeline(
+        db_connection=DB_CONN_TRANSACTION,
+        pipeline=pipeline,
+    )
 
     # Transform df
     if len(df) > 0:
-        df = expand_columns_of_dataframe(df, column='_id')  # Expand ID to get date
-
         if ('Année' in df.keys()) and ('Mois' in df.keys()):
             df['date'] = [datetime.datetime(int(row['Année']), int(row['Mois']), 1) for _, row in df.iterrows()]  # convert in datetime
             df.sort_values(by='date', inplace=True)

@@ -1,19 +1,17 @@
 from source.definitions import DB_CONN_TRANSACTION
-from source.transactions.exgest import TransactionExgest
-from utils.mixed_utils import expand_columns_of_dataframe
+from source.transactions.exgest import TransactionExgest, exgest_with_pipeline
 
 
 def get_data_for_graph(pipeline):
 
     # Extract data with defined pipeline
-    transExgest = TransactionExgest(DB_CONN_TRANSACTION)
-    transExgest.set_pipeline(pipeline)
-    df = transExgest.exgest()
+    df = exgest_with_pipeline(
+        db_connection=DB_CONN_TRANSACTION,
+        pipeline=pipeline,
+    )
 
     # Transform df
     if len(df) > 0:
-        df = expand_columns_of_dataframe(df, column='_id')  # Expand ID to get date
-
         if 'Année' in df.keys():
             df.sort_values(by='Année', inplace=True)
 
