@@ -132,3 +132,64 @@ class MetadataDB:
         self.connection.collection.update({'account_id': self.account_id},
                                           {"$set": {'date_last_import.str': date_str,
                                                     'date_last_import.dt': date_dt}}, upsert=False)
+
+    def add_category(self, new_category, parent_category=None):
+        list_categories = self.categories
+        name_new_category = list(new_category.keys())[0]
+
+        for att in ['Default_occasion', 'Order']:
+            assert att in list(new_category[name_new_category].keys())
+
+        # If the new category is a parent, add attributes to add sub-categories
+        if parent_category is None:
+            new_category[name_new_category]['Sub-categories'] = {}
+            new_list_categories = {**list_categories, **new_category}
+        else:
+            new_list_categories = list_categories.copy()
+            new_list_categories[parent_category]['Sub-categories'] = {
+                **new_list_categories[parent_category]['Sub-categories'],
+                **new_category}
+
+        # Update list of categories
+        self.categories = new_list_categories
+        self.update_db()
+
+    def remove_category(self, category_to_remove, parent_category):
+
+        # Delete category
+        if parent_category is None:
+            del self.categories[category_to_remove]
+        else:
+            del self.categories[parent_category]['Sub-categories'][category_to_remove]
+
+        # Update list of categories
+        self.update_db()
+
+    def update_category_properties(self, name_category, name_parent_category, new_category):
+
+        # Store sub-categories if they exist
+        if name_parent_category is None:
+            previous_sub_cat = self.categories[name_category]['Sub-categories']
+        else:
+            previous_sub_cat = None
+
+        # Remove previous category
+        self.remove_category(
+            category_to_remove=name_category,
+            parent_category=name_parent_category,
+        )
+
+        # Add new category
+        self.add_category(
+            new_category=new_category,
+            parent_category=name_parent_category,
+        )
+
+        # Put back the sub-categories
+        if previous_sub_cat is not None:
+            name_new_category = list(new_category.keys())[0]
+            self.categories[name_new_category]['Sub-categories'] = previous_sub_cat
+            self.update_db()
+
+    def move_category(self):
+        pass

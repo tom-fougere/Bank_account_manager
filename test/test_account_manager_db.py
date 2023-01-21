@@ -242,48 +242,13 @@ class TestAccountManagerDB(unittest.TestCase):
             self.db.update(new_transaction)
 
     def test_add_new_category(self):
+        pass
 
-        # Add new parent category
-        new_cat = {
-            "new_cat": {
-                "Order": 10,
-                "Default_occasion": "Def_occ"
-            }
-        }
-        self.db.add_new_category(new_cat)
+    def test_update_category_properties(self):
+        pass
 
-        self.assertTrue("new_cat" in self.db.metadata_db.categories.keys())
-        self.assertEqual(self.db.metadata_db.categories["new_cat"]['Order'],
-                         new_cat["new_cat"]['Order'])
-        self.assertEqual(self.db.metadata_db.categories["new_cat"]['Default_occasion'],
-                         new_cat["new_cat"]['Default_occasion'])
-        self.assertEqual(self.db.metadata_db.categories["new_cat"]['Sub-categories'], {})
-
-        # Add new sub-category
-        new_sb_cat = {
-            "new_sub_cat": {
-                "Order": 2,
-                "Default_occasion": "Def_occ_2"
-            }
-        }
-        parent_cat = 'Perso'
-        self.db.add_new_category(new_sb_cat, parent_category=parent_cat)
-
-        self.assertTrue("new_sub_cat" in self.db.metadata_db.categories[parent_cat]['Sub-categories'].keys())
-        self.assertEqual(self.db.metadata_db.categories[parent_cat]['Sub-categories']["new_sub_cat"],
-                         new_sb_cat["new_sub_cat"])
-
-        # Assert the values has been saved in the database (same asserts)
-        self.db.metadata_db.set_from_db()
-        self.assertTrue("new_cat" in self.db.metadata_db.categories.keys())
-        self.assertEqual(self.db.metadata_db.categories["new_cat"]['Order'],
-                         new_cat["new_cat"]['Order'])
-        self.assertEqual(self.db.metadata_db.categories["new_cat"]['Default_occasion'],
-                         new_cat["new_cat"]['Default_occasion'])
-        self.assertEqual(self.db.metadata_db.categories["new_cat"]['Sub-categories'], {})
-        self.assertTrue("new_sub_cat" in self.db.metadata_db.categories[parent_cat]['Sub-categories'].keys())
-        self.assertEqual(self.db.metadata_db.categories[parent_cat]['Sub-categories']["new_sub_cat"],
-                         new_sb_cat["new_sub_cat"])
+    def test_remove_category(self):
+        pass
 
 
 if __name__ == '__main__':

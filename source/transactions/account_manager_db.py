@@ -102,29 +102,29 @@ class AccountManagerDB:
         self.metadata_db.update_db()
 
     def add_new_category(self, new_category, parent_category=None):
-        list_categories = self.metadata_db.categories
-        name_new_category = list(new_category.keys())[0]
 
-        for att in ['Default_occasion', 'Order']:
-            assert att in list(new_category[name_new_category].keys())
+        # Add category in Metadata
+        self.metadata_db.add_category(
+            new_category=new_category,
+            parent_category=parent_category,
+        )
 
-        # If the new category is a parent, add attributes to add sub-categories
-        if parent_category is None:
-            new_category[name_new_category]['Sub-categories'] = {}
-            new_list_categories = {**list_categories, **new_category}
-        else:
-            new_list_categories = list_categories.copy()
-            new_list_categories[parent_category]['Sub-categories'] = {
-                **new_list_categories[parent_category]['Sub-categories'],
-                **new_category}
+    def _remove_category(self, category_to_remove, parent_category):
 
-        # Update list of categories
-        self.metadata_db.categories = new_list_categories
-        self.metadata_db.update_db()
+        # Remove category in Metadata
+        self.metadata_db.remove_category(
+            category_to_remove=category_to_remove,
+            parent_category=parent_category,
+        )
 
-    def move_category(self, previous_parent, new_parent):
-        pass
+    def update_category_properties(self, name_category, name_parent_category, new_category):
 
-    def update_category_property(self):
-        pass
+        # Update category properties in Metadata
+        self.metadata_db.update_category_properties(
+            name_category=name_category,
+            name_parent_category=name_parent_category,
+            new_category=new_category,
+        )
+
+    def move_category(self, name_category, name_current_parent, name_new_parent):
 

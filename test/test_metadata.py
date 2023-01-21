@@ -29,6 +29,7 @@ class TestMetadataDB(unittest.TestCase):
                              date_last_import=DATE_LAST_IMPORT,
                              date_balance_in_bank=DATE_BALANCE_IN_BANK)
         self.metadata_db.update_db()
+        self.metadata_db.set_from_db()
 
     def tearDown(self) -> None:
         # Remove all in the collection
@@ -191,3 +192,107 @@ class TestMetadataDB(unittest.TestCase):
         self.assertEqual(results['nb_transactions_db'], new_values['nb_transactions_db'])
 
         metadata_db.connection.collection.remove({"account_id": "009"})
+
+    def test_add_new_category(self):
+
+        # Add new parent category
+        new_cat = {
+            "new_cat": {
+                "Order": 10,
+                "Default_occasion": "Def_occ"
+            }
+        }
+        self.metadata_db.add_category(new_cat)
+
+        self.assertTrue("new_cat" in self.metadata_db.categories.keys())
+        self.assertEqual(self.metadata_db.categories["new_cat"]['Order'],
+                         new_cat["new_cat"]['Order'])
+        self.assertEqual(self.metadata_db.categories["new_cat"]['Default_occasion'],
+                         new_cat["new_cat"]['Default_occasion'])
+        self.assertEqual(self.metadata_db.categories["new_cat"]['Sub-categories'], {})
+
+        # Add new sub-category
+        new_sb_cat = {
+            "new_sub_cat": {
+                "Order": 2,
+                "Default_occasion": "Def_occ_2"
+            }
+        }
+        parent_cat = 'Perso'
+        self.metadata_db.add_category(new_sb_cat, parent_category=parent_cat)
+
+        self.assertTrue("new_sub_cat" in self.metadata_db.categories[parent_cat]['Sub-categories'].keys())
+        self.assertEqual(self.metadata_db.categories[parent_cat]['Sub-categories']["new_sub_cat"],
+                         new_sb_cat["new_sub_cat"])
+
+        # Assert the values has been saved in the database (same asserts)
+        self.metadata_db.set_from_db()
+        self.assertTrue("new_cat" in self.metadata_db.categories.keys())
+        self.assertEqual(self.metadata_db.categories["new_cat"]['Order'],
+                         new_cat["new_cat"]['Order'])
+        self.assertEqual(self.metadata_db.categories["new_cat"]['Default_occasion'],
+                         new_cat["new_cat"]['Default_occasion'])
+        self.assertEqual(self.metadata_db.categories["new_cat"]['Sub-categories'], {})
+        self.assertTrue("new_sub_cat" in self.metadata_db.categories[parent_cat]['Sub-categories'].keys())
+        self.assertEqual(self.metadata_db.categories[parent_cat]['Sub-categories']["new_sub_cat"],
+                         new_sb_cat["new_sub_cat"])
+
+    def test_remove_category(self):
+        self.metadata_db.remove_category(
+            category_to_remove='Assurance',
+            parent_category='Transport'
+        )
+        self.metadata_db.remove_category(
+            category_to_remove='Perso',
+            parent_category=None
+        )
+        self.metadata_db.set_from_db()
+
+        self.assertFalse('Assurance' in self.metadata_db.categories['Transport']['Sub-categories'].keys())
+        self.assertFalse('Perso' in self.metadata_db.categories.keys())
+
+    def test_update_category_properties(self):
+
+        # Update parent category
+        new_cat = {
+            "new_Parent_cat": {
+                "Default_occasion": "Default_occ",
+                "Order": 11,
+            }
+        }
+        previous_cat = self.metadata_db.categories['Perso']['Sub-categories']
+        self.metadata_db.update_category_properties(
+            name_category="Perso",
+            name_parent_category=None,
+            new_category=new_cat)
+        self.metadata_db.set_from_db()
+
+        self.assertFalse("Perso" in self.metadata_db.categories.keys())
+        self.assertTrue("new_Parent_cat" in self.metadata_db.categories.keys())
+        self.assertEqual(previous_cat, new_cat['new_Parent_cat']['Sub-categories'])
+        self.assertEqual(
+            self.metadata_db.categories['new_Parent_cat']["Default_occasion"],
+            new_cat['new_Parent_cat']["Default_occasion"]
+        )
+        self.assertEqual(
+            self.metadata_db.categories['new_Parent_cat']["Order"],
+            new_cat['new_Parent_cat']["Order"]
+        )
+
+        # Update child category
+        new_cat = {
+            "new_cat": {
+                "Default_occasion": "Default_occ",
+                "Order": 10,
+            }
+        }
+        self.metadata_db.update_category_properties(
+            name_category="Assurance",
+            name_parent_category="Transport",
+            new_category=new_cat)
+        self.metadata_db.set_from_db()
+
+        self.assertFalse("Assurance" in self.metadata_db.categories['Transport']['Sub-categories'].keys())
+        self.assertTrue("new_cat" in self.metadata_db.categories['Transport']['Sub-categories'].keys())
+        self.assertEqual(self.metadata_db.categories['Transport']['Sub-categories']["new_cat"], new_cat['new_cat'])
+
