@@ -128,3 +128,12 @@ class AccountManagerDB:
 
     def move_category(self, name_category, name_current_parent, name_new_parent):
 
+        if name_current_parent is None:
+            Warning("It's impossible to move a parent category !")
+        else:
+
+            self.metadata_db.move_category(
+                name_category=name_category,
+                name_current_parent_category=name_current_parent,
+                name_new_parent_category=name_new_parent,
+            )
