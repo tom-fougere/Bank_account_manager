@@ -133,7 +133,7 @@ class MetadataDB:
                                           {"$set": {'date_last_import.str': date_str,
                                                     'date_last_import.dt': date_dt}}, upsert=False)
 
-    def add_category(self, new_category, parent_category=None):
+    def add_category(self, new_category, name_parent_category=None):
         list_categories = self.categories
         name_new_category = list(new_category.keys())[0]
 
@@ -141,26 +141,26 @@ class MetadataDB:
             assert att in list(new_category[name_new_category].keys())
 
         # If the new category is a parent, add attributes to add sub-categories
-        if parent_category is None:
+        if name_parent_category is None:
             new_category[name_new_category]['Sub-categories'] = {}
             new_list_categories = {**list_categories, **new_category}
         else:
             new_list_categories = list_categories.copy()
-            new_list_categories[parent_category]['Sub-categories'] = {
-                **new_list_categories[parent_category]['Sub-categories'],
+            new_list_categories[name_parent_category]['Sub-categories'] = {
+                **new_list_categories[name_parent_category]['Sub-categories'],
                 **new_category}
 
         # Update list of categories
         self.categories = new_list_categories
         self.update_db()
 
-    def remove_category(self, category_to_remove, parent_category):
+    def remove_category(self, name_category_to_remove, name_parent_category):
 
         # Delete category
-        if parent_category is None:
-            del self.categories[category_to_remove]
+        if name_parent_category is None:
+            del self.categories[name_category_to_remove]
         else:
-            del self.categories[parent_category]['Sub-categories'][category_to_remove]
+            del self.categories[name_parent_category]['Sub-categories'][name_category_to_remove]
 
         # Update list of categories
         self.update_db()
@@ -175,14 +175,14 @@ class MetadataDB:
 
         # Remove previous category
         self.remove_category(
-            category_to_remove=name_category,
-            parent_category=name_parent_category,
+            name_category_to_remove=name_category,
+            name_parent_category=name_parent_category,
         )
 
         # Add new category
         self.add_category(
             new_category=new_category,
-            parent_category=name_parent_category,
+            name_parent_category=name_parent_category,
         )
 
         # Put back the sub-categories

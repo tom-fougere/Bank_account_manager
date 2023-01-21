@@ -219,7 +219,7 @@ class TestMetadataDB(unittest.TestCase):
             }
         }
         parent_cat = 'Perso'
-        self.metadata_db.add_category(new_sb_cat, parent_category=parent_cat)
+        self.metadata_db.add_category(new_sb_cat, name_parent_category=parent_cat)
 
         self.assertTrue("new_sub_cat" in self.metadata_db.categories[parent_cat]['Sub-categories'].keys())
         self.assertEqual(self.metadata_db.categories[parent_cat]['Sub-categories']["new_sub_cat"],
@@ -239,12 +239,12 @@ class TestMetadataDB(unittest.TestCase):
 
     def test_remove_category(self):
         self.metadata_db.remove_category(
-            category_to_remove='Assurance',
-            parent_category='Transport'
+            name_category_to_remove='Assurance',
+            name_parent_category='Transport'
         )
         self.metadata_db.remove_category(
-            category_to_remove='Perso',
-            parent_category=None
+            name_category_to_remove='Perso',
+            name_parent_category=None
         )
         self.metadata_db.set_from_db()
 
