@@ -106,7 +106,7 @@ class AccountManagerDB:
         # Add category in Metadata
         self.metadata_db.add_category(
             new_category=new_category,
-            parent_category=parent_category,
+            name_parent_category=parent_category,
         )
 
     def _remove_category(self, category_to_remove, parent_category):

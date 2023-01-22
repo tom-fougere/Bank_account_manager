@@ -23,34 +23,26 @@ class TestTransactionDB(unittest.TestCase):
             account_id=ACCOUNT_ID,
         )
 
+        # create list of transactions
+        data_reader = BankTSVReader('test/fake_data.tsv')
+        self.df_transactions = data_reader.get_dataframe()
+
+        self.db.ingest(
+            df_transactions=self.df_transactions,
+        )
+
     def tearDown(self) -> None:
         # Remove all in the collection
         self.db.connection.collection.remove({"account_id": ACCOUNT_ID})
 
     def test_ingest_and_delete(self):
-        # create list of transactions
-        data_reader = BankTSVReader('test/fake_data.tsv')
-        df_transactions = data_reader.get_dataframe()
 
-        self.db.ingest(
-            df_transactions=df_transactions,
-        )
-
-        self.assertEqual(self.db.connection.collection.count(), len(df_transactions))
+        self.assertEqual(self.db.connection.collection.count(), len(self.df_transactions))
 
         self.db.delete_all()
         self.assertEqual(self.db.connection.collection.count(), 0)
 
     def test_delete(self):
-
-        # Ingestion data
-        data_reader = BankTSVReader('test/fake_data.tsv')
-        df_transactions = data_reader.get_dataframe()
-
-        # Ingest data
-        self.db.ingest(
-            df_transactions=df_transactions,
-        )
 
         # Exgestion data to get only one transaction
         data_extractor = TransactionExgest(CONNECTION_TRANSACTION)
@@ -61,17 +53,9 @@ class TestTransactionDB(unittest.TestCase):
         # Delete selected transaction
         self.db.delete(df_transactions=transactions)
 
-        self.assertTrue(self.db.connection.collection.count(), len(df_transactions) - 1)
+        self.assertTrue(self.db.connection.collection.count(), len(self.df_transactions) - 1)
 
     def test_update(self):
-
-        # Ingest test transactions
-        data_reader = BankTSVReader('test/fake_data.tsv')
-        df_transactions = data_reader.get_dataframe()
-
-        self.db.ingest(
-            df_transactions=df_transactions,
-        )
 
         # Find transaction to update
         original_transaction = self.db.connection.collection.find_one(
@@ -124,13 +108,6 @@ class TestTransactionDB(unittest.TestCase):
                          updated_transaction['date']['str'])
 
     def test_update_not_existing_transaction(self):
-        # Ingest test transactions
-        data_reader = BankTSVReader('test/fake_data.tsv')
-        df_transactions = data_reader.get_dataframe()
-
-        self.db.ingest(
-            df_transactions=df_transactions,
-        )
 
         object_id = '000000000000000000000000'
 
@@ -156,35 +133,21 @@ class TestTransactionDB(unittest.TestCase):
             self.db.update(new_transaction)
 
     def test_get_latest_date(self):
-        # create list of transactions
-        data_reader = BankTSVReader('test/fake_data.tsv')
-        df_transactions = data_reader.get_dataframe()
-
-        self.db.ingest(
-            df_transactions=df_transactions,
-        )
 
         latest_date = self.db.get_latest_date()
-        self.assertEqual(latest_date, max(df_transactions['date_transaction_dt']))
+        self.assertEqual(latest_date, max(self.df_transactions['date_transaction_dt']))
 
     def test_get_nb_transactions(self):
-        # create list of transactions
-        data_reader = BankTSVReader('test/fake_data.tsv')
-        df_transactions = data_reader.get_dataframe()
-
-        self.db.ingest(
-            df_transactions=df_transactions,
-        )
 
         nb_transactions = self.db.get_nb_transactions()
-        self.assertEqual(nb_transactions, len(df_transactions))
+        self.assertEqual(nb_transactions, len(self.df_transactions))
 
     def test_get_balance(self):
-        # create list of transactions
-        data_reader = BankTSVReader('test/fake_data.tsv')
-        df_transactions = data_reader.get_dataframe()
 
-        self.db.ingest(
+        balance = self.db.get_balance()
+        self.assertEqual(balance, sum(self.df_transactions['amount']))
+
+    def test_change_category_name(self):
             df_transactions=df_transactions,
         )
 
