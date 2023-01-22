@@ -148,11 +148,66 @@ class TestTransactionDB(unittest.TestCase):
         self.assertEqual(balance, sum(self.df_transactions['amount']))
 
     def test_change_category_name(self):
-            df_transactions=df_transactions,
-        )
 
-        balance = self.db.get_balance()
-        self.assertEqual(balance, sum(df_transactions['amount']))
+        descriptions = ['TEST', 'FOOD', 'TELECOM']
+        categories = ['Transport', 'Transport', 'Perso']
+        sub_categories = ['Assurance', 'Carburant', 'Autre']
+
+        for des, cat, sub_cat in zip(descriptions, categories, sub_categories):
+            # Find transaction to update
+            original_transaction = self.db.connection.collection.find_one(
+                {'account_id': ACCOUNT_ID,
+                 'description': des})
+            object_id = str(original_transaction['_id'])
+
+            # Transaction with new values
+            new_trans_dict = {
+                '_id': object_id,
+                'account_id': ACCOUNT_ID,
+                'description': des,
+                'category': cat,
+                'sub_category': sub_cat,
+                'date_transaction_str': '2022-01-10',
+                'date_str': '2022-01-11',
+                'amount': 100.01,
+                'occasion': "ponctuel",
+                'transaction_type': "TYPE",
+                'note': "#note",
+                'check': True,
+            }
+            new_transaction = pd.DataFrame([new_trans_dict])
+
+            # Ingestion of transactions
+            self.db.update(new_transaction)
+
+        # Update category 1
+        self.db.change_category_name(
+            name_previous_cat='Transport',
+            name_previous_sub_cat='Assurance',
+            name_new_cat=None,
+            name_new_sub_cat="Carburant",
+        )
+        transaction = self.db.connection.collection.find_one(
+            {'account_id': ACCOUNT_ID,
+             'description': 'TEST'})
+        self.assertEqual(transaction['category'], "Transport")
+        self.assertEqual(transaction['sub_category'], "Carburant")
+
+        # Update category 2
+        self.db.change_category_name(
+            name_previous_cat='Transport',
+            name_previous_sub_cat=None,
+            name_new_cat="Perso",
+            name_new_sub_cat=None,
+        )
+        transaction = self.db.connection.collection.find_one(
+            {'account_id': ACCOUNT_ID,
+             'description': 'TEST'})
+        self.assertEqual(transaction['category'], "Perso")
+        transaction = self.db.connection.collection.find_one(
+            {'account_id': ACCOUNT_ID,
+             'description': 'FOOD'})
+        self.assertEqual(transaction['category'], "Perso")
 
 
 if __name__ == '__main__':

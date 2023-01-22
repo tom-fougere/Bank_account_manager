@@ -153,5 +153,30 @@ class TransactionDB:
 
         return balance_in_db
 
+    def change_category_name(self, name_previous_cat, name_previous_sub_cat, name_new_cat, name_new_sub_cat):
+
+        # Define filter
+        query_filter = {
+            "category": name_previous_cat,
+        }
+        if name_previous_sub_cat is not None:
+            query_filter.update({"sub_category": name_previous_sub_cat})
+
+        # Define new set
+        query_changes = {}
+        if name_new_cat is not None:
+            query_changes.update({"category": name_new_cat})
+        if name_new_sub_cat is not None:
+            query_changes.update({"sub_category": name_new_sub_cat})
+
+        if len(query_changes) > 0:
+            query_set = {
+                "$set": query_changes
+            }
+
+            # Update transaction's categories name
+            self.connection.collection.update_many(
+                query_filter, query_set
+            )
 
 
