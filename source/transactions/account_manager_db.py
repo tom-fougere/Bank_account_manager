@@ -113,8 +113,8 @@ class AccountManagerDB:
 
         # Remove category in Metadata
         self.metadata_db.remove_category(
-            category_to_remove=category_to_remove,
-            parent_category=parent_category,
+            name_category_to_remove=category_to_remove,
+            name_parent_category=parent_category,
         )
 
     def update_category_properties(self, name_category, name_parent_category, new_category):

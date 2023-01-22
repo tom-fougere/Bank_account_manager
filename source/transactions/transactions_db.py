@@ -155,6 +155,9 @@ class TransactionDB:
 
     def change_category_name(self, name_previous_cat, name_previous_sub_cat, name_new_cat, name_new_sub_cat):
 
+        assert name_previous_cat is not None
+        assert (name_new_cat is not None or name_new_sub_cat is not None)
+
         # Define filter
         query_filter = {
             "category": name_previous_cat,
@@ -175,8 +178,41 @@ class TransactionDB:
             }
 
             # Update transaction's categories name
-            self.connection.collection.update_many(
-                query_filter, query_set
+            self.update_many(
+                query_filter=query_filter,
+                query_action=query_set,
             )
+
+    def change_occasion(self, name_category, name_sub_category, previous_occasion, new_occasion):
+
+        assert name_category is not None
+        assert previous_occasion is not None
+        assert new_occasion is not None
+
+        # Define filter
+        query_filter = {
+            "category": name_category,
+            "occasion": previous_occasion
+        }
+        if name_sub_category is not None:
+            query_filter.update({"sub_category": name_sub_category})
+
+        query_set = {
+            "$set": {
+                "occasion": new_occasion
+            }
+        }
+
+        # Update transaction's occasion
+        self.update_many(
+            query_filter=query_filter,
+            query_action=query_set,
+        )
+
+    def update_many(self, query_filter, query_action):
+
+        return self.connection.collection.update_many(
+            query_filter, query_action
+        )
 
 

@@ -209,6 +209,67 @@ class TestTransactionDB(unittest.TestCase):
              'description': 'FOOD'})
         self.assertEqual(transaction['category'], "Perso")
 
+    def test_change_occasion(self):
+
+        descriptions = ['TEST', 'FOOD', 'TELECOM']
+        categories = ['Transport', 'Transport', 'Perso']
+        sub_categories = ['Assurance', 'Carburant', 'Autre']
+
+        for des, cat, sub_cat in zip(descriptions, categories, sub_categories):
+            # Find transaction to update
+            original_transaction = self.db.connection.collection.find_one(
+                {'account_id': ACCOUNT_ID,
+                 'description': des})
+            object_id = str(original_transaction['_id'])
+
+            # Transaction with new values
+            new_trans_dict = {
+                '_id': object_id,
+                'account_id': ACCOUNT_ID,
+                'description': des,
+                'category': cat,
+                'sub_category': sub_cat,
+                'date_transaction_str': '2022-01-10',
+                'date_str': '2022-01-11',
+                'amount': 100.01,
+                'occasion': "default",
+                'transaction_type': "TYPE",
+                'note': "#note",
+                'check': True,
+            }
+            new_transaction = pd.DataFrame([new_trans_dict])
+
+            # Ingestion of transactions
+            self.db.update(new_transaction)
+
+        # Update occasion 1
+        self.db.change_occasion(
+            name_category='Perso',
+            name_sub_category='Autre',
+            previous_occasion="default",
+            new_occasion="occ1",
+        )
+        transaction = self.db.connection.collection.find_one(
+            {'account_id': ACCOUNT_ID,
+             'description': 'TELECOM'})
+        self.assertEqual(transaction['occasion'], "occ1")
+
+        # Update occasion 2
+        self.db.change_occasion(
+            name_category='Transport',
+            name_sub_category=None,
+            previous_occasion="default",
+            new_occasion="occ2",
+        )
+        transaction = self.db.connection.collection.find_one(
+            {'account_id': ACCOUNT_ID,
+             'description': 'TEST'})
+        self.assertEqual(transaction['occasion'], "occ2")
+        transaction = self.db.connection.collection.find_one(
+            {'account_id': ACCOUNT_ID,
+             'description': 'FOOD'})
+        self.assertEqual(transaction['occasion'], "occ2")
+
 
 if __name__ == '__main__':
     unittest.main()
