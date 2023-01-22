@@ -250,6 +250,9 @@ class TestAccountManagerDB(unittest.TestCase):
     def test_remove_category(self):
         pass
 
+    def test_change_parent_category(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

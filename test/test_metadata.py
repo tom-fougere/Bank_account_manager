@@ -296,8 +296,8 @@ class TestMetadataDB(unittest.TestCase):
         self.assertTrue("new_cat" in self.metadata_db.categories['Transport']['Sub-categories'].keys())
         self.assertEqual(self.metadata_db.categories['Transport']['Sub-categories']["new_cat"], new_cat['new_cat'])
 
-    def test_move_category(self):
-        self.metadata_db.move_category(
+    def test_change_parent_category(self):
+        self.metadata_db.change_parent_category(
             name_category='Culture',
             name_current_parent_category='Sortie/Voyage',
             name_new_parent_category='Alimentation',

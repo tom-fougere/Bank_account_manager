@@ -191,7 +191,7 @@ class MetadataDB:
             self.categories[name_new_category]['Sub-categories'] = previous_sub_cat
             self.update_db()
 
-    def move_category(self, name_category, name_current_parent_category, name_new_parent_category):
+    def change_parent_category(self, name_category, name_current_parent_category, name_new_parent_category):
 
         if name_current_parent_category is None or name_new_parent_category is None:
             Warning("One of the parent category is None")

@@ -189,25 +189,26 @@ class TransactionDB:
         assert previous_occasion is not None
         assert new_occasion is not None
 
-        # Define filter
-        query_filter = {
-            "category": name_category,
-            "occasion": previous_occasion
-        }
-        if name_sub_category is not None:
-            query_filter.update({"sub_category": name_sub_category})
-
-        query_set = {
-            "$set": {
-                "occasion": new_occasion
+        if previous_occasion != new_occasion:
+            # Define filter
+            query_filter = {
+                "category": name_category,
+                "occasion": previous_occasion
             }
-        }
+            if name_sub_category is not None:
+                query_filter.update({"sub_category": name_sub_category})
 
-        # Update transaction's occasion
-        self.update_many(
-            query_filter=query_filter,
-            query_action=query_set,
-        )
+            query_set = {
+                "$set": {
+                    "occasion": new_occasion
+                }
+            }
+
+            # Update transaction's occasion
+            self.update_many(
+                query_filter=query_filter,
+                query_action=query_set,
+            )
 
     def update_many(self, query_filter, query_action):
 

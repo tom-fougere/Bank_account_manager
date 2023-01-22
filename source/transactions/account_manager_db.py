@@ -119,6 +119,8 @@ class AccountManagerDB:
 
     def update_category_properties(self, name_category, name_parent_category, new_category):
 
+        new_name = list(new_category.keys())[0]
+
         # Update category properties in Metadata
         self.metadata_db.update_category_properties(
             name_category=name_category,
@@ -126,14 +128,39 @@ class AccountManagerDB:
             new_category=new_category,
         )
 
-    def move_category(self, name_category, name_current_parent, name_new_parent):
+        # Change parent category in Transaction
+        # self.transactions_db.change_category_name(
+        #     name_previous_cat=name_parent_category,
+        #     name_previous_sub_cat=name_category,
+        #     name_new_cat=None,
+        #     name_new_sub_cat=None,
+        # )
+        #
+        # # Change occasion in Transaction
+        # self.transactions_db.change_occasion(
+        #     name_category=name_parent_category,
+        #     name_sub_category=name_category,
+        #     previous_occasion=None,
+        #     new_occasion=None,
+        # )
+
+    def change_parent_category(self, name_category, name_current_parent, name_new_parent):
 
         if name_current_parent is None:
             Warning("It's impossible to move a parent category !")
         else:
 
-            self.metadata_db.move_category(
+            # Change parent category in Metadata
+            self.metadata_db.change_parent_category(
                 name_category=name_category,
                 name_current_parent_category=name_current_parent,
                 name_new_parent_category=name_new_parent,
+            )
+
+            # Change parent category in Transaction
+            self.transactions_db.change_category_name(
+                name_previous_cat=name_current_parent,
+                name_previous_sub_cat=name_category,
+                name_new_cat=name_new_parent,
+                name_new_sub_cat=None,
             )
