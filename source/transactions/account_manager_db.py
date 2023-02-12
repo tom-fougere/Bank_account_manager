@@ -135,14 +135,14 @@ class AccountManagerDB:
         #     name_new_cat=None,
         #     name_new_sub_cat=None,
         # )
-        #
-        # # Change occasion in Transaction
-        # self.transactions_db.change_occasion(
-        #     name_category=name_parent_category,
-        #     name_sub_category=name_category,
-        #     previous_occasion=None,
-        #     new_occasion=None,
-        # )
+
+        # Change occasion in Transaction
+        self.transactions_db.change_occasion(
+            name_category=name_parent_category,
+            name_sub_category=name_category,
+            previous_occasion=self.metadata_db.get_default_occasion(name_parent_category, name_category),
+            new_occasion=new_category[new_name]["occasion"],
+        )
 
     def change_parent_category(self, name_category, name_current_parent, name_new_parent):
 
