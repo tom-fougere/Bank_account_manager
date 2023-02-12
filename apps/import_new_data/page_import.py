@@ -42,7 +42,7 @@ layout = html.Div([
                style={'width': '100%',
                       'margin-top': 10}
                ),
-    html.Div(id="btn_click"),
+    html.Div(id="message_import"),
     dcc.Graph(id='fig_indicators_new_transactions',
               figure=fig_indicators_new_transactions(None, None, None, None)),
     html.Div(id="table_new_import"),
@@ -87,14 +87,17 @@ def upload_file(list_of_contents, filename, btn_disabled):
 
 
 @app.callback(
-    Output('btn_click', 'children'),
+    Output('message_import', 'children'),
     Input('btn_import_database', 'n_clicks'),
-    State('drag_upload_file', 'filename'))
-def import_transactions_in_database(n_clicks, filename):
+    State('drag_upload_file', 'filename'),
+    State('btn_import_database', 'disabled'))
+def import_transactions_in_database(n_clicks, filename, btn_disabled):
     if n_clicks > 0:
 
+        full_path_filename = '/'.join([get_project_root(), DATA_FOLDER, filename])
+
         # Read data
-        df, account_info = read_and_format_data('/'.join([get_project_root(), DATA_FOLDER, filename]),
+        df, account_info = read_and_format_data(full_path_filename,
                                                 db_connection=DB_CONN_TRANSACTION)
         df_new = df[df['duplicate'] == 'False']
         df_new.drop(columns=['duplicate'])
@@ -106,9 +109,9 @@ def import_transactions_in_database(n_clicks, filename):
             account_id=account_info['account_id'])
         db.ingest(df_new, bank_info=account_info)
 
-        return 'The input value was and the button has been clicked {} times'.format(
-            n_clicks
-        )
+        upload_file(True, full_path_filename, btn_disabled)
+
+        return "Transactions importées !"
     else:
         return None
 
