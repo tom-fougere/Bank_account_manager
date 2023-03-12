@@ -53,23 +53,31 @@ def fig_indicators_new_transactions(connection_transaction, connection_metadata,
 
         figure = go.Figure()
         figure.add_trace(go.Indicator(
-            mode="number+delta",
-            value=nb_transactions_in_file,
-            title={"text": "Nombre de transactions<br>" +
-                   "<span style='font-size:0.8em;color:gray'>(dont nouvelles)</span>"},
-            delta={'reference': nb_transactions_in_file - len(df_new_transactions),
-                   'relative': False,
-                   },
+            mode="number",
+            value=len(df_new_transactions),
+            title={"text": "Nombre de transactions ajouté (/{})<br>".format(nb_transactions_in_file)},
             domain={'row': 0, 'column': 0}))
+        figure.add_trace(go.Indicator(
+            mode="number",
+            value=df_new_transactions['amount'].sum(),
+            number={'suffix': "€", "valueformat": '.2f'},
+            title={"text": "Somme ajoutée<br>"},
+            domain={'row': 0, 'column': 1}))
+        figure.add_trace(go.Indicator(
+            mode="number",
+            value=account_info['balance'],
+            number={'suffix': "€", "valueformat": '.2f'},
+            title={"text": "Total à la banque<br>"},
+            domain={'row': 0, 'column': 2}))
         figure.add_trace(go.Indicator(
             mode="number",
             value=data_comparison['difference'],
             number={'suffix': "€", "valueformat": '.2f'},
             title={"text": "Différence de revenu<br>" +
                    "<span style='font-size:0.8em;color:gray'>(avec la somme à la banque)</span>"},
-            domain={'row': 0, 'column': 1}))
+            domain={'row': 0, 'column': 3}))
         figure.update_layout(
-            grid={'rows': 1, 'columns': 2, 'pattern': "independent"},
+            grid={'rows': 1, 'columns': 4, 'pattern': "independent"},
             height=250  # px
         )
 
