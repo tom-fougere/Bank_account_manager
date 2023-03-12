@@ -124,6 +124,23 @@ def rename_columns(df):
             df.rename(columns={key: INFO_RENAMING[key]}, inplace=True)
 
 
+def sort_datatable(df, sort_by):
+
+    # Get original column names
+    df.rename(columns=INFO_RENAMING, inplace=True)
+
+    # Sort
+    df.sort_values(
+        sort_by[0]['column_id'],
+        ascending=sort_by[0]['direction'] == 'asc',
+        inplace=True
+    )
+
+    # Return with displayed column names
+    inv_map = {v: k for k, v in INFO_RENAMING.items()}
+    df.rename(columns=inv_map, inplace=True)
+
+
 def format_boolean_information(df):
 
     if InfoName.DUPLICATE in df.keys():

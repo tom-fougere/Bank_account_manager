@@ -317,7 +317,8 @@ def fig_categories(year=datetime.datetime.now().year):
 
         # Filter positive amount and remove Salary to get only expenses
         df_filter = df.copy()
-        df_filter = df_filter[(df_filter['Somme'] >= 0) & (df_filter['Catégorie'] != 'Salaire')]
+        df_filter = df_filter[(df_filter['Somme'] >= 0)]
+        df_filter = df_filter.fillna(value='None')
         # df_filter.loc[df['Sous-catégorie'] == "Internet/TV/Tel", ['Sous-catégorie']] = 'test'
 
         figure = px.sunburst(df_filter,

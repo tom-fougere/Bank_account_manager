@@ -44,6 +44,7 @@ transaction_details_layout = html.Div([
             html.Div('Date à la banque:'),
             dcc.DatePickerSingle(
                 id='canvas_date',
+                display_format='DD/MM/YYYY',
                 disabled=True),
         ],
             style={'width': '50%'}),
@@ -51,6 +52,7 @@ transaction_details_layout = html.Div([
             html.Div('Date Transaction:'),
             dcc.DatePickerSingle(
                 id='canvas_date_transaction',
+                display_format='DD/MM/YYYY',
                 disabled=True),
         ],
             style={'width': '50%'}

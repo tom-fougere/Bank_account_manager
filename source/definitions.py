@@ -88,8 +88,8 @@ INFO_RENAMING = {
     InfoName.NOTE: 'Note',
     InfoName.TYPE: 'Type',
     InfoName.DATE_TRANS_STR: 'Date',
-    InfoName.DATE_BANK: 'Date (banque)',
-    InfoName.DATE_TRANS: 'Date',
+    InfoName.DATE_BANK: 'Datetime (banque)',
+    InfoName.DATE_TRANS: 'Datetime',
     InfoName.DUPLICATE: 'Duplicata',
 }
 

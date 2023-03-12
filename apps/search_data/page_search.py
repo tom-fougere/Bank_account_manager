@@ -10,7 +10,7 @@ import time
 import datetime
 from calendar import monthrange
 from apps.search_data.sd_operations import search_transactions
-from apps.tables import format_dataframe, df_to_datatable, InfoDisplay
+from apps.tables import format_dataframe, df_to_datatable, InfoDisplay, sort_datatable
 from apps.components import get_sub_categories_for_dropdown_menu
 from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID, MONTHS
 from source.categories import get_list_categories
@@ -425,7 +425,8 @@ def update_sub_category(value):
 
 @app.callback(
     Output('store_transaction_enabled', 'data'),
-    [Input('cell_search', 'active_cell')],
+    [Input('cell_search', 'active_cell'),
+     Input('cell_search', 'sort_by')],
     [State('sd_radios', 'value'),
      State('sd_date_day_dropdown', 'value'),
      State('sd_date_month_dropdown', 'value'),
@@ -446,7 +447,7 @@ def update_sub_category(value):
      State('bool_occasion', 'on'),
      State('bool_note', 'on'),
      State('bool_check', 'on')])
-def store_enabled_transaction(cell_search,
+def store_enabled_transaction(cell_search, sort_by,
                               radio_value_date, date_day, date_month, date_year,
                               description, amount_min, amount_max,
                               type, category, sub_category, occasion, note, check,
@@ -475,6 +476,10 @@ def store_enabled_transaction(cell_search,
             'check': (bool_check, eval(check))
         }
         df = search_transactions(connection_name=DB_CONN_TRANSACTION, filters=filters)
+
+        # Sorting
+        if sort_by is not None and len(sort_by):
+            sort_datatable(df, sort_by)
 
         selected_df = df.iloc[cell_search['row']]
 

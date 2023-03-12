@@ -8,7 +8,7 @@ from app import app
 from utils.text_operations import get_project_root
 from source.transactions.account_manager_db import AccountManagerDB
 from apps.import_new_data.ind_operations import read_and_format_data, fig_indicators_new_transactions
-from apps.tables import format_dataframe, df_to_datatable, InfoDisplay
+from apps.tables import format_dataframe, df_to_datatable, InfoDisplay, sort_datatable
 from source.definitions import DB_CONN_TRANSACTION, DB_CONN_ACCOUNT, DATA_FOLDER
 
 
@@ -109,7 +109,7 @@ def import_transactions_in_database(n_clicks, filename, btn_disabled):
             account_id=account_info['account_id'])
         db.ingest(df_new, bank_info=account_info)
 
-        upload_file(True, full_path_filename, btn_disabled)
+        upload_file([], full_path_filename, btn_disabled)
 
         return "Transactions importées !"
     else:
@@ -118,13 +118,18 @@ def import_transactions_in_database(n_clicks, filename, btn_disabled):
 
 @app.callback(
     Output('store_transaction_disabled', 'data'),
-    [Input('cell_new_import', 'active_cell')],
+    [Input('cell_new_import', 'active_cell'),
+     Input('cell_new_import', 'sort_by')],
     [State('drag_upload_file', 'filename')])
-def store_disabled_transaction(cell_new_import, filename):
+def store_disabled_transaction(cell_new_import, sort_by, filename):
 
     # Read data
     df, _ = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
                                  db_connection=DB_CONN_TRANSACTION)
+
+    # Sorting
+    if sort_by is not None and len(sort_by):
+        sort_datatable(df, sort_by)
 
     data = None
 
