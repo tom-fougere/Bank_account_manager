@@ -109,7 +109,7 @@ def import_transactions_in_database(n_clicks, filename, btn_disabled):
             account_id=account_info['account_id'])
         db.ingest(df_new, bank_info=account_info)
 
-        upload_file(True, full_path_filename, btn_disabled)
+        upload_file([], full_path_filename, btn_disabled)
 
         return "Transactions importées !"
     else:
