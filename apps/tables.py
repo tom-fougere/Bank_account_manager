@@ -152,7 +152,7 @@ def format_boolean_information(df):
     return df
 
 
-def df_to_datatable(df, table_id):
+def df_to_datatable(df, table_id, checkbox=False, selected_rows=None):
 
     # Create columns for datatable
     columns = [{"name": i, "id": i, } for i in df.columns]
@@ -169,7 +169,7 @@ def df_to_datatable(df, table_id):
         data=df.to_dict('records'),
         columns=columns,
         selected_columns=[],
-        selected_rows=[],
+        selected_rows=[] if selected_rows is None else selected_rows,
         style_header={
             'backgroundColor': 'rgb(210, 210, 210)',
             'color': 'black',
@@ -187,6 +187,7 @@ def df_to_datatable(df, table_id):
         editable=False,
         style_cell_conditional=COND_COLUMN_WIDTH + COND_STYLE_CELL,
         style_data_conditional=COND_STYLE_DATA,
+        row_selectable=checkbox,
     )
 
     return dt_transactions

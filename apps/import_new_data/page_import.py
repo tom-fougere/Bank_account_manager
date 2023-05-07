@@ -1,9 +1,11 @@
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
-from dash import Input, Output, State
+from dash import Input, Output, State, callback_context
 import dash_table as dt
 from app import app
+import pandas as pd
+import json
 
 from utils.text_operations import get_project_root
 from source.transactions.account_manager_db import AccountManagerDB
@@ -46,42 +48,74 @@ layout = html.Div([
     dcc.Graph(id='fig_indicators_new_transactions',
               figure=fig_indicators_new_transactions(None, None, None, None)),
     html.Div(id="table_new_import"),
+    dcc.Store(id='store_transactions_df'),
+    dcc.Store(id='store_transactions_account_info'),
 ])
 
 
 @app.callback(
-    Output("fig_indicators_new_transactions", 'figure'),
-    Output("table_new_import", 'children'),
-    Output('btn_import_database', 'disabled'),
+    Output("store_transactions_df", 'data'),
+    Output("store_transactions_account_info", 'data'),
     Input('drag_upload_file', 'contents'),
-    State('drag_upload_file', 'filename'),
-    State('btn_import_database', 'disabled'))
-def upload_file(list_of_contents, filename, btn_disabled):
+    State('drag_upload_file', 'filename'))
+def upload_file(list_of_contents, filename):
 
-    # default outputs
-    fig = fig_indicators_new_transactions(None, None, None, None)
-    dt_transactions = dt.DataTable()
-    btn_import_state = btn_disabled
+    df_import = None
+    account_info = None
 
     if list_of_contents is not None:
         # Read data
         df, account_info = read_and_format_data('/'.join([get_project_root(), DATA_FOLDER, filename]),
                                                 db_connection=DB_CONN_TRANSACTION)
 
-        # Convert to dataTable
-        df_display = format_dataframe(df, InfoDisplay.IMPORT)
-        dt_transactions = df_to_datatable(df_display, table_id='cell_new_import')
+        # Format for Store component
+        df_import = df.to_json(date_format='iso')
 
-        # Enable button
-        btn_import_state = False
+    return df_import, account_info
 
-        # Create indicators
-        fig = fig_indicators_new_transactions(
-            connection_transaction=DB_CONN_TRANSACTION,
-            connection_metadata=DB_CONN_ACCOUNT,
-            df=df,
-            account_info=account_info,
-        )
+
+@app.callback(
+    Output("fig_indicators_new_transactions", 'figure'),
+    Output("table_new_import", 'children'),
+    Output('btn_import_database', 'disabled'),
+    Input('store_transactions_df', 'data'),
+    Input('store_transactions_account_info', 'data'),
+    State('btn_import_database', 'disabled'))
+def display_transactions(jsonified_df_transactions, account_info, btn_disabled):
+
+    ctx = callback_context
+    triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    # default outputs
+    fig = fig_indicators_new_transactions(None, None, None, None)
+    dt_transactions = dt.DataTable(id='cell_new_import')
+    btn_import_state = btn_disabled
+
+    # Set sub-category
+    if (triggered_input == 'store_transactions_df') or (triggered_input == 'store_transactions_account_info'):
+        if (jsonified_df_transactions is not None) and (account_info is not None):
+            parsed = json.loads(jsonified_df_transactions)
+            df = pd.DataFrame(parsed)
+
+            # Convert to dataTable
+            df_display = format_dataframe(df, InfoDisplay.IMPORT)
+            dt_transactions = df_to_datatable(
+                df_display,
+                table_id='cell_new_import',
+                checkbox='multi',
+                selected_rows=[int(i) for i, row in df_display.iterrows() if row['Duplicata'] == "Non"],
+            )
+
+            # Enable button
+            btn_import_state = False
+
+            # Create indicators
+            fig = fig_indicators_new_transactions(
+                connection_transaction=DB_CONN_TRANSACTION,
+                connection_metadata=DB_CONN_ACCOUNT,
+                df=df,
+                account_info=account_info,
+            )
 
     return fig, dt_transactions, btn_import_state
 
@@ -89,52 +123,60 @@ def upload_file(list_of_contents, filename, btn_disabled):
 @app.callback(
     Output('message_import', 'children'),
     Input('btn_import_database', 'n_clicks'),
+    State('store_transactions_df', 'data'),
+    State('store_transactions_account_info', 'data'),
+    State('cell_new_import', 'selected_rows'),
     State('drag_upload_file', 'filename'),
-    State('btn_import_database', 'disabled'))
-def import_transactions_in_database(n_clicks, filename, btn_disabled):
+    prevent_initial_call=True)
+def import_transactions_in_database(n_clicks, jsonified_df_transactions, account_info, selected_rows, filename):
+
+    message = None
+
     if n_clicks > 0:
 
-        full_path_filename = '/'.join([get_project_root(), DATA_FOLDER, filename])
+        if (jsonified_df_transactions is not None) and (account_info is not None) and len(selected_rows) > 0:
 
-        # Read data
-        df, account_info = read_and_format_data(full_path_filename,
-                                                db_connection=DB_CONN_TRANSACTION)
-        df_new = df[df['duplicate'] == 'False']
-        df_new.drop(columns=['duplicate'])
+            # Get data as dataframe
+            parsed = json.loads(jsonified_df_transactions)
+            df = pd.DataFrame(parsed)
 
-        # Database ingestion
-        db = AccountManagerDB(
-            name_connection_transaction=DB_CONN_TRANSACTION,
-            name_connection_metadata=DB_CONN_ACCOUNT,
-            account_id=account_info['account_id'])
-        db.ingest(df_new, bank_info=account_info)
+            # Extract only required rows
+            df_to_import = df.iloc[selected_rows]
 
-        upload_file([], full_path_filename, btn_disabled)
+            # Database ingestion
+            db = AccountManagerDB(
+                name_connection_transaction=DB_CONN_TRANSACTION,
+                name_connection_metadata=DB_CONN_ACCOUNT,
+                account_id=account_info['account_id'])
+            db.ingest(df_to_import, bank_info=account_info)
 
-        return "Transactions importées !"
-    else:
-        return None
+            message = "Transactions importées !"
+
+    return message
 
 
 @app.callback(
     Output('store_transaction_disabled', 'data'),
     [Input('cell_new_import', 'active_cell'),
      Input('cell_new_import', 'sort_by')],
-    [State('drag_upload_file', 'filename')])
-def store_disabled_transaction(cell_new_import, sort_by, filename):
-
-    # Read data
-    df, _ = read_and_format_data(full_filename='/'.join([get_project_root(), DATA_FOLDER, filename]),
-                                 db_connection=DB_CONN_TRANSACTION)
-
-    # Sorting
-    if sort_by is not None and len(sort_by):
-        sort_datatable(df, sort_by)
+    State('store_transactions_df', 'data'))
+def store_disabled_transaction(cell_new_import, sort_by, jsonified_df_transactions):
 
     data = None
 
     if cell_new_import is not None:
-        selected_df = df.iloc[cell_new_import['row']]
-        data = selected_df.to_json(date_format='iso')
+
+        if jsonified_df_transactions is not None:
+
+            # Get data as dataframe
+            parsed = json.loads(jsonified_df_transactions)
+            df = pd.DataFrame(parsed)
+
+            # Sorting
+            if sort_by is not None and len(sort_by):
+                sort_datatable(df, sort_by)
+
+            selected_df = df.iloc[cell_new_import['row']]
+            data = selected_df.to_json(date_format='iso')
 
     return data
