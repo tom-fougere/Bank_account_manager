@@ -8,6 +8,7 @@ import pandas as pd
 import json
 
 from utils.text_operations import get_project_root
+from utils.time_operations import convert_str_from_iso_format
 from source.transactions.account_manager_db import AccountManagerDB
 from apps.import_new_data.ind_operations import read_and_format_data, fig_indicators_new_transactions
 from apps.tables import format_dataframe, df_to_datatable, InfoDisplay, sort_datatable
@@ -94,8 +95,7 @@ def display_transactions(jsonified_df_transactions, account_info, btn_disabled):
     # Set sub-category
     if (triggered_input == 'store_transactions_df') or (triggered_input == 'store_transactions_account_info'):
         if (jsonified_df_transactions is not None) and (account_info is not None):
-            parsed = json.loads(jsonified_df_transactions)
-            df = pd.DataFrame(parsed)
+            df = rebuild_df_from_json(jsonified_df_transactions)
 
             # Convert to dataTable
             df_display = format_dataframe(df, InfoDisplay.IMPORT)
@@ -126,9 +126,8 @@ def display_transactions(jsonified_df_transactions, account_info, btn_disabled):
     State('store_transactions_df', 'data'),
     State('store_transactions_account_info', 'data'),
     State('cell_new_import', 'selected_rows'),
-    State('drag_upload_file', 'filename'),
     prevent_initial_call=True)
-def import_transactions_in_database(n_clicks, jsonified_df_transactions, account_info, selected_rows, filename):
+def import_transactions_in_database(n_clicks, jsonified_df_transactions, account_info, selected_rows):
 
     message = None
 
@@ -137,11 +136,12 @@ def import_transactions_in_database(n_clicks, jsonified_df_transactions, account
         if (jsonified_df_transactions is not None) and (account_info is not None) and len(selected_rows) > 0:
 
             # Get data as dataframe
-            parsed = json.loads(jsonified_df_transactions)
-            df = pd.DataFrame(parsed)
+            df = rebuild_df_from_json(jsonified_df_transactions)
+            account_info['date'] = convert_str_from_iso_format(account_info['date'])
 
             # Extract only required rows
             df_to_import = df.iloc[selected_rows]
+            df_to_import.drop(columns=['duplicate'], inplace=True)
 
             # Database ingestion
             db = AccountManagerDB(
@@ -169,8 +169,7 @@ def store_disabled_transaction(cell_new_import, sort_by, jsonified_df_transactio
         if jsonified_df_transactions is not None:
 
             # Get data as dataframe
-            parsed = json.loads(jsonified_df_transactions)
-            df = pd.DataFrame(parsed)
+            df = rebuild_df_from_json(jsonified_df_transactions)
 
             # Sorting
             if sort_by is not None and len(sort_by):
@@ -180,3 +179,13 @@ def store_disabled_transaction(cell_new_import, sort_by, jsonified_df_transactio
             data = selected_df.to_json(date_format='iso')
 
     return data
+
+
+def rebuild_df_from_json(json_data):
+    parsed = json.loads(json_data)
+    df = pd.DataFrame(parsed)
+
+    df['date_dt'] = df.apply(lambda x: convert_str_from_iso_format(x.date_dt), axis=1)
+    df['date_transaction_dt'] = df.apply(lambda x: convert_str_from_iso_format(x.date_transaction_dt), axis=1)
+
+    return df
