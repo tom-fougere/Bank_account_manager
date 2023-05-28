@@ -35,5 +35,12 @@ def modify_date_str_format(original_date_str, current_format, new_format):
     return date_dt.strftime(new_format)
 
 
+def convert_str_from_iso_format(datetime_str):
+    datetime_iso_format = datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
+    # With python 3.11, no need to replace the Z char (same for the line 31)
+
+    return datetime_iso_format
+
+
 def get_first_day_several_month_before(date, nb_months):
     return date.replace(day=1) + relativedelta(months=-nb_months)
