@@ -3,13 +3,16 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_daq as daq
 
-from source.definitions import DB_CONN_ACCOUNT, ACCOUNT_ID
+from source.transactions.account_manager_db import AccountManagerDB
+from source.definitions import DB_CONN_ACCOUNT, DB_CONN_TRANSACTION, ACCOUNT_ID
 from source.transactions.metadata import MetadataDB
 from apps.components import (
     get_categories_and_sub_for_dropdown_menu,
     get_occasions_for_dropdown_menu,
     get_categories_for_dropdown_menu,
 )
+
+DELIMITER = ':'
 
 
 def get_categories_name():
@@ -48,7 +51,7 @@ def create_switch_cat_content():
                     options=get_categories_and_sub_for_dropdown_menu(
                         db_connection=DB_CONN_ACCOUNT,
                         account_id=ACCOUNT_ID,
-                        delimiter=' - ',
+                        delimiter=DELIMITER,
                     ),
                     value=[],
                     style={'align-items': 'center'}
@@ -73,12 +76,17 @@ def create_switch_cat_content():
                 width={"size": 3, "order": 3},
             ),
             dbc.Col(
+                dbc.Badge("", color="success", id="badge_switch_cat"),
+                width={"size": 1, "order": 4},
+                style={"margin-top": "5px"}
+            ),
+            dbc.Col(
                 dbc.Button(
                     "Save",
                     color="primary",
                     id='id_button_switch_cat',
                 ),
-                width={"size": 1, "order": "last", 'offset': 4},
+                width={"size": 1, "order": "last", 'offset': 3},
             ),
         ])
     ])
@@ -171,7 +179,7 @@ def create_new_cat_content():
                         ),
                         dbc.Col(
                             dcc.Dropdown(
-                                id='id_dropdown_new_cat',
+                                id='id_dropdown_parent_new_cat',
                                 options=get_categories_for_dropdown_menu(
                                     db_connection=DB_CONN_ACCOUNT,
                                     account_id=ACCOUNT_ID
@@ -183,8 +191,13 @@ def create_new_cat_content():
                             width={"size": 4},
                             style={'align-items': 'center'}
                         ),
+                        dbc.Col(
+                            dbc.Badge("aaa", color="success", id="badge_new_cat"),
+                            width={"size": 1, "order": 4},
+                            style={"margin-top": "5px"}
+                        ),
                     ]
-                )
+                ),
             ]),
             dbc.Col([
                 html.Div([
@@ -393,3 +406,46 @@ def create_single_accordion_item(cat, sub_cat, default_occas=None, default_renam
     )
 
     return accordion_item
+
+
+# #################################### #
+# ########### FCT ############## #
+# #################################### #
+
+def add_new_category(new_cat_name, new_cat_occasion, parent_cat_name):
+
+    db = AccountManagerDB(
+        name_connection_transaction=DB_CONN_TRANSACTION,
+        name_connection_metadata=DB_CONN_ACCOUNT,
+        account_id=ACCOUNT_ID,
+    )
+
+    # Create category with all info
+    new_category = {
+        new_cat_name: {
+            "Order": 10,
+            "Default_occasion": new_cat_occasion
+        }
+    }
+
+    # Add category to database
+    db.add_new_category(new_category, parent_category=parent_cat_name)
+
+
+def move_category(parent_cat_and_cat_name, new_parent_name):
+
+    split_data = parent_cat_and_cat_name.split(DELIMITER)
+    parent_cat = split_data[0].strip()
+    cat_name = '-'.join(split_data[1:])
+
+    db = AccountManagerDB(
+        name_connection_transaction=DB_CONN_TRANSACTION,
+        name_connection_metadata=DB_CONN_ACCOUNT,
+        account_id=ACCOUNT_ID,
+    )
+
+    db.change_parent_category(
+        name_category=cat_name,
+        name_current_parent=parent_cat,
+        name_new_parent=new_parent_name
+    )

@@ -1,9 +1,9 @@
 import dash_bootstrap_components as dbc
-from dash import Input, Output, State, html, ALL
+from dash import Input, Output, State, html, ALL, callback_context
 from app import app
 
 from apps.params_category.pc_operations import get_categories_name, get_tab_content, get_new_cat_content, \
-    get_switch_cat_content
+    get_switch_cat_content, add_new_category
 
 tabs_category = dbc.Tabs(
     [
@@ -57,7 +57,7 @@ def disable_enable_renaming(values):
 
 
 @app.callback(
-    Output('id_dropdown_new_cat', 'disabled'),
+    Output('id_dropdown_parent_new_cat', 'disabled'),
     Input('id_switch_new_cat', 'on')
 )
 def disable_new_sub_cat(value):
@@ -66,12 +66,11 @@ def disable_new_sub_cat(value):
 
 @app.callback(
     [Output('id_text_new_cat', 'children'),
-     Output('id_button_new_cat', 'disabled'), ],
+     Output('id_button_new_cat', 'disabled')],
     [Input('id_input_new_cat', 'value'),
      Input('id_switch_new_cat', 'on'),
      Input('id_dropdown_new_cat_occasion', 'value'),
-     Input('id_dropdown_new_cat', 'value'),]
-
+     Input('id_dropdown_parent_new_cat', 'value')]
 )
 def check_new_cat_exist(new_cat_name, is_subcat, occasion, mother_cat):
     message = ''
@@ -118,3 +117,57 @@ def check_renaming(values):
 
     print(values)
     return values
+
+
+@app.callback(
+    Output("badge_new_cat", "children"),
+    Output("badge_new_cat", "is_open"),
+    Input("id_button_new_cat", "n_clicks"),
+    State("id_input_new_cat", "value"),
+    State("id_dropdown_new_cat_occasion", "value"),
+    State("id_dropdown_parent_new_cat", "value")
+)
+def add_new_category(n_clicks, new_cat_name, new_cat_default_occ, parent_cat):
+
+    ctx = callback_context
+    triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    message = ""
+    is_open = False
+
+    if triggered_input == 'id_button_new_cat':
+
+        add_new_category(
+            new_cat_name=new_cat_name,
+            new_cat_occasion=new_cat_default_occ,
+            parent_cat_name=parent_cat if len(new_cat_name) > 0 else None
+        )
+
+        message = "Done"
+        is_open = True
+
+    return message, is_open
+
+
+@app.callback(
+    Output("badge_switch_cat", "children"),
+    Output("badge_switch_cat", "is_open"),
+    Input("id_button_switch_cat", "n_clicks"),
+    State("id_dropdown_switch_cat_from", "value"),
+    State("id_dropdown_switch_cat_to", "value"),
+)
+def move_category(n_clicks, cat_and_parent_cat, new_parent_cat):
+    ctx = callback_context
+    triggered_input = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    message = ""
+    is_open = False
+
+    if triggered_input == 'id_button_switch_cat':
+
+        move_category(cat_and_parent_cat, new_parent_cat)
+
+        message = "Done"
+        is_open = True
+
+    return message, is_open
