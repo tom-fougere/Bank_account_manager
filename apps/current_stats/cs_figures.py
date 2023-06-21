@@ -175,6 +175,8 @@ def fig_expenses_vs_category(year=datetime.datetime.now().year):
         figure.update_layout(barmode='relative', title_text='Dépenses vs catégories')
         figure.update_yaxes(autorange="reversed")
         figure.update_traces(textposition='inside')
+        figure.update_xaxes(categoryorder='array',
+                            categoryarray=MONTHS)
     else:
         figure = {}
 
@@ -211,6 +213,8 @@ def fig_expenses_vs_occasion(year=datetime.datetime.now().year):
         figure.update_layout(barmode='relative', title_text='Dépenses vs occasions')
         figure.update_yaxes(autorange="reversed")
         figure.update_traces(textposition='inside')
+        figure.update_xaxes(categoryorder='array',
+                            categoryarray=MONTHS)
     else:
         figure = {}
 
