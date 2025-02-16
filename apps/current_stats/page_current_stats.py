@@ -1,7 +1,6 @@
 import datetime
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc, html
 from dash import Input, Output, State, callback_context
 from app import app
 from apps.current_stats.cs_figures import (

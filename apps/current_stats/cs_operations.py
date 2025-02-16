@@ -1,5 +1,5 @@
 import datetime
-from pandas import Categorical
+from pandas import Categorical, DataFrame, concat
 
 from source.definitions import DB_CONN_TRANSACTION, MONTHS
 from source.transactions.exgest import exgest_with_pipeline
@@ -65,7 +65,8 @@ def format_df_saving(df):
                 'Année': None,
                 'date': None,
             }
-            df = df.append(new_row, ignore_index=True)
+            df = concat([df, DataFrame([new_row])], ignore_index=True)
+            # df = df.append(new_row, ignore_index=True)
 
     # Sort dataframe by month
     df['Month_cat'] = Categorical(

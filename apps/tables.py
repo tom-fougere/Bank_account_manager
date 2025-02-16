@@ -1,6 +1,6 @@
 import pandas as pd
-import dash_table as dt
-from dash_table.Format import Format, Symbol, Scheme
+from dash import dash_table as dt
+from dash.dash_table.Format import Format, Symbol, Scheme
 from source.definitions import InfoName, INFO_RENAMING, InfoDisplay
 
 

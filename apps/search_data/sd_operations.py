@@ -1,4 +1,4 @@
-import dash_table as dt
+from dash import dash_table as dt
 
 from source.transactions.exgest import TransactionExgest
 from source.transactions.transaction_operations import format_dataframe_to_datatable

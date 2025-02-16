@@ -1,6 +1,5 @@
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import html, dcc
 from dash import Input, Output, State, callback_context
 import dash_daq as daq
 import pandas as pd
