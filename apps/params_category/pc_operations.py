@@ -1,6 +1,5 @@
-import dash_html_components as html
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
+from dash import html, dcc
 import dash_daq as daq
 
 from source.transactions.account_manager_db import AccountManagerDB
