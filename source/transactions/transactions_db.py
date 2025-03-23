@@ -128,7 +128,7 @@ class TransactionDB:
 
     def get_nb_transactions(self):
 
-        return self.connection.collection.count()
+        return self.connection.collection.count_documents({})
 
     def get_balance(self):
 

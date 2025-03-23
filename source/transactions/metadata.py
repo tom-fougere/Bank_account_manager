@@ -70,7 +70,7 @@ class MetadataDB:
             'date_last_import': self.date_last_import,
         }
 
-        self.connection.collection.update(
+        self.connection.collection.update_one(
             {
                 'account_id': self.account_id
             },
